@@ -1,0 +1,44 @@
+import { defineStackbitConfig } from "@stackbit/types";
+import { GitContentSource } from "@stackbit/cms-git";
+
+export default defineStackbitConfig({
+  stackbitVersion: "~0.6.0",
+  ssgName: "vite",
+  nodeVersion: "20",
+  contentSources: [
+    new GitContentSource({
+      rootPath: __dirname,
+      contentDirs: ["content"],
+      models: [
+        {
+          name: "Page",
+          type: "page",
+          urlPath: "/{slug}",
+          filePath: "content/pages/{slug}.json",
+          fields: [
+            { name: "title", type: "string", required: true },
+            { name: "slug", type: "string", required: true },
+            { name: "sections", type: "list", items: { type: "reference", models: ["Section"] } }
+          ]
+        },
+        {
+          name: "Section",
+          type: "object",
+          fields: [
+            { name: "type", type: "string", required: true },
+            { name: "title", type: "string" },
+            { name: "content", type: "string" }
+          ]
+        }
+      ]
+    })
+  ],
+  siteMap: ({ documents }) => {
+    return documents
+      .filter((doc) => doc.type === "Page")
+      .map((doc) => ({
+        urlPath: `/${doc.slug || ""}`,
+        document: doc
+      }));
+  }
+});
