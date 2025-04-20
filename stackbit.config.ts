@@ -20,7 +20,7 @@ export default defineStackbitConfig({
           name: "Page",
           type: "page",
           urlPath: "/{slug}",
-          filePath: "content/pages/{slug}.json",
+          filePath: "content/pages/{slug}.md",
           fields: [
             { name: "title", type: "string", required: true },
             { name: "slug", type: "string", required: true },
@@ -33,19 +33,11 @@ export default defineStackbitConfig({
           fields: [
             { name: "type", type: "string", required: true },
             { name: "title", type: "string" },
-            { name: "content", type: "string" },
+            { name: "content", type: "markdown" },
             { name: "image", type: "image" }
           ]
         }
       ]
     })
-  ],
-  siteMap: ({ documents }) => {
-    return documents
-      .filter((doc) => doc.type === "Page")
-      .map((doc) => ({
-        urlPath: `/${doc.slug || ""}`,
-        document: doc
-      }));
-  }
+  ]
 });

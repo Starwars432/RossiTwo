@@ -18,3 +18,5 @@ collections:
       - { label: "Featured", name: "featured", widget: "boolean", default: false }
       - { label: "Price", name: "price", widget: "number" }
       - { label: "Content", name: "body", widget: "markdown" }
+
+local_backend: true
