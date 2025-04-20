@@ -9,6 +9,12 @@ export default defineStackbitConfig({
     new GitContentSource({
       rootPath: __dirname,
       contentDirs: ["content"],
+      assetsConfig: {
+        referenceType: "static",
+        staticDir: "public",
+        uploadDir: "uploads",
+        publicPath: "/"
+      },
       models: [
         {
           name: "Page",
@@ -27,7 +33,8 @@ export default defineStackbitConfig({
           fields: [
             { name: "type", type: "string", required: true },
             { name: "title", type: "string" },
-            { name: "content", type: "string" }
+            { name: "content", type: "string" },
+            { name: "image", type: "image" }
           ]
         }
       ]
