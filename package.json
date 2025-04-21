@@ -22,7 +22,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",
-    "@netlify/plugin-vite": "^3.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/react-scroll": "^1.8.10",
