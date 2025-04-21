@@ -1,5 +1,5 @@
 [build]
-  command = "node stackbit-build.js"
+  command = "npm run netlify-build"
   publish = "dist"
   environment = { NODE_VERSION = "20" }
 

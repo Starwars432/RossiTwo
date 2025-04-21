@@ -3,11 +3,8 @@ import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   stackbitVersion: "~0.6.0",
-  ssgName: "vite",
+  ssgName: "custom",
   nodeVersion: "20",
-  buildCommand: "npm run build",
-  devCommand: "npm run dev",
-  publishDir: "dist",
   contentSources: [
     new GitContentSource({
       rootPath: __dirname,
@@ -58,6 +55,13 @@ export default defineStackbitConfig({
       ]
     })
   ],
+  presetSource: {
+    type: "files",
+    basePath: "/"
+  },
+  devCommand: "npm run dev",
+  buildCommand: "npm run build",
+  publishDir: "dist",
   siteMap: ({ documents }) => {
     return documents
       .filter(doc => doc.modelName === 'Page')

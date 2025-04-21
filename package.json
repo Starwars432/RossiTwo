@@ -2,13 +2,14 @@
   "name": "vite-react-typescript-starter",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "prebuild": "node -e \"import('fs').then(fs => fs.mkdirSync('dist', { recursive: true }))\"",
+    "prebuild": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\"",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "netlify-build": "node stackbit-build.js"
   },
   "dependencies": {
     "@splinetool/react-spline": "^2.2.6",
