@@ -9,5 +9,10 @@ export default defineConfig({
     rollupOptions: {
       input: './index.html'
     }
+  },
+  server: {
+    fs: {
+      strict: false
+    }
   }
 });
