@@ -3,7 +3,7 @@ import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   stackbitVersion: "~0.6.0",
-  ssgName: "custom",
+  ssgName: "vite",
   nodeVersion: "20",
   contentSources: [
     new GitContentSource({
@@ -59,5 +59,11 @@ export default defineStackbitConfig({
           isHomePage: doc.fields.slug === 'home' || doc.fields.slug === ''
         };
       });
+  },
+  previewSettings: {
+    enable: true,
+    buildCommand: "npm run build",
+    outputDir: "dist",
+    rootDir: "/"
   }
 });
