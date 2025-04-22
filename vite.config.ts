@@ -6,13 +6,10 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
-      },
-      output: {
-        manualChunks: undefined
       }
     },
     assetsDir: 'assets',
