@@ -7,6 +7,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Log environment for debugging
+console.log('Environment variables:', process.env.NODE_ENV, process.env.ENABLE_VISUAL_EDITOR);
+console.log('Current directory:', __dirname);
+
 // Ensure dist directory exists
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
@@ -17,7 +21,7 @@ if (!fs.existsSync(distDir)) {
 // Run build command
 try {
   console.log('Running build process...');
-  execSync('npm run build', { 
+  execSync('npx tsc && vite build', { 
     stdio: 'inherit',
     env: { 
       ...process.env,
@@ -28,52 +32,43 @@ try {
   
   console.log('Build completed successfully');
   
-  // Copy admin files if they exist
-  const adminDir = path.join(__dirname, 'public', 'admin');
-  const distAdminDir = path.join(distDir, 'admin');
-  
-  if (fs.existsSync(adminDir)) {
-    if (!fs.existsSync(distAdminDir)) {
-      fs.mkdirSync(distAdminDir, { recursive: true });
+  // Function to recursively copy directory
+  const copyDir = (src, dest) => {
+    if (!fs.existsSync(dest)) {
+      fs.mkdirSync(dest, { recursive: true });
     }
-    fs.readdirSync(adminDir).forEach(file => {
-      fs.copyFileSync(
-        path.join(adminDir, file),
-        path.join(distAdminDir, file)
-      );
-    });
-  }
-  
-  // Copy Visual Editor (vos) files if they exist
-  const vosDir = path.join(__dirname, 'public', 'vos');
-  const distVosDir = path.join(distDir, 'vos');
-  
-  if (fs.existsSync(vosDir)) {
-    if (!fs.existsSync(distVosDir)) {
-      fs.mkdirSync(distVosDir, { recursive: true });
-    }
-    fs.readdirSync(vosDir).forEach(file => {
-      fs.copyFileSync(
-        path.join(vosDir, file),
-        path.join(distVosDir, file)
-      );
-    });
-  }
-  
-  // Copy any additional static files from public that might not be included in the build
-  const publicDir = path.join(__dirname, 'public');
-  fs.readdirSync(publicDir).forEach(file => {
-    // Skip admin and vos directories as we've already handled them
-    if (file !== 'admin' && file !== 'vos') {
-      const srcPath = path.join(publicDir, file);
-      const destPath = path.join(distDir, file);
+    
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const srcPath = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name);
       
-      // Skip if it's a directory (for now, we could make this recursive if needed)
-      if (!fs.lstatSync(srcPath).isDirectory()) {
+      if (entry.isDirectory()) {
+        copyDir(srcPath, destPath);
+      } else {
         fs.copyFileSync(srcPath, destPath);
       }
     }
-  });
+  };
+  
+  // Copy public directory contents to dist
+  const publicDir = path.join(__dirname, 'public');
+  if (fs.existsSync(publicDir)) {
+    console.log('Copying public directory to dist...');
+    const entries = fs.readdirSync(publicDir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      const srcPath = path.join(publicDir, entry.name);
+      const destPath = path.join(distDir, entry.name);
+      
+      if (entry.isDirectory()) {
+        copyDir(srcPath, destPath);
+      } else {
+        fs.copyFileSync(srcPath, destPath);
+      }
+    }
+  }
   
   // Create _redirects file for Netlify to properly handle SPAs
   fs.writeFileSync(
@@ -85,6 +80,14 @@ try {
   const files = fs.readdirSync(distDir);
   console.log(`Files in dist directory: ${files.length}`);
   console.log('Files:', files.join(', '));
+  
+  // Check for index.html to ensure build was successful
+  if (!fs.existsSync(path.join(distDir, 'index.html'))) {
+    console.error('Error: index.html not found in dist directory');
+    process.exit(1);
+  } else {
+    console.log('Success: index.html found in dist directory');
+  }
   
 } catch (error) {
   console.error('Build failed:', error);
