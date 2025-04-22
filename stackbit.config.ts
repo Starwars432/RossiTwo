@@ -37,20 +37,6 @@ export default defineStackbitConfig({
             { name: "content", type: "markdown" },
             { name: "image", type: "image" }
           ]
-        },
-        {
-          name: "Service",
-          type: "data",
-          filePath: "content/services/{slug}.md",
-          fields: [
-            { name: "title", type: "string", required: true },
-            { name: "icon", type: "string" },
-            { name: "description", type: "text" },
-            { name: "category", type: "string" },
-            { name: "featured", type: "boolean" },
-            { name: "price", type: "number" },
-            { name: "content", type: "markdown" }
-          ]
         }
       ]
     })
