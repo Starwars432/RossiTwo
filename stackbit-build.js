@@ -21,7 +21,7 @@ if (!fs.existsSync(distDir)) {
 // Run build command
 try {
   console.log('Running build process...');
-  execSync('vite build', { 
+  execSync('npx vite build', { 
     stdio: 'inherit',
     env: { 
       ...process.env,
