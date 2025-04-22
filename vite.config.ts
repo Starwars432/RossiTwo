@@ -14,6 +14,9 @@ export default defineConfig({
     }
   },
   server: {
+    port: 5173,
+    host: true,
+    strictPort: true,
     fs: {
       strict: false
     }
@@ -22,5 +25,10 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, 'src')
     }
+  },
+  preview: {
+    port: 5173,
+    host: true,
+    strictPort: true
   }
 });
