@@ -1,4 +1,3 @@
-// CommonJS version for better compatibility
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -13,51 +12,38 @@ if (!fs.existsSync(distDir)) {
 // Run build command
 try {
   console.log('Running build process...');
-  execSync('npm run build', { stdio: 'inherit' });
+  execSync('npm run build', { 
+    stdio: 'inherit',
+    env: { 
+      ...process.env,
+      PUBLIC_URL: '/',
+      NODE_ENV: 'production'
+    }
+  });
+  
   console.log('Build completed successfully');
   
-  // Check if the build actually produced files
+  // Copy admin files if they exist
+  const adminDir = path.join(__dirname, 'public', 'admin');
+  const distAdminDir = path.join(distDir, 'admin');
+  
+  if (fs.existsSync(adminDir)) {
+    if (!fs.existsSync(distAdminDir)) {
+      fs.mkdirSync(distAdminDir, { recursive: true });
+    }
+    fs.readdirSync(adminDir).forEach(file => {
+      fs.copyFileSync(
+        path.join(adminDir, file),
+        path.join(distAdminDir, file)
+      );
+    });
+  }
+  
+  // Verify build output
   const files = fs.readdirSync(distDir);
   console.log(`Files in dist directory: ${files.length}`);
   
-  if (files.length === 0) {
-    console.log('Warning: dist directory is empty after build!');
-    
-    // Create a minimal fallback for Netlify
-    const indexHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manifest Illusions</title>
-</head>
-<body>
-  <div id="root">Loading site preview...</div>
-  <script>
-    console.log('Site is loading...');
-  </script>
-</body>
-</html>`;
-    
-    fs.writeFileSync(path.join(distDir, 'index.html'), indexHtml);
-    console.log('Created placeholder index.html');
-  }
 } catch (error) {
   console.error('Build failed:', error);
-  
-  // Create fallback content for Netlify
-  const indexHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manifest Illusions</title>
-</head>
-<body>
-  <div id="root">Build failed, but site preview is still available.</div>
-</body>
-</html>`;
-  
-  fs.writeFileSync(path.join(distDir, 'index.html'), indexHtml);
-  console.log('Created error fallback index.html');
+  process.exit(1);
 }
