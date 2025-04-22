@@ -4,12 +4,12 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host --port 5173",
     "build": "tsc && vite build",
     "prebuild": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\"",
     "postbuild": "cp -r public/* dist/ 2>/dev/null || true",
     "lint": "eslint .",
-    "preview": "vite preview",
+    "preview": "vite preview --host --port 5173",
     "netlify-build": "node stackbit-build.js"
   },
   "dependencies": {
