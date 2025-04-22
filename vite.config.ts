@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
+    emptyOutDir: false,
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
@@ -23,7 +23,8 @@ export default defineConfig({
     host: true,
     strictPort: true,
     fs: {
-      strict: false
+      strict: false,
+      allow: ['.']
     }
   },
   resolve: {
