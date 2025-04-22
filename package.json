@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 5173",
-    "build": "tsc && vite build",
+    "build": "npx tsc && vite build",
     "prebuild": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\"",
     "postbuild": "cp -r public/* dist/ 2>/dev/null || true",
     "lint": "eslint .",
@@ -23,7 +23,8 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.2.3",
     "react-intersection-observer": "^9.8.1",
-    "react-scroll": "^1.8.9"
+    "react-scroll": "^1.8.9",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
@@ -38,7 +39,6 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3",
     "vite": "^5.1.4"
   }
 }
