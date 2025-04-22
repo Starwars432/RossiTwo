@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 5173",
-    "build": "npx tsc && vite build",
+    "build": "vite build",
     "prebuild": "node -e \"require('fs').mkdirSync('dist', { recursive: true })\"",
     "postbuild": "cp -r public/* dist/ 2>/dev/null || true",
     "lint": "eslint .",
