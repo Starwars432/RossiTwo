@@ -10,8 +10,13 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html')
+      },
+      output: {
+        manualChunks: undefined
       }
-    }
+    },
+    assetsDir: 'assets',
+    sourcemap: true
   },
   server: {
     port: 5173,
