@@ -1,6 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import fs from 'fs';
+
+// Create dist directory if it doesn't exist
+if (!fs.existsSync('dist')) {
+  fs.mkdirSync('dist', { recursive: true });
+}
 
 export default defineConfig({
   plugins: [react()],

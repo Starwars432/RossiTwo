@@ -46,7 +46,7 @@ export default defineStackbitConfig({
     basePath: "/"
   },
   devCommand: "npm run dev",
-  buildCommand: "npm run build",
+  buildCommand: "ENABLE_VISUAL_EDITOR=true npm run build",
   publishDir: "dist",
   siteMap: ({ documents }) => {
     return documents
@@ -62,7 +62,7 @@ export default defineStackbitConfig({
   },
   previewSettings: {
     enable: true,
-    buildCommand: "npm run build",
+    buildCommand: "ENABLE_VISUAL_EDITOR=true npm run build",
     outputDir: "dist",
     rootDir: "/"
   }
