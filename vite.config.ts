@@ -15,6 +15,9 @@ export default defineConfig({
     assetsDir: 'assets',
     sourcemap: true
   },
+  css: {
+    postcss: true
+  },
   server: {
     port: 5173,
     host: true,

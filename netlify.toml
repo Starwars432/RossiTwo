@@ -1,5 +1,5 @@
 [build]
-  command = "npm install && npm run netlify-build"
+  command = "npm ci --include=dev && npm run netlify-build"
   publish = "dist"
   environment = { NODE_VERSION = "20" }
 
@@ -16,7 +16,7 @@
   environment = { NODE_ENV = "production" }
 
 [context.visual-editor]
-  command = "npm install && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
+  command = "npm ci --include=dev && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
   publish = "dist"
   environment = { NODE_ENV = "production", ENABLE_VISUAL_EDITOR = "true" }
 
