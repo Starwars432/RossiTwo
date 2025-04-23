@@ -15,16 +15,22 @@ console.log('Environment variables:', {
 });
 console.log('Current directory:', __dirname);
 
-// Ensure dist directory exists
+// Ensure dist directory exists immediately
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
   console.log('Creating dist directory...');
   fs.mkdirSync(distDir, { recursive: true });
+  
+  // Create a minimal placeholder index.html to ensure the directory isn't empty
+  fs.writeFileSync(
+    path.join(distDir, 'index.html'),
+    '<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Loading...</title></head><body><div id="root"></div></body></html>'
+  );
 }
 
-// Run Vite build command
+// Run build command
 try {
-  console.log('Running Vite build process...');
+  console.log('Running build process...');
   execSync('npm run build', { 
     stdio: 'inherit',
     env: { 
@@ -56,7 +62,7 @@ try {
     }
   };
   
-  // Copy public directory contents to dist
+  // Copy public directory contents to dist if it exists
   const publicDir = path.join(__dirname, 'public');
   if (fs.existsSync(publicDir)) {
     console.log('Copying public directory to dist...');

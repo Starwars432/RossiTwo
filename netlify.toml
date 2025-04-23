@@ -16,7 +16,7 @@
   environment = { NODE_ENV = "production" }
 
 [context.visual-editor]
-  command = "npm ci --include=dev && ENABLE_VISUAL_EDITOR=true npm run build"
+  command = "npm ci --include=dev && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
   publish = "dist"
   environment = { NODE_ENV = "production", ENABLE_VISUAL_EDITOR = "true" }
 
@@ -25,6 +25,9 @@
   to = "/index.html"
   status = 200
 
-[tool.stackbit]
-  build = "npm run build"
-  publish = "dist"
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[build.environment]
+  NPM_FLAGS = "--no-audit --no-fund"
