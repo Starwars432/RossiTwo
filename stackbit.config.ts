@@ -53,9 +53,9 @@ export default defineStackbitConfig({
       .filter(doc => doc.modelName === 'Page')
       .map(doc => ({
         stableId: doc.id,
-        urlPath: `/${String(doc.fields?.slug || '')}`,
+        urlPath: `/${String(doc.fields?.slug?.toString() || '')}`,
         document: doc,
-        isHomePage: String(doc.fields?.slug) === 'home' || String(doc.fields?.slug) === ''
+        isHomePage: String(doc.fields?.slug?.toString()) === 'home' || String(doc.fields?.slug?.toString()) === ''
       }));
   }
 });

@@ -3,7 +3,7 @@ import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   stackbitVersion: "~0.6.0",
-  ssgName: "vite",
+  ssgName: "custom",
   nodeVersion: "20",
   contentSources: [
     new GitContentSource({
@@ -32,15 +32,9 @@ export default defineStackbitConfig({
   ],
   presetSource: {
     type: "files",
-    basePath: "/"
+    presetDirs: ["content"]
   },
   devCommand: "npm run dev",
   buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
-  publishDir: "dist",
-  previewSettings: {
-    enable: true,
-    buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
-    outputDir: "dist",
-    rootDir: "/"
-  }
+  publishDir: "dist"
 });
