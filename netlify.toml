@@ -9,15 +9,15 @@
   publish = "dist"
 
 [context.production]
-  environment = { NODE_ENV = "production" }
+  environment = {}
 
 [context.deploy-preview]
-  environment = { NODE_ENV = "production" }
+  environment = {}
 
 [context.visual-editor]
   command = "npm ci && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
   publish = "dist"
-  environment = { NODE_ENV = "production", ENABLE_VISUAL_EDITOR = "true" }
+  environment = { ENABLE_VISUAL_EDITOR = "true" }
 
 [[redirects]]
   from = "/*"
@@ -29,5 +29,6 @@
   node_bundler = "esbuild"
 
 [build.environment]
+  NODE_ENV = "production"
   NODE_VERSION = "20"
   NPM_FLAGS = "--no-audit --no-fund"

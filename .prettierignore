@@ -1,0 +1,8 @@
+dist
+node_modules
+coverage
+build
+.git
+.husky
+*.min.js
+*.d.ts
