@@ -3,7 +3,7 @@ import { GitContentSource } from "@stackbit/cms-git";
 
 export default defineStackbitConfig({
   stackbitVersion: "~0.6.0",
-  ssgName: "vite",
+  ssgName: "custom",
   nodeVersion: "20",
   contentSources: [
     new GitContentSource({
@@ -39,11 +39,11 @@ export default defineStackbitConfig({
           ]
         }
       ]
-    })
+    }) as any
   ],
   presetSource: {
     type: "files",
-    basePath: "/"
+    presetDirs: ["content"]
   },
   devCommand: "npm run dev",
   buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
@@ -51,14 +51,12 @@ export default defineStackbitConfig({
   siteMap: ({ documents }) => {
     return documents
       .filter(doc => doc.modelName === 'Page')
-      .map(doc => {
-        return {
-          stableId: doc.id,
-          urlPath: `/${doc.fields.slug || ''}`,
-          document: doc,
-          isHomePage: doc.fields.slug === 'home' || doc.fields.slug === ''
-        };
-      });
+      .map(doc => ({
+        stableId: doc.id,
+        urlPath: `/${String(doc.fields?.slug || '')}`,
+        document: doc,
+        isHomePage: String(doc.fields?.slug) === 'home' || String(doc.fields?.slug) === ''
+      }));
   },
   previewSettings: {
     enable: true,
