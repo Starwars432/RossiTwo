@@ -46,7 +46,7 @@ export default defineStackbitConfig({
     presetDirs: ["content"]
   },
   devCommand: "npm run dev",
-  buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
+  buildCommand: "npm run netlify-build",
   publishDir: "dist",
   siteMap: ({ documents }) => {
     return documents

@@ -15,6 +15,11 @@ console.log('Environment variables:', {
 });
 console.log('Current directory:', __dirname);
 
+// Log for Stackbit or Visual Editor environment
+if (process.env.ENABLE_VISUAL_EDITOR) {
+  console.log("📦 Running inside Visual Editor environment");
+}
+
 // Ensure dist directory exists immediately
 const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
@@ -88,12 +93,13 @@ try {
   // Check for index.html to ensure build was successful
   if (!fs.existsSync(path.join(distDir, 'index.html'))) {
     console.error('Error: index.html not found in dist directory');
-    process.exit(1);
+    process.exit(1);  // Exit with failure
   } else {
     console.log('Success: index.html found in dist directory');
+    process.exit(0);  // Exit with success
   }
   
 } catch (error) {
   console.error('Build failed:', error);
-  process.exit(1);
+  process.exit(1);  // Exit with failure
 }
