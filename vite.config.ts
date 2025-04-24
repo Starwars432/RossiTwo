@@ -25,15 +25,11 @@ export default defineConfig(({ command, mode }) => {
       },
       assetsDir: 'assets',
       sourcemap: true,
-      // Ensure we generate a clean build
       manifest: true,
-      // Improve chunking strategy
-      chunkSizeWarningLimit: 1000,
       cssCodeSplit: true
     },
     css: {
       postcss: true,
-      // Enable source maps for CSS in development
       devSourcemap: true
     },
     server: {
@@ -55,7 +51,6 @@ export default defineConfig(({ command, mode }) => {
       host: true,
       strictPort: true
     },
-    // Optimize dependencies
     optimizeDeps: {
       include: [
         'react',

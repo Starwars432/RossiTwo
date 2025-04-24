@@ -35,11 +35,11 @@ export default defineStackbitConfig({
     basePath: "/"
   },
   devCommand: "npm run dev",
-  buildCommand: "ENABLE_VISUAL_EDITOR=true npm run build",
+  buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
   publishDir: "dist",
   previewSettings: {
     enable: true,
-    buildCommand: "ENABLE_VISUAL_EDITOR=true npm run build",
+    buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
     outputDir: "dist",
     rootDir: "/"
   }
