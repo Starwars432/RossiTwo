@@ -17,8 +17,11 @@
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src"],
+  "include": ["src", "*.js", "*.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
