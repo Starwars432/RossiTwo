@@ -1,7 +1,6 @@
 [build]
   command = "npm ci --include=dev && npm run netlify-build"
   publish = "dist"
-  environment = { NODE_VERSION = "20" }
 
 [dev]
   command = "npm run dev"
@@ -30,4 +29,5 @@
   node_bundler = "esbuild"
 
 [build.environment]
+  NODE_VERSION = "20"
   NPM_FLAGS = "--no-audit --no-fund"
