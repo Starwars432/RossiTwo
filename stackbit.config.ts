@@ -57,11 +57,5 @@ export default defineStackbitConfig({
         document: doc,
         isHomePage: String(doc.fields?.slug) === 'home' || String(doc.fields?.slug) === ''
       }));
-  },
-  previewSettings: {
-    enable: true,
-    buildCommand: "ENABLE_VISUAL_EDITOR=true node netlify-build.js",
-    outputDir: "dist",
-    rootDir: "/"
   }
 });
