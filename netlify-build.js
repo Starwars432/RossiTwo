@@ -20,12 +20,6 @@ const distDir = path.join(__dirname, 'dist');
 if (!fs.existsSync(distDir)) {
   console.log('Creating dist directory...');
   fs.mkdirSync(distDir, { recursive: true });
-  
-  // Create a minimal placeholder index.html to ensure the directory isn't empty
-  fs.writeFileSync(
-    path.join(distDir, 'index.html'),
-    '<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Loading...</title></head><body><div id="root"></div></body></html>'
-  );
 }
 
 // Run build command
