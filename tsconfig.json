@@ -17,7 +17,7 @@
     "esModuleInterop": true,
     "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "node"],
+    "types": ["./node_modules/vite/client", "node"],
     "paths": {
       "@/*": ["./src/*"]
     }
