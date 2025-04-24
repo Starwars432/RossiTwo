@@ -71,9 +71,9 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     server: {
-      port: 5173,
+      port: 5175,
       host: true,
-      strictPort: true,
+      strictPort: false,
       fs: {
         strict: false,
         allow: ['.']
@@ -99,9 +99,9 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     preview: {
-      port: 5173,
+      port: 5175,
       host: true,
-      strictPort: true
+      strictPort: false
     },
     optimizeDeps: {
       include: [
