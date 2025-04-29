@@ -22,6 +22,8 @@
     "@splinetool/runtime": "^1.0.51",
     "@stackbit/cms-git": "^0.4.0",
     "@stackbit/types": "^0.7.0",
+    "@types/react-scroll": "^1.8.10",
+    "@types/react-dom": "^18.2.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "react": "^18.2.0",
@@ -34,8 +36,6 @@
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@types/react-scroll": "^1.8.10",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^4.2.1",
