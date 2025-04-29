@@ -74,6 +74,9 @@ export default defineConfig(({ command, mode }) => {
       port: 5175,
       host: true,
       strictPort: false,
+      allowedHosts: [
+        'devserver-preview--manifestillusions.netlify.app'
+      ],
       fs: {
         strict: false,
         allow: ['.']
