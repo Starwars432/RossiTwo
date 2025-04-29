@@ -1,10 +1,10 @@
 [build]
-  command = "npm ci && npm run netlify-build"
+  command = "npm ci --include=dev && npm run netlify-build"
   publish = "dist"
 
 [dev]
   command = "npm run dev"
-  targetPort = 5173
+  targetPort = 5175
   port = 8888
   publish = "dist"
 
@@ -15,7 +15,7 @@
   environment = {}
 
 [context.visual-editor]
-  command = "npm ci && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
+  command = "npm ci --include=dev && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
   publish = "dist"
   environment = { ENABLE_VISUAL_EDITOR = "true" }
 
