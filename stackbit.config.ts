@@ -39,7 +39,7 @@ export default defineStackbitConfig({
           ]
         }
       ]
-    }) as any
+    })
   ],
   presetSource: {
     type: "files",
@@ -48,14 +48,13 @@ export default defineStackbitConfig({
   devCommand: "npm run dev",
   buildCommand: "npm run netlify-build",
   publishDir: "dist",
-  siteMap: ({ documents }) => {
-    return documents
-      .filter(doc => doc.modelName === 'Page')
+  siteMap: ({ documents }) =>
+    documents
+      .filter(doc => doc.modelName === "Page")
       .map(doc => ({
         stableId: doc.id,
-        urlPath: `/${String(doc.fields?.slug?.toString() || '')}`,
+        urlPath: `/${String(doc.fields?.slug || "")}`,
         document: doc,
-        isHomePage: String(doc.fields?.slug?.toString()) === 'home' || String(doc.fields?.slug?.toString()) === ''
-      }));
-  }
+        isHomePage: ["", "home"].includes(String(doc.fields?.slug || ""))
+      }))
 });
