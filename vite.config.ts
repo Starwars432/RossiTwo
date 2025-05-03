@@ -73,7 +73,7 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     server: {
-      port: 5175,
+      port: process.env.PORT ? Number(process.env.PORT) : 5175,
       host: true,
       strictPort: false,
       allowedHosts: [
@@ -104,7 +104,7 @@ export default defineConfig(({ command, mode }) => {
       }
     },
     preview: {
-      port: 5175,
+      port: process.env.PORT ? Number(process.env.PORT) : 5175,
       host: true,
       strictPort: false
     },
