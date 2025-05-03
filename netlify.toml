@@ -1,28 +1,21 @@
 [build]
-  command = "npm ci --include=dev && npm run netlify-build"
+  command = "node netlify-build.js"
   publish = "dist"
+
+[context.production.environment]
+  ENABLE_VISUAL_EDITOR = "false"
+
+[context.deploy-preview.environment]
+  ENABLE_VISUAL_EDITOR = "true"
+
+[context.branch-deploy.environment]
+  ENABLE_VISUAL_EDITOR = "true"
 
 [dev]
   command = "npm run dev"
   targetPort = 5175
   port = 8888
   publish = "dist"
-
-[context.production]
-  environment = {}
-
-[context.deploy-preview]
-  environment = {}
-
-[context.visual-editor]
-  command = "npm ci --include=dev && ENABLE_VISUAL_EDITOR=true npm run netlify-build"
-  publish = "dist"
-  environment = { ENABLE_VISUAL_EDITOR = "true" }
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
 
 [functions]
   directory = "netlify/functions"
@@ -32,3 +25,8 @@
   NODE_ENV = "production"
   NODE_VERSION = "20"
   NPM_FLAGS = "--no-audit --no-fund --include=dev"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

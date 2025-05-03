@@ -178,10 +178,22 @@ const buildSteps = {
 
   build: () => {
     log.info('Running build...');
-    runBuildCommand('npm run build', {
-      PUBLIC_URL: process.env.PUBLIC_URL,
-      NODE_ENV: process.env.NODE_ENV
-    });
+
+    if (process.env.ENABLE_VISUAL_EDITOR === 'true') {
+      log.info('Visual Editor is ENABLED. Building with visual editing support...');
+      runBuildCommand('npm run build', {
+        PUBLIC_URL: process.env.PUBLIC_URL,
+        NODE_ENV: process.env.NODE_ENV,
+        ENABLE_VISUAL_EDITOR: 'true'
+      });
+    } else {
+      log.info('Visual Editor is DISABLED. Building without visual editing support...');
+      runBuildCommand('npm run build', {
+        PUBLIC_URL: process.env.PUBLIC_URL,
+        NODE_ENV: process.env.NODE_ENV,
+        ENABLE_VISUAL_EDITOR: 'false'
+      });
+    }
   },
 
   copyPublicFiles: (distDir) => {

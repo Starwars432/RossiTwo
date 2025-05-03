@@ -40,6 +40,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ icon, title, description }) =
       animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
       transition={{ duration: 0.6 }}
       className="service-card bg-black/50 backdrop-blur-lg p-6 rounded-lg border border-blue-400/20 hover:border-blue-400/50 transition-all"
+      data-sb-field-path={__ENABLE_VISUAL_EDITOR__ ? `.${title.toLowerCase().replace(/\s+/g, '-')}` : undefined}
     >
       <div className="mb-4 text-blue-400">{icon}</div>
       <h3 className="text-xl font-semibold mb-2 text-blue-400">{title}</h3>
@@ -58,6 +59,11 @@ function App() {
       console.log(acceptedFiles);
     },
   });
+
+  // Initialize visual editor if enabled
+  if (__ENABLE_VISUAL_EDITOR__) {
+    console.log('Visual Editor is enabled');
+  }
 
   return (
     <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
@@ -134,6 +140,7 @@ function App() {
       <section
         id="home"
         className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        data-sb-field-path={__ENABLE_VISUAL_EDITOR__ ? '.hero' : undefined}
       >
         <div className="absolute inset-0 z-0">
           <Spline scene="https://prod.spline.design/M0A3Y0cy9S1ujpeC/scene.splinecode" />
@@ -154,6 +161,7 @@ function App() {
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.2 }}
               className="text-xl text-gray-300 mt-8 mb-12 max-w-3xl mx-auto"
+              data-sb-field-path={__ENABLE_VISUAL_EDITOR__ ? '.hero-description' : undefined}
             >
               Elevating brands with cutting-edge design and innovative digital marketing strategies
             </motion.p>

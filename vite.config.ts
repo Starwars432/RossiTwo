@@ -14,6 +14,8 @@ export default defineConfig(({ command, mode }) => {
   const isVisualEditor = process.env.ENABLE_VISUAL_EDITOR === 'true';
   const isDev = mode === 'development';
   
+  console.log(`Mode: ${mode}, Visual Editor: ${isVisualEditor ? 'enabled' : 'disabled'}`);
+  
   return {
     plugins: [
       react({
@@ -54,7 +56,7 @@ export default defineConfig(({ command, mode }) => {
       manifest: true,
       cssCodeSplit: true,
       minify: !isVisualEditor,
-      watch: isVisualEditor ? {
+      watch: isDev && isVisualEditor ? {
         clearScreen: false,
         include: ['src/**', 'content/**'],
         exclude: ['node_modules/**', 'dist/**']
@@ -121,7 +123,8 @@ export default defineConfig(({ command, mode }) => {
     },
     define: {
       'process.env.ENABLE_VISUAL_EDITOR': JSON.stringify(isVisualEditor),
-      'process.env.NODE_ENV': JSON.stringify(mode)
+      'process.env.NODE_ENV': JSON.stringify(mode),
+      '__ENABLE_VISUAL_EDITOR__': JSON.stringify(isVisualEditor)
     },
     esbuild: {
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
