@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-scroll';
 import { motion } from 'framer-motion';
 import { Sparkles, ShoppingCart, LogIn, Menu, X } from 'lucide-react';
@@ -9,7 +9,7 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
+  const [cartCount] = useState(0);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
