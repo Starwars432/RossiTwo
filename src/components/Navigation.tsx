@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-scroll';
 import { motion } from 'framer-motion';
-import { Sparkles, ShoppingCart, LogIn, Menu, X } from 'lucide-react';
+import { Sparkles, ShoppingCart, LogIn, Menu, X, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 
 interface NavigationProps {
   onLoginClick: () => void;
@@ -9,7 +11,9 @@ interface NavigationProps {
 
 const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount] = useState(0);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const { items } = useCart();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -76,24 +80,59 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="text-blue-400 hover:text-blue-300 relative"
-              aria-label={`Shopping Cart with ${cartCount} items`}
+              aria-label={`Shopping Cart with ${items.length} items`}
             >
               <ShoppingCart className="w-6 h-6" />
-              {cartCount > 0 && (
+              {items.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartCount}
+                  {items.length}
                 </span>
               )}
             </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={onLoginClick}
-              className="bg-blue-500/20 text-blue-400 px-6 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
-            >
-              <LogIn className="w-4 h-4" />
-              <span>Login</span>
-            </motion.button>
+            {user ? (
+              <div className="relative">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="bg-blue-500/20 text-blue-400 p-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
+                >
+                  <User className="w-5 h-5" />
+                  <span className="max-w-[120px] truncate">{user.email}</span>
+                </motion.button>
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1">
+                    <a
+                      href="/account"
+                      className="block px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
+                    >
+                      View Account
+                    </a>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsProfileOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={onLoginClick}
+                  className="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
+                </motion.button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -155,27 +194,59 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-blue-400 hover:text-blue-300 relative"
-                aria-label={`Shopping Cart with ${cartCount} items`}
+                aria-label={`Shopping Cart with ${items.length} items`}
               >
                 <ShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
+                {items.length > 0 && (
                   <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
+                    {items.length}
                   </span>
                 )}
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  onLoginClick();
-                  setIsMenuOpen(false);
-                }}
-                className="bg-blue-500/20 text-blue-400 px-6 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Login</span>
-              </motion.button>
+              {user ? (
+                <div className="flex-1">
+                  <button
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="w-full bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="text-sm truncate">{user.email}</span>
+                  </button>
+                  {isProfileOpen && (
+                    <div className="mt-2 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1">
+                      <a
+                        href="/account"
+                        className="block px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
+                      >
+                        View Account
+                      </a>
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setIsProfileOpen(false);
+                          setIsMenuOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => {
+                    onLoginClick();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex-1 bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center justify-center space-x-2"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Login</span>
+                </motion.button>
+              )}
             </div>
           </motion.div>
         )}
