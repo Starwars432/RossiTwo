@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -11,6 +11,12 @@ import { CartProvider } from './contexts/CartContext';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  useEffect(() => {
+    // Ensure page starts at the top
+    window.history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <AuthProvider>
