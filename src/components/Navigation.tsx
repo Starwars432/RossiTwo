@@ -37,40 +37,55 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
         <div className="hidden md:flex items-center space-x-8">
           <Link
             to="home"
+            spy={true}
             smooth={true}
             duration={500}
+            offset={0}
+            isDynamic={true}
             className="text-sm hover:text-blue-400 transition-colors cursor-pointer"
           >
             Home
           </Link>
           <Link
             to="services"
+            spy={true}
             smooth={true}
             duration={500}
+            offset={-70}
+            isDynamic={true}
             className="text-sm hover:text-blue-400 transition-colors cursor-pointer"
           >
             Services
           </Link>
           <Link
             to="portfolio"
+            spy={true}
             smooth={true}
             duration={500}
+            offset={-70}
+            isDynamic={true}
             className="text-sm hover:text-blue-400 transition-colors cursor-pointer"
           >
             Portfolio
           </Link>
           <Link
             to="custom-design"
+            spy={true}
             smooth={true}
             duration={500}
+            offset={-70}
+            isDynamic={true}
             className="text-sm hover:text-blue-400 transition-colors cursor-pointer"
           >
             Custom Design
           </Link>
           <Link
             to="contact"
+            spy={true}
             smooth={true}
             duration={500}
+            offset={-70}
+            isDynamic={true}
             className="text-sm hover:text-blue-400 transition-colors cursor-pointer"
           >
             Contact
@@ -146,8 +161,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
           >
             <Link
               to="home"
+              spy={true}
               smooth={true}
               duration={500}
+              offset={0}
+              isDynamic={true}
               className="block text-sm hover:text-blue-400 transition-colors cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -155,8 +173,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
             </Link>
             <Link
               to="services"
+              spy={true}
               smooth={true}
               duration={500}
+              offset={-70}
+              isDynamic={true}
               className="block text-sm hover:text-blue-400 transition-colors cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -164,8 +185,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
             </Link>
             <Link
               to="portfolio"
+              spy={true}
               smooth={true}
               duration={500}
+              offset={-70}
+              isDynamic={true}
               className="block text-sm hover:text-blue-400 transition-colors cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -173,8 +197,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
             </Link>
             <Link
               to="custom-design"
+              spy={true}
               smooth={true}
               duration={500}
+              offset={-70}
+              isDynamic={true}
               className="block text-sm hover:text-blue-400 transition-colors cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
             >
@@ -182,8 +209,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
             </Link>
             <Link
               to="contact"
+              spy={true}
               smooth={true}
               duration={500}
+              offset={-70}
+              isDynamic={true}
               className="block text-sm hover:text-blue-400 transition-colors cursor-pointer"
               onClick={() => setIsMenuOpen(false)}
             >
