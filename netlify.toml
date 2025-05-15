@@ -30,6 +30,12 @@
   NPM_FLAGS = "--no-audit --no-fund --include=dev"
 
 [[redirects]]
+  from = "/vos/*"
+  to = "/vos/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
