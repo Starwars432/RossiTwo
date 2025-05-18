@@ -8,10 +8,9 @@ import ProfileDropdown from './ProfileDropdown';
 
 interface NavigationProps {
   onLoginClick: () => void;
-  onProfileClick: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ onLoginClick, onProfileClick }) => {
+const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user } = useAuth();

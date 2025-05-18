@@ -41,10 +41,7 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-          <Navigation 
-            onLoginClick={() => setIsLoginOpen(true)} 
-            onProfileClick={() => setCurrentPage('profile')}
-          />
+          <Navigation onLoginClick={() => setIsLoginOpen(true)} />
           {currentPage === 'home' ? (
             <>
               <Hero />
