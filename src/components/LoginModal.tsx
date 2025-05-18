@@ -26,11 +26,18 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         await signIn(email, password);
         onClose();
       } else {
+        if (password.length < 6) {
+          throw new Error('Password must be at least 6 characters long');
+        }
         await signUp(email, password);
-        onClose(); // Close modal after successful signup since user is now logged in
+        onClose();
       }
     } catch (err) {
-      setError(mode === 'login' ? 'Invalid email or password' : 'Error creating account');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(mode === 'login' ? 'Invalid login credentials' : 'Error creating account');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -41,8 +48,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       await signInWithGoogle();
       onClose();
     } catch (err) {
-      setError('Error signing in with Google');
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Error signing in with Google');
+      }
     }
+  };
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+    setError(null);
+  };
+
+  const switchMode = (newMode: 'login' | 'signup') => {
+    setMode(newMode);
+    resetForm();
   };
 
   return (
@@ -66,10 +88,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               <h2 className="text-2xl text-blue-400">{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => {
-                    setMode('login');
-                    setError(null);
-                  }}
+                  onClick={() => switchMode('login')}
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-all ${
                     mode === 'login'
                       ? 'bg-blue-500 text-white'
@@ -80,10 +99,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <span>Login</span>
                 </button>
                 <button
-                  onClick={() => {
-                    setMode('signup');
-                    setError(null);
-                  }}
+                  onClick={() => switchMode('signup')}
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-all ${
                     mode === 'signup'
                       ? 'bg-blue-500 text-white'

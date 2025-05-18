@@ -33,9 +33,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // Listen for changes on auth state
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -46,22 +47,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}`,
         data: {
-          email_confirmed: true
+          email_confirmed: true // Skip email confirmation
         }
       }
     });
 
-    if (error) throw error;
+    if (error) {
+      throw new Error(error.message);
+    }
 
-    // If signup is successful, immediately sign in
+    // Auto sign in after signup
     if (data.user) {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (signInError) throw signInError;
+      await signIn(email, password);
     }
   };
 
@@ -70,32 +69,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
     });
-    if (error) throw error;
+
+    if (error) {
+      throw new Error(error.message);
+    }
   };
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}`,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent'
+        }
       }
     });
-    if (error) throw error;
+    
+    if (error) {
+      throw new Error(error.message);
+    }
   };
 
   const signInWithGithub = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: `${window.location.origin}`
       }
     });
-    if (error) throw error;
+    
+    if (error) {
+      throw new Error(error.message);
+    }
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    if (error) {
+      throw new Error(error.message);
+    }
   };
 
   return (
