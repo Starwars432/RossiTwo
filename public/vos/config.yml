@@ -1,8 +1,6 @@
 backend:
   name: git-gateway
   branch: main
-  site_domain: manifestillusions.com
-  base_url: https://auth.manifestillusions.com
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

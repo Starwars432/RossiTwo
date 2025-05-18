@@ -61,6 +61,58 @@ export interface Database {
           updated_at?: string | null
         }
       }
+      profiles: {
+        Row: {
+          id: string
+          email: string
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          email: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          email?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      purchases: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          items: Json
+          status: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount: number
+          items: Json
+          status?: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount?: number
+          items?: Json
+          status?: string
+          created_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never

@@ -4,15 +4,17 @@ import { motion } from 'framer-motion';
 import { Sparkles, ShoppingCart, LogIn, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import ProfileDropdown from './ProfileDropdown';
 
 interface NavigationProps {
   onLoginClick: () => void;
+  onProfileClick: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
+const Navigation: React.FC<NavigationProps> = ({ onLoginClick, onProfileClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { items } = useCart();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -115,25 +117,7 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
                   <User className="w-5 h-5" />
                   <span className="max-w-[120px] truncate">{user.email}</span>
                 </motion.button>
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1">
-                    <a
-                      href="/account"
-                      className="block px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
-                    >
-                      View Account
-                    </a>
-                    <button
-                      onClick={() => {
-                        signOut();
-                        setIsProfileOpen(false);
-                      }}
-                      className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                )}
+                <ProfileDropdown isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
               </div>
             ) : (
               <div className="flex items-center space-x-2">
@@ -242,26 +226,10 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
                     <User className="w-4 h-4" />
                     <span className="text-sm truncate">{user.email}</span>
                   </button>
-                  {isProfileOpen && (
-                    <div className="mt-2 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1">
-                      <a
-                        href="/account"
-                        className="block px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
-                      >
-                        View Account
-                      </a>
-                      <button
-                        onClick={() => {
-                          signOut();
-                          setIsProfileOpen(false);
-                          setIsMenuOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors"
-                      >
-                        Sign Out
-                      </button>
-                    </div>
-                  )}
+                  <ProfileDropdown isOpen={isProfileOpen} onClose={() => {
+                    setIsProfileOpen(false);
+                    setIsMenuOpen(false);
+                  }} />
                 </div>
               ) : (
                 <motion.button

@@ -27,8 +27,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         onClose();
       } else {
         await signUp(email, password);
-        setMode('login');
-        setError('Account created! Please sign in.');
+        onClose(); // Close modal after successful signup since user is now logged in
       }
     } catch (err) {
       setError(mode === 'login' ? 'Invalid email or password' : 'Error creating account');
@@ -67,7 +66,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               <h2 className="text-2xl text-blue-400">{mode === 'login' ? 'Login' : 'Sign Up'}</h2>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setMode('login')}
+                  onClick={() => {
+                    setMode('login');
+                    setError(null);
+                  }}
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-all ${
                     mode === 'login'
                       ? 'bg-blue-500 text-white'
@@ -78,7 +80,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <span>Login</span>
                 </button>
                 <button
-                  onClick={() => setMode('signup')}
+                  onClick={() => {
+                    setMode('signup');
+                    setError(null);
+                  }}
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg transition-all ${
                     mode === 'signup'
                       ? 'bg-blue-500 text-white'
