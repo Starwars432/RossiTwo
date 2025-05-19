@@ -16,16 +16,14 @@ function App() {
   const [currentPage, setCurrentPage] = useState<'home' | 'profile' | 'vos'>('home');
 
   useEffect(() => {
-    // Ensure page starts at the top
     window.history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
 
-    // Handle navigation
     const handleNavigation = () => {
       const path = window.location.pathname;
       if (path === '/profile') {
         setCurrentPage('profile');
-      } else if (path === '/vos') {
+      } else if (path.startsWith('/vos')) {
         setCurrentPage('vos');
       } else {
         setCurrentPage('home');
@@ -34,9 +32,11 @@ function App() {
 
     handleNavigation();
     window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('load', handleNavigation);
 
     return () => {
       window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('load', handleNavigation);
     };
   }, []);
 
@@ -47,6 +47,7 @@ function App() {
           {currentPage !== 'vos' && (
             <Navigation onLoginClick={() => setIsLoginOpen(true)} />
           )}
+          
           {currentPage === 'home' && (
             <>
               <Hero />
@@ -56,8 +57,10 @@ function App() {
               <Footer />
             </>
           )}
+          
           {currentPage === 'profile' && <ProfilePage />}
           {currentPage === 'vos' && <VisualEditor />}
+          
           <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </div>
       </CartProvider>
