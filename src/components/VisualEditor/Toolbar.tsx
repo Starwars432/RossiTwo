@@ -35,6 +35,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('bold') ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Bold"
       >
         <Bold className="w-5 h-5" />
       </button>
@@ -43,6 +44,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('italic') ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Italic"
       >
         <Italic className="w-5 h-5" />
       </button>
@@ -52,6 +54,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('heading', { level: 1 }) ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Heading 1"
       >
         <Heading1 className="w-5 h-5" />
       </button>
@@ -60,6 +63,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('heading', { level: 2 }) ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Heading 2"
       >
         <Heading2 className="w-5 h-5" />
       </button>
@@ -68,6 +72,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('heading', { level: 3 }) ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Heading 3"
       >
         <Heading3 className="w-5 h-5" />
       </button>
@@ -77,6 +82,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('bulletList') ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Bullet List"
       >
         <List className="w-5 h-5" />
       </button>
@@ -85,6 +91,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('orderedList') ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Ordered List"
       >
         <ListOrdered className="w-5 h-5" />
       </button>
@@ -99,12 +106,14 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         className={`p-2 rounded hover:bg-blue-500/20 ${
           editor.isActive('link') ? 'text-blue-400' : 'text-white'
         }`}
+        aria-label="Add Link"
       >
         <Link className="w-5 h-5" />
       </button>
       <button
         onClick={addImage}
         className="p-2 rounded hover:bg-blue-500/20 text-white"
+        aria-label="Add Image"
       >
         <Image className="w-5 h-5" />
       </button>
@@ -113,6 +122,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         onClick={() => editor.chain().focus().undo().run()}
         disabled={!editor.can().undo()}
         className="p-2 rounded hover:bg-blue-500/20 text-white disabled:opacity-50"
+        aria-label="Undo"
       >
         <Undo className="w-5 h-5" />
       </button>
@@ -120,6 +130,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         onClick={() => editor.chain().focus().redo().run()}
         disabled={!editor.can().redo()}
         className="p-2 rounded hover:bg-blue-500/20 text-white disabled:opacity-50"
+        aria-label="Redo"
       >
         <Redo className="w-5 h-5" />
       </button>

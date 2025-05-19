@@ -51,7 +51,6 @@ const VisualEditor: React.FC = () => {
     checkAdminStatus();
   }, [user]);
 
-  // Debounce content updates to prevent multiple rapid saves
   const debounce = (func: Function, wait: number) => {
     let timeout: NodeJS.Timeout;
     return (...args: any[]) => {
@@ -97,14 +96,12 @@ const VisualEditor: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="flex h-screen">
-        {/* Sidebar */}
         <div className="w-64 bg-black/50 border-r border-blue-400/30 p-4">
           <PageList onPageSelect={setCurrentPage} currentPage={currentPage} />
           <MediaLibrary />
           <Settings />
         </div>
 
-        {/* Editor */}
         <div className="flex-1 flex flex-col">
           {editor && <Toolbar editor={editor} />}
           <div className="flex-1 p-4 relative">
@@ -118,7 +115,11 @@ const VisualEditor: React.FC = () => {
                 Saving changes...
               </div>
             )}
-            <EditorContent editor={editor} className="prose prose-invert max-w-none" />
+            <EditorContent 
+              editor={editor} 
+              className="prose prose-invert max-w-none"
+              aria-label="Content editor"
+            />
           </div>
         </div>
       </div>
