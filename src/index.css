@@ -27,3 +27,16 @@ body {
   background: rgba(96, 165, 250, 0.1);
   border-color: #3b82f6;
 }
+
+.editable-content [contenteditable="true"] {
+  outline: 2px solid transparent;
+  transition: outline-color 0.2s;
+}
+
+.editable-content [contenteditable="true"]:hover {
+  outline-color: rgba(96, 165, 250, 0.3);
+}
+
+.editable-content [contenteditable="true"]:focus {
+  outline-color: rgba(96, 165, 250, 0.5);
+}

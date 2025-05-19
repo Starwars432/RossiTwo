@@ -9,11 +9,17 @@ import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import Hero from '../Hero';
+import Services from '../Services';
+import CustomDesign from '../CustomDesign';
+import Contact from '../Contact';
+import Footer from '../Footer';
 import { Bold, Italic, AlignLeft, AlignCenter, AlignRight, Link as LinkIcon, Image, Plus } from 'lucide-react';
 
 const VisualEditor: React.FC = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentContent, setCurrentContent] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -31,10 +37,14 @@ const VisualEditor: React.FC = () => {
         placeholder: 'Click to edit content...',
       }),
     ],
+    content: currentContent,
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none focus:outline-none min-h-[200px] p-4',
+        class: 'prose prose-invert max-w-none focus:outline-none',
       },
+    },
+    onUpdate: ({ editor }) => {
+      setCurrentContent(editor.getHTML());
     },
   });
 
@@ -163,10 +173,16 @@ const VisualEditor: React.FC = () => {
               </button>
             </div>
           </FloatingMenu>
-
-          <EditorContent editor={editor} />
         </>
       )}
+
+      <div className="editable-content">
+        <Hero />
+        <Services />
+        <CustomDesign />
+        <Contact />
+        <Footer />
+      </div>
     </div>
   );
 };
