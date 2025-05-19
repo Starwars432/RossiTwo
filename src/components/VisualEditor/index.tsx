@@ -15,6 +15,7 @@ const VisualEditor: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -31,7 +32,7 @@ const VisualEditor: React.FC = () => {
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-invert max-w-none focus:outline-none',
+        class: 'prose prose-invert max-w-none focus:outline-none min-h-[200px] p-4',
         role: 'textbox',
         'aria-label': 'Content editor',
         'aria-multiline': 'true',
@@ -112,18 +113,40 @@ const VisualEditor: React.FC = () => {
 
         <div className="flex-1 flex flex-col">
           {editor && <Toolbar editor={editor} />}
-          <div className="flex-1 p-4 relative">
-            {error && (
-              <div className="absolute top-0 right-0 m-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400" role="alert">
-                {error}
+          <div className="flex-1 flex">
+            <div className={`flex-1 relative ${showPreview ? 'border-r border-blue-400/30' : ''}`}>
+              {error && (
+                <div className="absolute top-0 right-0 m-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400" role="alert">
+                  {error}
+                </div>
+              )}
+              {isSaving && (
+                <div className="absolute top-0 right-0 m-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded text-blue-400" role="status">
+                  Saving changes...
+                </div>
+              )}
+              <EditorContent editor={editor} />
+            </div>
+
+            {showPreview && (
+              <div className="flex-1 bg-white">
+                <iframe
+                  src={`/preview/${currentPage?.slug || ''}`}
+                  className="w-full h-full border-0"
+                  title="Page preview"
+                />
               </div>
             )}
-            {isSaving && (
-              <div className="absolute top-0 right-0 m-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded text-blue-400" role="status">
-                Saving changes...
-              </div>
-            )}
-            <EditorContent editor={editor} />
+          </div>
+
+          <div className="border-t border-blue-400/30 p-4 flex justify-end">
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+              aria-label={showPreview ? 'Hide preview' : 'Show preview'}
+            >
+              {showPreview ? 'Hide Preview' : 'Show Preview'}
+            </button>
           </div>
         </div>
       </div>
