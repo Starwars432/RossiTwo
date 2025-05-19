@@ -8,6 +8,7 @@ const MediaLibrary: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isExpanded) {
@@ -17,6 +18,7 @@ const MediaLibrary: React.FC = () => {
 
   const fetchMedia = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('media')
         .select('*')
@@ -26,6 +28,7 @@ const MediaLibrary: React.FC = () => {
       setMedia(data || []);
     } catch (error) {
       console.error('Error fetching media:', error);
+      setError('Failed to load media');
     } finally {
       setLoading(false);
     }
@@ -38,25 +41,23 @@ const MediaLibrary: React.FC = () => {
     maxSize: 5242880, // 5MB
     onDrop: async (acceptedFiles) => {
       setUploading(true);
+      setError(null);
       try {
         for (const file of acceptedFiles) {
           const fileExt = file.name.split('.').pop();
           const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
           const filePath = `${fileName}`;
 
-          // Upload file to Supabase Storage
           const { error: uploadError } = await supabase.storage
             .from('media')
             .upload(filePath, file);
 
           if (uploadError) throw uploadError;
 
-          // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from('media')
             .getPublicUrl(filePath);
 
-          // Save media record
           const { data, error } = await supabase
             .from('media')
             .insert({
@@ -75,6 +76,7 @@ const MediaLibrary: React.FC = () => {
         }
       } catch (error) {
         console.error('Error uploading media:', error);
+        setError('Failed to upload media');
       } finally {
         setUploading(false);
       }
@@ -83,14 +85,13 @@ const MediaLibrary: React.FC = () => {
 
   const deleteMedia = async (id: string, filename: string) => {
     try {
-      // Delete from storage
+      setError(null);
       const { error: storageError } = await supabase.storage
         .from('media')
         .remove([filename]);
 
       if (storageError) throw storageError;
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from('media')
         .delete()
@@ -101,6 +102,7 @@ const MediaLibrary: React.FC = () => {
       setMedia(media.filter(item => item.id !== id));
     } catch (error) {
       console.error('Error deleting media:', error);
+      setError('Failed to delete media');
     }
   };
 
@@ -109,6 +111,7 @@ const MediaLibrary: React.FC = () => {
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center text-blue-400 hover:text-blue-300 mb-4"
+        aria-label={isExpanded ? 'Collapse media library' : 'Expand media library'}
       >
         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         <span className="ml-2">Media Library</span>
@@ -116,11 +119,18 @@ const MediaLibrary: React.FC = () => {
 
       {isExpanded && (
         <div className="space-y-4">
+          {error && (
+            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded p-2">
+              {error}
+            </div>
+          )}
+
           <div
             {...getRootProps()}
             className={`border-2 border-dashed border-blue-400/30 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400/50 transition-colors ${
               uploading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
+            aria-label="Drop zone for file upload"
           >
             <input {...getInputProps()} />
             <Upload className="w-6 h-6 mx-auto mb-2 text-blue-400" />
@@ -148,6 +158,7 @@ const MediaLibrary: React.FC = () => {
                   <button
                     onClick={() => deleteMedia(item.id, item.filename)}
                     className="absolute top-1 right-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Delete ${item.filename}`}
                   >
                     <Trash2 className="w-4 h-4 text-red-400" />
                   </button>

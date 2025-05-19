@@ -13,6 +13,8 @@ const VisualEditor: React.FC = () => {
   const { user } = useAuth();
   const [currentPage, setCurrentPage] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -23,7 +25,6 @@ const VisualEditor: React.FC = () => {
     ],
     content: currentPage?.content || '',
     onUpdate: ({ editor }) => {
-      // Handle content updates
       if (currentPage) {
         handleContentUpdate(editor.getHTML());
       }
@@ -34,35 +35,56 @@ const VisualEditor: React.FC = () => {
     const checkAdminStatus = async () => {
       if (!user) return;
 
-      const { data, error } = await supabase.rpc('is_admin', {
-        user_id: user.id
-      });
+      try {
+        const { data, error } = await supabase.rpc('is_admin', {
+          user_id: user.id
+        });
 
-      if (!error && data) {
+        if (error) throw error;
         setIsAdmin(data);
+      } catch (err) {
+        console.error('Error checking admin status:', err);
+        setError('Failed to verify admin status');
       }
     };
 
     checkAdminStatus();
   }, [user]);
 
-  const handleContentUpdate = async (content: string) => {
-    if (!currentPage || !user) return;
+  // Debounce content updates to prevent multiple rapid saves
+  const debounce = (func: Function, wait: number) => {
+    let timeout: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  const handleContentUpdate = debounce(async (content: string) => {
+    if (!currentPage || !user || isSaving) return;
 
     try {
+      setIsSaving(true);
+      setError(null);
+
       const { error } = await supabase
         .from('pages')
         .update({
           content: { html: content },
           updated_at: new Date().toISOString(),
         })
-        .eq('id', currentPage.id);
+        .eq('id', currentPage.id)
+        .select()
+        .single();
 
       if (error) throw error;
-    } catch (error) {
-      console.error('Error updating content:', error);
+    } catch (err) {
+      console.error('Error updating content:', err);
+      setError('Failed to save changes');
+    } finally {
+      setIsSaving(false);
     }
-  };
+  }, 1000);
 
   if (!user || !isAdmin) {
     return (
@@ -85,7 +107,17 @@ const VisualEditor: React.FC = () => {
         {/* Editor */}
         <div className="flex-1 flex flex-col">
           {editor && <Toolbar editor={editor} />}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 relative">
+            {error && (
+              <div className="absolute top-0 right-0 m-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400">
+                {error}
+              </div>
+            )}
+            {isSaving && (
+              <div className="absolute top-0 right-0 m-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded text-blue-400">
+                Saving changes...
+              </div>
+            )}
             <EditorContent editor={editor} className="prose prose-invert max-w-none" />
           </div>
         </div>

@@ -13,6 +13,7 @@ const Settings: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isExpanded && user) {
@@ -22,6 +23,7 @@ const Settings: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
+      setError(null);
       const { data, error } = await supabase
         .from('editor_settings')
         .select('*')
@@ -37,6 +39,7 @@ const Settings: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching settings:', error);
+      setError('Failed to load settings');
     } finally {
       setLoading(false);
     }
@@ -45,6 +48,7 @@ const Settings: React.FC = () => {
   const saveSettings = async () => {
     if (!user) return;
     setSaving(true);
+    setError(null);
 
     try {
       const { error } = await supabase
@@ -53,11 +57,14 @@ const Settings: React.FC = () => {
           user_id: user.id,
           ...settings,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
     } catch (error) {
       console.error('Error saving settings:', error);
+      setError('Failed to save settings');
     } finally {
       setSaving(false);
     }
@@ -68,6 +75,7 @@ const Settings: React.FC = () => {
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="flex items-center text-blue-400 hover:text-blue-300 mb-4"
+        aria-label={isExpanded ? 'Collapse settings' : 'Expand settings'}
       >
         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
         <span className="ml-2">Settings</span>
@@ -75,13 +83,22 @@ const Settings: React.FC = () => {
 
       {isExpanded && (
         <div className="space-y-4">
+          {error && (
+            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded p-2">
+              {error}
+            </div>
+          )}
+          
           {loading ? (
             <p className="text-sm text-gray-400">Loading settings...</p>
           ) : (
             <>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">GitHub Token</label>
+                <label className="block text-sm text-gray-400 mb-1" htmlFor="github-token">
+                  GitHub Token
+                </label>
                 <input
+                  id="github-token"
                   type="password"
                   value={settings.github_token}
                   onChange={e => setSettings({ ...settings, github_token: e.target.value })}
@@ -90,8 +107,11 @@ const Settings: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm text-gray-400 mb-1">GitHub Repo</label>
+                <label className="block text-sm text-gray-400 mb-1" htmlFor="github-repo">
+                  GitHub Repo
+                </label>
                 <input
+                  id="github-repo"
                   type="text"
                   value={settings.github_repo}
                   onChange={e => setSettings({ ...settings, github_repo: e.target.value })}
@@ -105,6 +125,7 @@ const Settings: React.FC = () => {
                 onClick={saveSettings}
                 disabled={saving}
                 className="w-full flex items-center justify-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
+                aria-label={saving ? 'Saving settings...' : 'Save settings'}
               >
                 <Save className="w-4 h-4" />
                 <span>{saving ? 'Saving...' : 'Save Settings'}</span>
