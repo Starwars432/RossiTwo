@@ -14,6 +14,7 @@ const Settings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (isExpanded && user) {
@@ -45,10 +46,29 @@ const Settings: React.FC = () => {
     }
   };
 
+  const validateSettings = () => {
+    if (!settings.github_token) {
+      setError('GitHub token is required');
+      return false;
+    }
+    if (!settings.github_repo) {
+      setError('GitHub repository is required');
+      return false;
+    }
+    if (!/^[\w-]+\/[\w-]+$/.test(settings.github_repo)) {
+      setError('GitHub repository must be in format "username/repository"');
+      return false;
+    }
+    return true;
+  };
+
   const saveSettings = async () => {
     if (!user) return;
+    if (!validateSettings()) return;
+
     setSaving(true);
     setError(null);
+    setSuccessMessage(null);
 
     try {
       const { error } = await supabase
@@ -62,9 +82,25 @@ const Settings: React.FC = () => {
         });
 
       if (error) throw error;
+      setSuccessMessage('Settings saved successfully!');
+      
+      // Verify GitHub token and repo access
+      const [owner, repo] = settings.github_repo.split('/');
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+        headers: {
+          'Authorization': `token ${settings.github_token}`,
+          'Accept': 'application/vnd.github.v3+json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Unable to access GitHub repository. Please check your token and repository name.');
+      }
+
     } catch (error) {
       console.error('Error saving settings:', error);
-      setError('Failed to save settings');
+      setError(error instanceof Error ? error.message : 'Failed to save settings');
+      setSuccessMessage(null);
     } finally {
       setSaving(false);
     }
@@ -89,6 +125,12 @@ const Settings: React.FC = () => {
             </div>
           )}
           
+          {successMessage && (
+            <div className="text-sm text-green-400 bg-green-500/10 border border-green-500/30 rounded p-2">
+              {successMessage}
+            </div>
+          )}
+
           {loading ? (
             <p className="text-sm text-gray-400">Loading settings...</p>
           ) : (
@@ -101,23 +143,37 @@ const Settings: React.FC = () => {
                   id="github-token"
                   type="password"
                   value={settings.github_token}
-                  onChange={e => setSettings({ ...settings, github_token: e.target.value })}
+                  onChange={e => {
+                    setSettings({ ...settings, github_token: e.target.value });
+                    setError(null);
+                  }}
                   className="w-full px-3 py-2 bg-black/50 border border-blue-400/30 rounded focus:outline-none focus:border-blue-400"
                   placeholder="Enter GitHub token"
+                  aria-describedby="github-token-help"
                 />
+                <p id="github-token-help" className="text-xs text-gray-500 mt-1">
+                  Create a token with 'repo' scope at GitHub Developer Settings
+                </p>
               </div>
               <div>
                 <label className="block text-sm text-gray-400 mb-1" htmlFor="github-repo">
-                  GitHub Repo
+                  GitHub Repository
                 </label>
                 <input
                   id="github-repo"
                   type="text"
                   value={settings.github_repo}
-                  onChange={e => setSettings({ ...settings, github_repo: e.target.value })}
+                  onChange={e => {
+                    setSettings({ ...settings, github_repo: e.target.value });
+                    setError(null);
+                  }}
                   className="w-full px-3 py-2 bg-black/50 border border-blue-400/30 rounded focus:outline-none focus:border-blue-400"
-                  placeholder="username/repo"
+                  placeholder="username/repository"
+                  aria-describedby="github-repo-help"
                 />
+                <p id="github-repo-help" className="text-xs text-gray-500 mt-1">
+                  Format: username/repository (e.g., octocat/Hello-World)
+                </p>
               </div>
               <motion.button
                 whileHover={{ scale: 1.02 }}

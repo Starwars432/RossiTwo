@@ -29,6 +29,14 @@ const VisualEditor: React.FC = () => {
         handleContentUpdate(editor.getHTML());
       }
     },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-invert max-w-none focus:outline-none',
+        role: 'textbox',
+        'aria-label': 'Content editor',
+        'aria-multiline': 'true',
+      },
+    },
   });
 
   useEffect(() => {
@@ -106,20 +114,16 @@ const VisualEditor: React.FC = () => {
           {editor && <Toolbar editor={editor} />}
           <div className="flex-1 p-4 relative">
             {error && (
-              <div className="absolute top-0 right-0 m-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400">
+              <div className="absolute top-0 right-0 m-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400" role="alert">
                 {error}
               </div>
             )}
             {isSaving && (
-              <div className="absolute top-0 right-0 m-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded text-blue-400">
+              <div className="absolute top-0 right-0 m-4 p-3 bg-blue-500/10 border border-blue-400/30 rounded text-blue-400" role="status">
                 Saving changes...
               </div>
             )}
-            <EditorContent 
-              editor={editor} 
-              className="prose prose-invert max-w-none"
-              aria-label="Content editor"
-            />
+            <EditorContent editor={editor} />
           </div>
         </div>
       </div>
