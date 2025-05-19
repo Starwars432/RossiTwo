@@ -21,6 +21,13 @@ interface ToolbarProps {
 const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
   if (!editor) return null;
 
+  const addImage = () => {
+    const url = window.prompt('Enter the image URL');
+    if (url) {
+      editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
+    }
+  };
+
   return (
     <div className="border-b border-blue-400/30 p-4 bg-black/50 flex items-center space-x-2">
       <button
@@ -96,12 +103,7 @@ const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
         <Link className="w-5 h-5" />
       </button>
       <button
-        onClick={() => {
-          const url = window.prompt('Enter the image URL');
-          if (url) {
-            editor.chain().focus().setImage({ src: url }).run();
-          }
-        }}
+        onClick={addImage}
         className="p-2 rounded hover:bg-blue-500/20 text-white"
       >
         <Image className="w-5 h-5" />

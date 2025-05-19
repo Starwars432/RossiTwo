@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Image, ChevronDown, ChevronRight, Upload, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Upload, Trash2 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { supabase } from '../../lib/supabase';
 
