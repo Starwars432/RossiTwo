@@ -14,7 +14,6 @@ import { Bold, Italic, AlignLeft, AlignCenter, AlignRight, Link as LinkIcon, Ima
 const VisualEditor: React.FC = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -52,7 +51,6 @@ const VisualEditor: React.FC = () => {
         setIsAdmin(data);
       } catch (err) {
         console.error('Error checking admin status:', err);
-        setError('Failed to verify admin status');
       }
     };
 
