@@ -7,12 +7,13 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import LoginModal from './components/LoginModal';
 import ProfilePage from './components/ProfilePage';
+import VisualEditor from './components/VisualEditor';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 
 function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'home' | 'profile'>('home');
+  const [currentPage, setCurrentPage] = useState<'home' | 'profile' | 'vos'>('home');
 
   useEffect(() => {
     // Ensure page starts at the top
@@ -24,6 +25,8 @@ function App() {
       const path = window.location.pathname;
       if (path === '/profile') {
         setCurrentPage('profile');
+      } else if (path === '/vos') {
+        setCurrentPage('vos');
       } else {
         setCurrentPage('home');
       }
@@ -41,8 +44,10 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-          <Navigation onLoginClick={() => setIsLoginOpen(true)} />
-          {currentPage === 'home' ? (
+          {currentPage !== 'vos' && (
+            <Navigation onLoginClick={() => setIsLoginOpen(true)} />
+          )}
+          {currentPage === 'home' && (
             <>
               <Hero />
               <Services />
@@ -50,9 +55,9 @@ function App() {
               <Contact />
               <Footer />
             </>
-          ) : (
-            <ProfilePage />
           )}
+          {currentPage === 'profile' && <ProfilePage />}
+          {currentPage === 'vos' && <VisualEditor />}
           <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
         </div>
       </CartProvider>
