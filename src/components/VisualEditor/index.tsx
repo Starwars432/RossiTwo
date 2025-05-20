@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent, BubbleMenu, FloatingMenu } from '@tiptap/react';
+import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import TextStyle from '@tiptap/extension-text-style';
@@ -78,102 +78,95 @@ const VisualEditor: React.FC = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {editor && (
-        <>
-          <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-            <div className="flex items-center space-x-1 bg-black/90 border border-blue-400/30 rounded-lg p-1">
-              <button
-                onClick={() => editor.chain().focus().toggleBold().run()}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive('bold') ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Bold"
-              >
-                <Bold className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().toggleItalic().run()}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive('italic') ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Italic"
-              >
-                <Italic className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive({ textAlign: 'left' }) ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Align left"
-              >
-                <AlignLeft className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive({ textAlign: 'center' }) ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Align center"
-              >
-                <AlignCenter className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive({ textAlign: 'right' }) ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Align right"
-              >
-                <AlignRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => {
-                  const url = window.prompt('Enter the link URL');
-                  if (url) {
-                    editor.chain().focus().setLink({ href: url }).run();
-                  }
-                }}
-                className={`p-1 rounded hover:bg-blue-500/20 ${
-                  editor.isActive('link') ? 'text-blue-400' : 'text-white'
-                }`}
-                aria-label="Add link"
-              >
-                <LinkIcon className="w-4 h-4" />
-              </button>
-            </div>
-          </BubbleMenu>
-
-          <FloatingMenu editor={editor} tippyOptions={{ duration: 100 }}>
-            <div className="bg-black/90 border border-blue-400/30 rounded-lg p-1">
-              <button
-                onClick={() => {
-                  const url = window.prompt('Enter the image URL');
-                  if (url) {
-                    editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
-                  }
-                }}
-                className="flex items-center space-x-2 p-2 hover:bg-blue-500/20 rounded w-full"
-                aria-label="Add image"
-              >
-                <Image className="w-4 h-4" />
-                <span>Add Image</span>
-              </button>
-              <button
-                onClick={() => {
-                  const title = window.prompt('Enter section title');
-                  if (title) {
-                    editor.chain().focus().insertContent(`<h2>${title}</h2>`).run();
-                  }
-                }}
-                className="flex items-center space-x-2 p-2 hover:bg-blue-500/20 rounded w-full"
-                aria-label="Add section"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Section</span>
-              </button>
-            </div>
-          </FloatingMenu>
-        </>
+        <div className="fixed top-4 right-4 z-50 bg-black/90 border border-blue-400/30 rounded-lg p-2 space-y-2">
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive('bold') ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Bold"
+            >
+              <Bold className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive('italic') ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Italic"
+            >
+              <Italic className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().setTextAlign('left').run()}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive({ textAlign: 'left' }) ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Align left"
+            >
+              <AlignLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().setTextAlign('center').run()}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive({ textAlign: 'center' }) ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Align center"
+            >
+              <AlignCenter className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => editor.chain().focus().setTextAlign('right').run()}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive({ textAlign: 'right' }) ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Align right"
+            >
+              <AlignRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex items-center space-x-1">
+            <button
+              onClick={() => {
+                const url = window.prompt('Enter the link URL');
+                if (url) {
+                  editor.chain().focus().setLink({ href: url }).run();
+                }
+              }}
+              className={`p-1 rounded hover:bg-blue-500/20 ${
+                editor.isActive('link') ? 'text-blue-400' : 'text-white'
+              }`}
+              aria-label="Add link"
+            >
+              <LinkIcon className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                const url = window.prompt('Enter the image URL');
+                if (url) {
+                  editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
+                }
+              }}
+              className="p-1 rounded hover:bg-blue-500/20 text-white"
+              aria-label="Add image"
+            >
+              <Image className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                const title = window.prompt('Enter section title');
+                if (title) {
+                  editor.chain().focus().insertContent(`<h2>${title}</h2>`).run();
+                }
+              }}
+              className="p-1 rounded hover:bg-blue-500/20 text-white"
+              aria-label="Add section"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="editable-content">
