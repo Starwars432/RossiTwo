@@ -56,3 +56,20 @@ body {
 .editable-content img:hover {
   outline: 2px solid rgba(96, 165, 250, 0.3);
 }
+
+.ProseMirror {
+  min-height: 100px;
+  padding: 1rem;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

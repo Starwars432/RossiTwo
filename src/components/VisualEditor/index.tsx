@@ -25,6 +25,7 @@ const VisualEditor: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -80,6 +81,7 @@ const VisualEditor: React.FC = () => {
     if (editor && currentPage) {
       editor.commands.setContent(currentPage.content);
       updatePreview(currentPage.content);
+      setPreviewUrl(window.location.origin);
     }
   }, [currentPage, editor]);
 
@@ -110,15 +112,24 @@ const VisualEditor: React.FC = () => {
       <!DOCTYPE html>
       <html>
         <head>
+          <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
           <style>
-            body { font-family: system-ui; line-height: 1.5; }
+            body { 
+              font-family: 'Playfair Display', serif;
+              line-height: 1.5;
+              margin: 0;
+              padding: 20px;
+              background: black;
+              color: white;
+            }
             img { max-width: 100%; height: auto; }
             [data-editable="true"] { outline: 2px solid transparent; }
             [data-editable="true"]:hover { outline-color: rgba(96, 165, 250, 0.3); }
+            .content { max-width: 1200px; margin: 0 auto; }
           </style>
         </head>
         <body>
-          <div class="editable-content">
+          <div class="content editable-content">
             ${content}
           </div>
         </body>
@@ -162,10 +173,20 @@ const VisualEditor: React.FC = () => {
 
           {/* Preview */}
           <div className="w-1/2 flex flex-col">
-            <div className="p-4 border-b border-blue-400/30 bg-black/50">
+            <div className="p-4 border-b border-blue-400/30 bg-black/50 flex justify-between items-center">
               <h3 className="text-blue-400">Live Preview</h3>
+              {previewUrl && (
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  View Live Site
+                </a>
+              )}
             </div>
-            <div className="flex-1 p-4 overflow-auto bg-white">
+            <div className="flex-1 overflow-auto bg-black">
               {preview && (
                 <iframe
                   srcDoc={preview}

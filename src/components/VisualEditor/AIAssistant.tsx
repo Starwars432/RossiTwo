@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Send, X, Bot, ChevronDown, ChevronUp } from 'lucide-react';
+import { motion, useDragControls } from 'framer-motion';
+import { Send, X, Bot, ChevronDown, ChevronUp, GripVertical } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -21,7 +21,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onCreatePage, onUpdateContent
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     scrollToBottom();
@@ -101,9 +103,29 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onCreatePage, onUpdateContent
   };
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between p-3 border-b border-blue-400/30">
+    <motion.div
+      drag
+      dragControls={dragControls}
+      dragMomentum={false}
+      dragElastic={0}
+      onDragEnd={(_, info) => {
+        setPosition({
+          x: position.x + info.offset.x,
+          y: position.y + info.offset.y,
+        });
+      }}
+      style={{
+        x: position.x,
+        y: position.y,
+      }}
+      className="fixed bottom-4 right-4 w-80 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg"
+    >
+      <div
+        className="flex items-center justify-between p-3 border-b border-blue-400/30 cursor-move"
+        onPointerDown={(e) => dragControls.start(e)}
+      >
         <div className="flex items-center space-x-2 text-blue-400">
+          <GripVertical className="w-4 h-4" />
           <Bot className="w-5 h-5" />
           <span>AI Assistant</span>
         </div>
@@ -180,7 +202,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ onCreatePage, onUpdateContent
           </form>
         </>
       )}
-    </div>
+    </motion.div>
   );
 };
 
