@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useEditor } from '@tiptap/react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import TextStyle from '@tiptap/extension-text-style';
@@ -7,6 +7,8 @@ import Color from '@tiptap/extension-color';
 import FontFamily from '@tiptap/extension-font-family';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
+import FloatingMenu from '@tiptap/extension-floating-menu';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Hero from '../Hero';
@@ -19,34 +21,61 @@ import { Bold, Italic, AlignLeft, AlignCenter, AlignRight, Link as LinkIcon, Ima
 const VisualEditor: React.FC = () => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [currentContent, setCurrentContent] = useState<string | null>(null);
+  const [selectedElement, setSelectedElement] = useState<HTMLElement | null>(null);
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Link.configure({
-        openOnClick: false,
-      }),
-      TextStyle,
-      Color,
-      FontFamily,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      Placeholder.configure({
-        placeholder: 'Click to edit content...',
-      }),
-    ],
-    content: currentContent,
-    editorProps: {
-      attributes: {
-        class: 'prose prose-invert max-w-none focus:outline-none',
-      },
-    },
-    onUpdate: ({ editor }) => {
-      setCurrentContent(editor.getHTML());
-    },
-  });
+  useEffect(() => {
+    const makeAllContentEditable = () => {
+      const makeEditable = (element: HTMLElement) => {
+        // Skip elements that shouldn't be editable
+        const nonEditableTags = ['SCRIPT', 'STYLE', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'];
+        if (nonEditableTags.includes(element.tagName)) return;
+
+        // Make text nodes editable
+        if (element.childNodes.length === 0 || 
+            (element.childNodes.length === 1 && element.firstChild?.nodeType === Node.TEXT_NODE)) {
+          element.setAttribute('data-editable', 'true');
+          element.contentEditable = 'true';
+          element.addEventListener('focus', () => setSelectedElement(element));
+          element.addEventListener('blur', () => setSelectedElement(null));
+        }
+
+        // Recursively process child elements
+        Array.from(element.children).forEach(child => {
+          if (child instanceof HTMLElement) {
+            makeEditable(child);
+          }
+        });
+      };
+
+      // Start with the main content container
+      const container = document.querySelector('.editable-content');
+      if (container instanceof HTMLElement) {
+        makeEditable(container);
+      }
+
+      // Set up mutation observer to handle dynamically added content
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (node instanceof HTMLElement) {
+              makeEditable(node);
+            }
+          });
+        });
+      });
+
+      if (container) {
+        observer.observe(container, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      return () => observer.disconnect();
+    };
+
+    makeAllContentEditable();
+  }, []);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -67,6 +96,14 @@ const VisualEditor: React.FC = () => {
     checkAdminStatus();
   }, [user]);
 
+  const handleCreateServicePage = () => {
+    const title = window.prompt('Enter service page title:');
+    if (!title) return;
+
+    // Here you would typically create a new service page
+    // and link it to the parent service
+  };
+
   if (!user || !isAdmin) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -77,50 +114,40 @@ const VisualEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      {editor && (
+      {selectedElement && (
         <div className="fixed top-4 right-4 z-50 bg-black/90 border border-blue-400/30 rounded-lg p-2 space-y-2">
           <div className="flex items-center space-x-1">
             <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive('bold') ? 'text-blue-400' : 'text-white'
-              }`}
+              onClick={() => document.execCommand('bold')}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Bold"
             >
               <Bold className="w-4 h-4" />
             </button>
             <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive('italic') ? 'text-blue-400' : 'text-white'
-              }`}
+              onClick={() => document.execCommand('italic')}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Italic"
             >
               <Italic className="w-4 h-4" />
             </button>
             <button
-              onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive({ textAlign: 'left' }) ? 'text-blue-400' : 'text-white'
-              }`}
+              onClick={() => document.execCommand('justifyLeft')}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Align left"
             >
               <AlignLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive({ textAlign: 'center' }) ? 'text-blue-400' : 'text-white'
-              }`}
+              onClick={() => document.execCommand('justifyCenter')}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Align center"
             >
               <AlignCenter className="w-4 h-4" />
             </button>
             <button
-              onClick={() => editor.chain().focus().setTextAlign('right').run()}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive({ textAlign: 'right' }) ? 'text-blue-400' : 'text-white'
-              }`}
+              onClick={() => document.execCommand('justifyRight')}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Align right"
             >
               <AlignRight className="w-4 h-4" />
@@ -131,12 +158,10 @@ const VisualEditor: React.FC = () => {
               onClick={() => {
                 const url = window.prompt('Enter the link URL');
                 if (url) {
-                  editor.chain().focus().setLink({ href: url }).run();
+                  document.execCommand('createLink', false, url);
                 }
               }}
-              className={`p-1 rounded hover:bg-blue-500/20 ${
-                editor.isActive('link') ? 'text-blue-400' : 'text-white'
-              }`}
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Add link"
             >
               <LinkIcon className="w-4 h-4" />
@@ -145,23 +170,18 @@ const VisualEditor: React.FC = () => {
               onClick={() => {
                 const url = window.prompt('Enter the image URL');
                 if (url) {
-                  editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
+                  document.execCommand('insertImage', false, url);
                 }
               }}
-              className="p-1 rounded hover:bg-blue-500/20 text-white"
+              className="p-1 rounded hover:bg-blue-500/20"
               aria-label="Add image"
             >
               <Image className="w-4 h-4" />
             </button>
             <button
-              onClick={() => {
-                const title = window.prompt('Enter section title');
-                if (title) {
-                  editor.chain().focus().insertContent(`<h2>${title}</h2>`).run();
-                }
-              }}
-              className="p-1 rounded hover:bg-blue-500/20 text-white"
-              aria-label="Add section"
+              onClick={handleCreateServicePage}
+              className="p-1 rounded hover:bg-blue-500/20"
+              aria-label="Add service page"
             >
               <Plus className="w-4 h-4" />
             </button>

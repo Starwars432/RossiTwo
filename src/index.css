@@ -28,15 +28,16 @@ body {
   border-color: #3b82f6;
 }
 
-.editable-content [contenteditable="true"] {
+.editable-content [data-editable="true"] {
+  cursor: text;
   outline: 2px solid transparent;
   transition: outline-color 0.2s;
 }
 
-.editable-content [contenteditable="true"]:hover {
+.editable-content [data-editable="true"]:hover {
   outline-color: rgba(96, 165, 250, 0.3);
 }
 
-.editable-content [contenteditable="true"]:focus {
+.editable-content [data-editable="true"]:focus {
   outline-color: rgba(96, 165, 250, 0.5);
 }
