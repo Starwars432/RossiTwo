@@ -59,7 +59,7 @@ const VisualEditor: React.FC = () => {
     }
   }, [currentPage, editor]);
 
-  const handleContentUpdate = async (content: string) => {
+  const handleContentUpdate = async (content: string): Promise<void> => {
     if (!currentPage || !user) return;
 
     try {
@@ -79,7 +79,7 @@ const VisualEditor: React.FC = () => {
     }
   };
 
-  const handleCreatePage = async (title: string, content: string) => {
+  const handleCreatePage = async (title: string, content: string): Promise<void> => {
     const slug = title.toLowerCase().replace(/\s+/g, '-');
     try {
       const { data, error } = await supabase
@@ -103,7 +103,7 @@ const VisualEditor: React.FC = () => {
     }
   };
 
-  const handleAddImage = async (url: string) => {
+  const handleAddImage = async (url: string): Promise<void> => {
     if (!editor) return;
     editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
   };
@@ -142,7 +142,12 @@ const VisualEditor: React.FC = () => {
         {/* AI Assistant */}
         <AIAssistant
           onCreatePage={handleCreatePage}
-          onUpdateContent={(content) => editor?.commands.setContent(content)}
+          onUpdateContent={async (content) => {
+            if (editor) {
+              editor.commands.setContent(content);
+              await handleContentUpdate(content);
+            }
+          }}
           onAddImage={handleAddImage}
         />
       </div>
