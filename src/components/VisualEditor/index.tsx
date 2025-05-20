@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import TextStyle from '@tiptap/extension-text-style';
+import Color from '@tiptap/extension-color';
+import FontFamily from '@tiptap/extension-font-family';
+import TextAlign from '@tiptap/extension-text-align';
+import Placeholder from '@tiptap/extension-placeholder';
+import BubbleMenu from '@tiptap/extension-bubble-menu';
+import FloatingMenu from '@tiptap/extension-floating-menu';
+import Heading from '@tiptap/extension-heading';
+import Image from '@tiptap/extension-image';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Toolbar from './Toolbar';
@@ -15,6 +24,7 @@ const VisualEditor: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [currentPage, setCurrentPage] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -22,6 +32,19 @@ const VisualEditor: React.FC = () => {
       Link.configure({
         openOnClick: false,
       }),
+      TextStyle,
+      Color,
+      FontFamily,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      Placeholder.configure({
+        placeholder: 'Start writing...',
+      }),
+      BubbleMenu,
+      FloatingMenu,
+      Heading,
+      Image,
     ],
     content: currentPage?.content || '',
     editable: true,
@@ -56,6 +79,7 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (editor && currentPage) {
       editor.commands.setContent(currentPage.content);
+      updatePreview(currentPage.content);
     }
   }, [currentPage, editor]);
 
@@ -73,39 +97,34 @@ const VisualEditor: React.FC = () => {
         .eq('id', currentPage.id);
 
       if (error) throw error;
+      updatePreview(content);
     } catch (err) {
       console.error('Error updating content:', err);
       setError('Failed to save changes');
     }
   };
 
-  const handleCreatePage = async (title: string, content: string): Promise<void> => {
-    const slug = title.toLowerCase().replace(/\s+/g, '-');
-    try {
-      const { data, error } = await supabase
-        .from('pages')
-        .insert({
-          title,
-          slug,
-          content: { html: content },
-          is_draft: true,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setCurrentPage(data);
-      }
-    } catch (err) {
-      console.error('Error creating page:', err);
-      throw new Error('Failed to create page');
-    }
-  };
-
-  const handleAddImage = async (url: string): Promise<void> => {
-    if (!editor) return;
-    editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
+  const updatePreview = (content: string) => {
+    // Create a preview version of the content
+    const previewContent = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: system-ui; line-height: 1.5; }
+            img { max-width: 100%; height: auto; }
+            [data-editable="true"] { outline: 2px solid transparent; }
+            [data-editable="true"]:hover { outline-color: rgba(96, 165, 250, 0.3); }
+          </style>
+        </head>
+        <body>
+          <div class="editable-content">
+            ${content}
+          </div>
+        </body>
+      </html>
+    `;
+    setPreview(previewContent);
   };
 
   if (!user || !isAdmin) {
@@ -126,29 +145,75 @@ const VisualEditor: React.FC = () => {
           <Settings />
         </div>
 
-        {/* Editor */}
-        <div className="flex-1 flex flex-col">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2">
-              {error}
+        {/* Editor and Preview */}
+        <div className="flex-1 flex">
+          {/* Editor */}
+          <div className="w-1/2 flex flex-col border-r border-blue-400/30">
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2">
+                {error}
+              </div>
+            )}
+            {editor && <Toolbar editor={editor} />}
+            <div className="flex-1 p-4 editable-content">
+              <EditorContent editor={editor} className="prose prose-invert max-w-none" />
             </div>
-          )}
-          {editor && <Toolbar editor={editor} />}
-          <div className="flex-1 p-4 editable-content">
-            <EditorContent editor={editor} className="prose prose-invert max-w-none" />
+          </div>
+
+          {/* Preview */}
+          <div className="w-1/2 flex flex-col">
+            <div className="p-4 border-b border-blue-400/30 bg-black/50">
+              <h3 className="text-blue-400">Live Preview</h3>
+            </div>
+            <div className="flex-1 p-4 overflow-auto bg-white">
+              {preview && (
+                <iframe
+                  srcDoc={preview}
+                  className="w-full h-full border-0"
+                  title="Preview"
+                  sandbox="allow-same-origin"
+                />
+              )}
+            </div>
           </div>
         </div>
 
         {/* AI Assistant */}
         <AIAssistant
-          onCreatePage={handleCreatePage}
+          onCreatePage={async (title, content) => {
+            const slug = title.toLowerCase().replace(/\s+/g, '-');
+            try {
+              const { data, error } = await supabase
+                .from('pages')
+                .insert({
+                  title,
+                  slug,
+                  content: { html: content },
+                  is_draft: true,
+                })
+                .select()
+                .single();
+
+              if (error) throw error;
+              if (data) {
+                setCurrentPage(data);
+              }
+            } catch (err) {
+              console.error('Error creating page:', err);
+              throw new Error('Failed to create page');
+            }
+          }}
           onUpdateContent={async (content) => {
             if (editor) {
               editor.commands.setContent(content);
               await handleContentUpdate(content);
             }
           }}
-          onAddImage={handleAddImage}
+          onAddImage={async (url) => {
+            if (editor) {
+              editor.chain().focus().setImage({ src: url }).run();
+            }
+          }}
         />
       </div>
     </div>
