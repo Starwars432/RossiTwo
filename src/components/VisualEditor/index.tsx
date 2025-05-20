@@ -2,13 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import TextStyle from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
-import FontFamily from '@tiptap/extension-font-family';
-import TextAlign from '@tiptap/extension-text-align';
-import Placeholder from '@tiptap/extension-placeholder';
-import BubbleMenu from '@tiptap/extension-bubble-menu';
-import FloatingMenu from '@tiptap/extension-floating-menu';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import Toolbar from './Toolbar';
@@ -28,21 +21,6 @@ const VisualEditor: React.FC = () => {
       StarterKit,
       Link.configure({
         openOnClick: false,
-      }),
-      TextStyle,
-      Color,
-      FontFamily,
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-      }),
-      Placeholder.configure({
-        placeholder: 'Start typing...',
-      }),
-      BubbleMenu.configure({
-        element: document.querySelector('.bubble-menu'),
-      }),
-      FloatingMenu.configure({
-        element: document.querySelector('.floating-menu'),
       }),
     ],
     content: currentPage?.content || '',
