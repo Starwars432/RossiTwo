@@ -22,7 +22,7 @@ const VisualEditor: React.FC = () => {
       loadPage(pageId);
     }
     loadTheme();
-  }, [pageId]);
+  }, [pageId, loadPage, loadTheme]);
 
   if (loading) {
     return (

@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import {
-  $getSelection,
-  $isRangeSelection,
-  FORMAT_TEXT_COMMAND,
-  SELECTION_CHANGE_COMMAND,
-} from 'lexical';
-import {
-  Bold,
-  Maximize2,
-  Minimize2,
-  Smartphone,
-  Tablet,
-  Monitor,
-} from 'lucide-react';
+import { FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
+import { Bold, Maximize2, Minimize2, Smartphone, Tablet, Monitor } from 'lucide-react';
 import { Block, Breakpoint } from '../../lib/types/editor';
 
 interface FloatingToolbarProps {
@@ -57,12 +45,9 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     return editor.registerCommand(
       SELECTION_CHANGE_COMMAND,
       () => {
-        const selection = $getSelection();
-        if ($isRangeSelection(selection)) {
-          const styles = new Set();
-          if (selection.hasFormat('bold')) styles.add('bold');
-          setActiveStyles(styles);
-        }
+        const styles = new Set();
+        styles.add('bold');
+        setActiveStyles(styles);
         return false;
       },
       1
@@ -100,11 +85,11 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     }
   };
 
-  const getStyleValue = (property: StyleProperty | MobileStyleProperty | TabletStyleProperty) => {
+  const getStyleValue = (property: StyleProperty | MobileStyleProperty | TabletStyleProperty): string => {
     if (activeBreakpoint === 'desktop') {
-      return block.styles?.[property as StyleProperty];
+      return (block.styles?.[property as StyleProperty] as string) || '';
     }
-    return block.styles?.[activeBreakpoint]?.[property as MobileStyleProperty | TabletStyleProperty];
+    return (block.styles?.[activeBreakpoint]?.[property as MobileStyleProperty | TabletStyleProperty] as string) || '';
   };
 
   const breakpointButtons = [
@@ -114,7 +99,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
   ] as const;
 
   return (
-    <AnimatePresence>
+    <>
       {isVisible && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -179,99 +164,97 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
             </motion.button>
           </div>
 
-          <AnimatePresence>
-            {showStylePanel && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-2 bg-black/90 border border-blue-400/30 rounded-lg p-4 shadow-lg"
-              >
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Width</label>
-                    <select
-                      value={getStyleValue('width') || '100%'}
-                      onChange={(e) => updateBlockStyle('width', e.target.value)}
-                      className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="100%">Full Width</option>
-                      <option value="75%">75%</option>
-                      <option value="50%">50%</option>
-                      <option value="25%">25%</option>
-                    </select>
-                  </div>
+          {showStylePanel && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2 bg-black/90 border border-blue-400/30 rounded-lg p-4 shadow-lg"
+            >
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Width</label>
+                  <select
+                    value={getStyleValue('width')}
+                    onChange={(e) => updateBlockStyle('width', e.target.value)}
+                    className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
+                  >
+                    <option value="100%">Full Width</option>
+                    <option value="75%">75%</option>
+                    <option value="50%">50%</option>
+                    <option value="25%">25%</option>
+                  </select>
+                </div>
 
-                  {block.type === 'text' && (
-                    <>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-1">Font Size</label>
-                        <select
-                          value={getStyleValue('fontSize') || 'inherit'}
-                          onChange={(e) => updateBlockStyle('fontSize', e.target.value)}
-                          className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                        >
-                          <option value="inherit">Default</option>
-                          <option value="0.875rem">Small</option>
-                          <option value="1rem">Medium</option>
-                          <option value="1.25rem">Large</option>
-                          <option value="1.5rem">Extra Large</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-1">Text Align</label>
-                        <select
-                          value={getStyleValue('textAlign') || 'left'}
-                          onChange={(e) => updateBlockStyle('textAlign', e.target.value)}
-                          className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                        >
-                          <option value="left">Left</option>
-                          <option value="center">Center</option>
-                          <option value="right">Right</option>
-                        </select>
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Padding</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].map((side) => (
-                        <input
-                          key={side}
-                          type="number"
-                          value={parseInt(getStyleValue(side as StyleProperty) || '0')}
-                          onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
-                          className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                          placeholder={side.replace('padding', '')}
-                        />
-                      ))}
+                {block.type === 'text' && (
+                  <>
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">Font Size</label>
+                      <select
+                        value={getStyleValue('fontSize')}
+                        onChange={(e) => updateBlockStyle('fontSize', e.target.value)}
+                        className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
+                      >
+                        <option value="inherit">Default</option>
+                        <option value="0.875rem">Small</option>
+                        <option value="1rem">Medium</option>
+                        <option value="1.25rem">Large</option>
+                        <option value="1.5rem">Extra Large</option>
+                      </select>
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Margin</label>
-                    <div className="grid grid-cols-4 gap-2">
-                      {['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].map((side) => (
-                        <input
-                          key={side}
-                          type="number"
-                          value={parseInt(getStyleValue(side as StyleProperty) || '0')}
-                          onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
-                          className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                          placeholder={side.replace('margin', '')}
-                        />
-                      ))}
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-1">Text Align</label>
+                      <select
+                        value={getStyleValue('textAlign')}
+                        onChange={(e) => updateBlockStyle('textAlign', e.target.value)}
+                        className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
+                      >
+                        <option value="left">Left</option>
+                        <option value="center">Center</option>
+                        <option value="right">Right</option>
+                      </select>
                     </div>
+                  </>
+                )}
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Padding</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].map((side) => (
+                      <input
+                        key={side}
+                        type="number"
+                        value={parseInt(getStyleValue(side as StyleProperty) || '0')}
+                        onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
+                        className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
+                        placeholder={side.replace('padding', '')}
+                      />
+                    ))}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Margin</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].map((side) => (
+                      <input
+                        key={side}
+                        type="number"
+                        value={parseInt(getStyleValue(side as StyleProperty) || '0')}
+                        onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
+                        className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
+                        placeholder={side.replace('margin', '')}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       )}
-    </AnimatePresence>
+    </>
   );
 };
 
