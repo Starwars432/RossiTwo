@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Block } from '../../../lib/types/editor';
 import { motion } from 'framer-motion';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
@@ -10,12 +9,13 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import { $getRoot, EditorState } from 'lexical';
 import FloatingToolbar from '../FloatingToolbar';
+import { Block, Breakpoint } from '../../../lib/types/editor';
 
 interface TextBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
-  breakpoint: string;
+  breakpoint: Breakpoint;
 }
 
 const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
@@ -62,10 +62,10 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, break
   };
 
   const textStyles = {
-    ...block.styles,
     display: 'block',
-    width: block.styles?.width || '100%'
-  };
+    width: '100%',
+    ...block.styles
+  } as const;
 
   return (
     <motion.div

@@ -1,3 +1,5 @@
+export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
+
 export interface Page {
   id: string;
   slug: string;
@@ -14,6 +16,39 @@ export interface Page {
   published_at?: string;
 }
 
+export interface BlockStyles {
+  font?: string;
+  color?: string;
+  backgroundColor?: string;
+  padding?: string;
+  margin?: string;
+  width?: string;
+  height?: string;
+  display?: string;
+  flexDirection?: string;
+  justifyContent?: string;
+  alignItems?: string;
+  gap?: string;
+  mobile?: {
+    width?: string;
+    display?: string;
+    flexDirection?: string;
+    padding?: string;
+    margin?: string;
+    fontSize?: string;
+    textAlign?: string;
+  };
+  tablet?: {
+    width?: string;
+    display?: string;
+    flexDirection?: string;
+    padding?: string;
+    margin?: string;
+    fontSize?: string;
+    textAlign?: string;
+  };
+}
+
 export interface Block {
   id: string;
   type: 'text' | 'image' | 'container' | 'row' | 'column' | 'section' | 'component';
@@ -22,38 +57,7 @@ export interface Block {
   alt?: string;
   children?: Block[];
   componentId?: string;
-  styles?: {
-    font?: string;
-    color?: string;
-    backgroundColor?: string;
-    padding?: string;
-    margin?: string;
-    width?: string;
-    height?: string;
-    display?: string;
-    flexDirection?: string;
-    justifyContent?: string;
-    alignItems?: string;
-    gap?: string;
-    mobile?: {
-      width?: string;
-      display?: string;
-      flexDirection?: string;
-      padding?: string;
-      margin?: string;
-      fontSize?: string;
-      textAlign?: string;
-    };
-    tablet?: {
-      width?: string;
-      display?: string;
-      flexDirection?: string;
-      padding?: string;
-      margin?: string;
-      fontSize?: string;
-      textAlign?: string;
-    };
-  };
+  styles?: BlockStyles;
 }
 
 export interface Component {
@@ -67,5 +71,3 @@ export interface Component {
   updated_at: string;
   user_id: string;
 }
-
-export type Breakpoint = 'desktop' | 'tablet' | 'mobile';

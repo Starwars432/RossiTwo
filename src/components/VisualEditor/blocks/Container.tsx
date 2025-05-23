@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { Block } from '../../../lib/types/editor';
 import { motion } from 'framer-motion';
+import { Block, Breakpoint } from '../../../lib/types/editor';
 import BlockRenderer from '../BlockRenderer';
 
 interface ContainerBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
-  breakpoint: string;
+  breakpoint: Breakpoint;
 }
 
 const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
@@ -23,10 +23,10 @@ const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEdit
   };
 
   const containerStyles = {
-    ...block.styles,
     display: 'flex',
-    flexDirection: block.styles?.flexDirection || 'column'
-  };
+    flexDirection: block.styles?.flexDirection || 'column',
+    ...block.styles
+  } as const;
 
   return (
     <motion.div

@@ -12,7 +12,7 @@ interface BlockRendererProps {
 }
 
 const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
-  const components: Record<Block['type'], React.FC<BlockRendererProps>> = {
+  const components = {
     text: TextBlock,
     image: ImageBlock,
     container: ContainerBlock,
@@ -20,7 +20,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditin
     column: ContainerBlock,
     section: ContainerBlock,
     component: ContainerBlock
-  };
+  } as const;
 
   const Component = components[block.type];
   if (!Component) {
@@ -31,16 +31,17 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditin
   // Merge responsive styles based on breakpoint
   const getResponsiveStyles = () => {
     const baseStyles = { ...block.styles };
-    delete baseStyles.mobile;
-    delete baseStyles.tablet;
-
-    if (breakpoint === 'mobile' && block.styles?.mobile) {
-      return { ...baseStyles, ...block.styles.mobile };
+    if (!baseStyles) return {};
+    
+    const { mobile, tablet, ...rest } = baseStyles;
+    
+    if (breakpoint === 'mobile' && mobile) {
+      return { ...rest, ...mobile };
     }
-    if (breakpoint === 'tablet' && block.styles?.tablet) {
-      return { ...baseStyles, ...block.styles.tablet };
+    if (breakpoint === 'tablet' && tablet) {
+      return { ...rest, ...tablet };
     }
-    return baseStyles;
+    return rest;
   };
 
   const blockWithResponsiveStyles = {
@@ -48,7 +49,12 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditin
     styles: getResponsiveStyles()
   };
 
-  return <Component block={blockWithResponsiveStyles} onUpdate={onUpdate} isEditing={isEditing} breakpoint={breakpoint} />;
+  return <Component 
+    block={blockWithResponsiveStyles} 
+    onUpdate={onUpdate} 
+    isEditing={isEditing} 
+    breakpoint={breakpoint} 
+  />;
 };
 
 export default BlockRenderer;

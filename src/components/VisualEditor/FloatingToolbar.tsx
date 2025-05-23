@@ -23,13 +23,13 @@ interface FloatingToolbarProps {
   breakpoint: Breakpoint;
 }
 
-const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate }) => {
+const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, breakpoint }) => {
   const [editor] = useLexicalComposerContext();
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [activeStyles, setActiveStyles] = useState(new Set());
   const [showStylePanel, setShowStylePanel] = useState(false);
-  const [activeBreakpoint, setActiveBreakpoint] = useState<Breakpoint>('desktop');
+  const [activeBreakpoint, setActiveBreakpoint] = useState<Breakpoint>(breakpoint);
 
   useEffect(() => {
     const updateToolbar = () => {
@@ -73,7 +73,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate }) =>
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
-  const updateBlockStyle = (property: string, value: string) => {
+  const updateBlockStyle = (property: keyof Block['styles'], value: string) => {
     if (activeBreakpoint === 'desktop') {
       onUpdate({
         ...block,
@@ -104,10 +104,10 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate }) =>
   };
 
   const breakpointButtons = [
-    { value: 'desktop', icon: Monitor, label: 'Desktop' },
-    { value: 'tablet', icon: Tablet, label: 'Tablet' },
-    { value: 'mobile', icon: Smartphone, label: 'Mobile' }
-  ] as const;
+    { value: 'desktop' as const, icon: Monitor, label: 'Desktop' },
+    { value: 'tablet' as const, icon: Tablet, label: 'Tablet' },
+    { value: 'mobile' as const, icon: Smartphone, label: 'Mobile' }
+  ];
 
   return (
     <AnimatePresence>
