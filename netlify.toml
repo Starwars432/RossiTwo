@@ -2,40 +2,20 @@
   command = "CI='' npm run build"
   publish = "dist"
 
-[context.production.environment]
-  ENABLE_VISUAL_EDITOR = "false"
-  NODE_ENV = "production"
-
-[context.deploy-preview.environment]
-  ENABLE_VISUAL_EDITOR = "true"
-  NODE_ENV = "production"
-
-[context.branch-deploy.environment]
-  ENABLE_VISUAL_EDITOR = "true"
-  NODE_ENV = "production"
-
 [dev]
   command = "npm run dev"
   targetPort = 5175
   port = 8888
-  publish = "dist"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-[build.environment]
-  NODE_ENV = "production"
-  NODE_VERSION = "20"
-  NPM_FLAGS = "--no-audit --no-fund --include=dev"
-
-[[redirects]]
-  from = "/vos/*"
-  to = "/index.html"
-  status = 200
-  force = true
+  framework = "#custom"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[functions]
+  node_bundler = "esbuild"
+
+[build.environment]
+  NODE_VERSION = "20"
+  ENABLE_VISUAL_EDITOR = "true"
