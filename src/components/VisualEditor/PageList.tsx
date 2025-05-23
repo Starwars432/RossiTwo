@@ -122,9 +122,12 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
         .eq('id', pageId);
 
       if (error) throw error;
-      setPages(pages.filter(p => p.id !== pageId));
+      
+      const updatedPages = pages.filter(p => p.id !== pageId);
+      setPages(updatedPages);
+      
       if (currentPage?.id === pageId) {
-        const firstPage = pages.find(p => p.id !== pageId);
+        const firstPage = updatedPages[0];
         if (firstPage) {
           onPageSelect(firstPage);
         }

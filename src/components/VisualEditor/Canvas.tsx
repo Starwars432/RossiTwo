@@ -1,24 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  rectIntersection
-} from '@dnd-kit/core';
+import React from 'react';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, useSensor, useSensors, PointerSensor, rectIntersection } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Block, Breakpoint } from '../../lib/types/editor';
+import { Block } from '../../lib/types/editor';
 import { useEditorStore } from '../../lib/stores/editorStore';
 import DraggableBlock from './DraggableBlock';
 import BlockRenderer from './BlockRenderer';
 import Toolbar from './Toolbar';
 import { Smartphone, Tablet, Monitor } from 'lucide-react';
+import { useBreakpoint } from '../../contexts/BreakpointContext';
 
 interface CanvasProps {
   isEditing: boolean;
@@ -28,7 +19,7 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
   const { page, addBlock, moveBlock, updateBlock, undo, redo } = useEditorStore();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [dropTarget, setDropTarget] = React.useState<string | null>(null);
-  const [breakpoint, setBreakpoint] = useState<Breakpoint>('desktop');
+  const { breakpoint, setBreakpoint } = useBreakpoint();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -37,25 +28,6 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
       },
     })
   );
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-        e.preventDefault();
-        if (e.shiftKey) {
-          redo();
-        } else {
-          undo();
-        }
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-        e.preventDefault();
-        redo();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo]);
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
