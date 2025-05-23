@@ -16,7 +16,7 @@ interface CanvasProps {
 }
 
 const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
-  const { page, addBlock, moveBlock, updateBlock, undo, redo } = useEditorStore();
+  const { page, addBlock, moveBlock, updateBlock } = useEditorStore();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [dropTarget, setDropTarget] = React.useState<string | null>(null);
   const { breakpoint, setBreakpoint } = useBreakpoint();
