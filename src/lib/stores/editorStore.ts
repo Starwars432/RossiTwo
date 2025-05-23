@@ -37,10 +37,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     const newPage = produce(page, draft => {
       draft.blocks[blockIndex] = updatedBlock;
-      draft.updatedAt = new Date().toISOString();
+      draft.updated_at = new Date().toISOString();
     });
 
-    // Remove any future history after current index
     const newHistory = history.slice(0, currentIndex + 1);
     newHistory.push(newPage);
 
@@ -57,7 +56,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     const newPage = produce(page, draft => {
       draft.blocks.push(block);
-      draft.updatedAt = new Date().toISOString();
+      draft.updated_at = new Date().toISOString();
     });
 
     const newHistory = history.slice(0, currentIndex + 1);
@@ -76,7 +75,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
     const newPage = produce(page, draft => {
       draft.blocks.splice(blockIndex, 1);
-      draft.updatedAt = new Date().toISOString();
+      draft.updated_at = new Date().toISOString();
     });
 
     const newHistory = history.slice(0, currentIndex + 1);
@@ -96,7 +95,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const newPage = produce(page, draft => {
       const [movedBlock] = draft.blocks.splice(fromIndex, 1);
       draft.blocks.splice(toIndex, 0, movedBlock);
-      draft.updatedAt = new Date().toISOString();
+      draft.updated_at = new Date().toISOString();
     });
 
     const newHistory = history.slice(0, currentIndex + 1);

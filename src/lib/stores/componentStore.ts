@@ -11,7 +11,7 @@ interface ComponentState {
   deleteComponent: (id: string) => Promise<void>;
 }
 
-export const useComponentStore = create<ComponentState>((set, get) => ({
+export const useComponentStore = create<ComponentState>((set) => ({
   components: [],
   loading: false,
   error: null,
@@ -88,7 +88,7 @@ export const useComponentStore = create<ComponentState>((set, get) => ({
 // Set up real-time subscriptions
 supabase
   .channel('components')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'components' }, (payload) => {
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'components' }, () => {
     const store = useComponentStore.getState();
     store.loadComponents();
   })

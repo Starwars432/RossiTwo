@@ -63,10 +63,10 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over || !page) return;
 
-    const activeBlock = page?.blocks.find(block => block.id === active.id);
-    const overBlock = page?.blocks.find(block => block.id === over.id);
+    const activeBlock = page.blocks.find(block => block.id === active.id);
+    const overBlock = page.blocks.find(block => block.id === over.id);
 
     if (!activeBlock || !overBlock) return;
 
@@ -80,9 +80,9 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over) {
-      const activeBlock = page?.blocks.find(block => block.id === active.id);
-      const overBlock = page?.blocks.find(block => block.id === over.id);
+    if (over && page) {
+      const activeBlock = page.blocks.find(block => block.id === active.id);
+      const overBlock = page.blocks.find(block => block.id === over.id);
 
       if (activeBlock && overBlock) {
         if (overBlock.type === 'container' && dropTarget === over.id) {
@@ -98,8 +98,8 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
             newBlocks.splice(activeIndex, 1);
           }
         } else if (active.id !== over.id) {
-          const oldIndex = page?.blocks.findIndex(block => block.id === active.id);
-          const newIndex = page?.blocks.findIndex(block => block.id === over.id);
+          const oldIndex = page.blocks.findIndex(block => block.id === active.id);
+          const newIndex = page.blocks.findIndex(block => block.id === over.id);
 
           if (oldIndex !== undefined && newIndex !== undefined) {
             moveBlock(oldIndex, newIndex);

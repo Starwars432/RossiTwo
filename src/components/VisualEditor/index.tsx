@@ -13,9 +13,9 @@ import KeyboardShortcuts from './KeyboardShortcuts';
 
 const VisualEditor: React.FC = () => {
   const { pageId } = useParams();
-  const { loadPage, currentPage, loading, error } = usePageStore();
+  const { loadPage, loading, error } = usePageStore();
   const { loadTheme } = useThemeStore();
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing] = useState(true);
 
   useEffect(() => {
     if (pageId) {
@@ -42,19 +42,16 @@ const VisualEditor: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex">
-      {/* Sidebar */}
       <div className="w-64 bg-black/50 border-r border-blue-400/30 p-4">
-        <PageList />
+        <PageList onPageSelect={loadPage} />
         <MediaLibrary />
         <ThemeSettings />
         {pageId && <GitHubSync pageId={pageId} />}
         <Settings />
       </div>
 
-      {/* Main Editor */}
       <Canvas isEditing={isEditing} />
 
-      {/* Tutorial and Keyboard Shortcuts */}
       <Tutorial />
       <KeyboardShortcuts />
     </div>

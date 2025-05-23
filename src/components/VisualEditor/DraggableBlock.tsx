@@ -2,7 +2,7 @@ import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { motion } from 'framer-motion';
-import { Block } from '../../lib/types/editor';
+import { Block, Breakpoint } from '../../lib/types/editor';
 import BlockRenderer from './BlockRenderer';
 
 interface DraggableBlockProps {
@@ -10,13 +10,15 @@ interface DraggableBlockProps {
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
   isDropTarget?: boolean;
+  breakpoint: Breakpoint;
 }
 
 const DraggableBlock: React.FC<DraggableBlockProps> = ({
   block,
   onUpdate,
   isEditing,
-  isDropTarget
+  isDropTarget,
+  breakpoint
 }) => {
   const {
     attributes,
@@ -64,6 +66,7 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
         block={block}
         onUpdate={onUpdate}
         isEditing={isEditing}
+        breakpoint={breakpoint}
       />
     </motion.div>
   );

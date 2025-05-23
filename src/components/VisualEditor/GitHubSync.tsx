@@ -19,10 +19,11 @@ const GitHubSync: React.FC<GitHubSyncProps> = ({ pageId }) => {
     setSuccess(null);
 
     try {
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/sync-github`, {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/sync-github`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabase.auth.getSession()?.access_token}`,
+          'Authorization': `Bearer ${session?.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ pageId }),

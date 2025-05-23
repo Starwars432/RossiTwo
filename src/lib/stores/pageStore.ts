@@ -14,7 +14,7 @@ interface PageState {
   deletePage: (id: string) => Promise<void>;
 }
 
-export const usePageStore = create<PageState>((set, get) => ({
+export const usePageStore = create<PageState>((set) => ({
   pages: [],
   currentPage: null,
   loading: false,
@@ -71,7 +71,6 @@ export const usePageStore = create<PageState>((set, get) => ({
 
       if (error) throw error;
       
-      // Update local state
       set(state => ({
         currentPage: data,
         pages: state.pages.map(p => p.id === data.id ? data : p)
@@ -104,7 +103,6 @@ export const usePageStore = create<PageState>((set, get) => ({
 
       if (error) throw error;
 
-      // Update local state
       set(state => ({
         pages: [data, ...state.pages]
       }));
@@ -129,7 +127,6 @@ export const usePageStore = create<PageState>((set, get) => ({
 
       if (error) throw error;
 
-      // Update local state
       set(state => ({
         pages: state.pages.filter(p => p.id !== id),
         currentPage: state.currentPage?.id === id ? null : state.currentPage

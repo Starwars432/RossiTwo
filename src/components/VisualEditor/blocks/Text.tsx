@@ -8,16 +8,17 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { $getRoot, $createParagraphNode, $createTextNode, EditorState } from 'lexical';
+import { $getRoot, EditorState } from 'lexical';
 import FloatingToolbar from '../FloatingToolbar';
 
 interface TextBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
+  breakpoint: string;
 }
 
-const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing }) => {
+const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const initialConfig = {
@@ -60,12 +61,18 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing }) => 
     });
   };
 
+  const textStyles = {
+    ...block.styles,
+    display: 'block',
+    width: block.styles?.width || '100%'
+  };
+
   return (
     <motion.div
       className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={block.styles}
+      style={textStyles}
     >
       {isEditing && isHovered && (
         <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
@@ -73,7 +80,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing }) => 
         </div>
       )}
       <LexicalComposer initialConfig={initialConfig}>
-        {isEditing && <FloatingToolbar block={block} onUpdate={onUpdate} />}
+        {isEditing && <FloatingToolbar block={block} onUpdate={onUpdate} breakpoint={breakpoint} />}
         <div className="relative">
           <RichTextPlugin
             contentEditable={

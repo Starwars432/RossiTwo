@@ -9,22 +9,8 @@ import {
 } from 'lexical';
 import {
   Bold,
-  Italic,
-  Underline,
-  Strikethrough,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  List,
-  ListOrdered,
-  Link,
-  Type,
-  Image,
-  Layout,
-  Palette,
   Maximize2,
   Minimize2,
-  ChevronDown,
   Smartphone,
   Tablet,
   Monitor,
@@ -37,7 +23,7 @@ interface FloatingToolbarProps {
   breakpoint: Breakpoint;
 }
 
-const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, breakpoint }) => {
+const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate }) => {
   const [editor] = useLexicalComposerContext();
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -75,18 +61,15 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
         if ($isRangeSelection(selection)) {
           const styles = new Set();
           if (selection.hasFormat('bold')) styles.add('bold');
-          if (selection.hasFormat('italic')) styles.add('italic');
-          if (selection.hasFormat('underline')) styles.add('underline');
-          if (selection.hasFormat('strikethrough')) styles.add('strikethrough');
           setActiveStyles(styles);
         }
         return false;
       },
-      []
+      [1]
     );
   }, [editor]);
 
-  const formatText = (format: string) => {
+  const formatText = (format: 'bold') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
@@ -113,18 +96,18 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     }
   };
 
-  const getStyleValue = (property: string) => {
+  const getStyleValue = (property: keyof Block['styles']) => {
     if (activeBreakpoint === 'desktop') {
       return block.styles?.[property];
     }
-    return block.styles?.[activeBreakpoint]?.[property];
+    return block.styles?.[activeBreakpoint]?.[property as keyof typeof block.styles[typeof activeBreakpoint]];
   };
 
   const breakpointButtons = [
     { value: 'desktop', icon: Monitor, label: 'Desktop' },
     { value: 'tablet', icon: Tablet, label: 'Tablet' },
     { value: 'mobile', icon: Smartphone, label: 'Mobile' }
-  ];
+  ] as const;
 
   return (
     <AnimatePresence>
@@ -148,7 +131,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
                   key={value}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setActiveBreakpoint(value as Breakpoint)}
+                  onClick={() => setActiveBreakpoint(value)}
                   className={`p-1.5 rounded ${
                     activeBreakpoint === value
                       ? 'bg-blue-500 text-white'
@@ -162,22 +145,19 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
             </div>
 
             {block.type === 'text' && (
-              <>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => formatText('bold')}
-                  className={`p-1.5 rounded ${
-                    activeStyles.has('bold')
-                      ? 'bg-blue-500 text-white'
-                      : 'text-blue-400 hover:bg-blue-500/20'
-                  }`}
-                  title="Bold"
-                >
-                  <Bold className="w-4 h-4" />
-                </motion.button>
-                {/* Add other text formatting buttons */}
-              </>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => formatText('bold')}
+                className={`p-1.5 rounded ${
+                  activeStyles.has('bold')
+                    ? 'bg-blue-500 text-white'
+                    : 'text-blue-400 hover:bg-blue-500/20'
+                }`}
+                title="Bold"
+              >
+                <Bold className="w-4 h-4" />
+              </motion.button>
             )}
 
             <motion.button

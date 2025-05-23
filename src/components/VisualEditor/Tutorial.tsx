@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Joyride, { Step, CallBackProps, STATUS } from 'react-joyride';
+import Joyride, { Step, CallBackProps } from 'react-joyride';
 import { useLocalStorage } from '../../lib/hooks/useLocalStorage';
 
 const steps: Step[] = [
@@ -57,8 +57,7 @@ const Tutorial: React.FC = () => {
   }, [hasSeenTutorial]);
 
   const handleJoyrideCallback = (data: CallBackProps) => {
-    const { status } = data;
-    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    if (data.status === 'finished' || data.status === 'skipped') {
       setRun(false);
       setHasSeenTutorial(true);
     }

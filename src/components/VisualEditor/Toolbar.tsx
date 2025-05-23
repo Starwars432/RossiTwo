@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Type, Image, Layout, Plus, Undo, Redo } from 'lucide-react';
+import { Type, Image, Layout, Undo, Redo } from 'lucide-react';
 import { Block } from '../../lib/types/editor';
 import { useEditorStore } from '../../lib/stores/editorStore';
 

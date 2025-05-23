@@ -6,7 +6,7 @@ import { Page } from '../../lib/types/editor';
 
 interface PageListProps {
   onPageSelect: (page: Page) => void;
-  currentPage: Page | null;
+  currentPage?: Page | null;
 }
 
 const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
@@ -124,7 +124,10 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
       if (error) throw error;
       setPages(pages.filter(p => p.id !== pageId));
       if (currentPage?.id === pageId) {
-        onPageSelect(pages[0]);
+        const firstPage = pages.find(p => p.id !== pageId);
+        if (firstPage) {
+          onPageSelect(firstPage);
+        }
       }
     } catch (error) {
       console.error('Error deleting page:', error);

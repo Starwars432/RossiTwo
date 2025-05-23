@@ -7,9 +7,10 @@ interface ContainerBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
+  breakpoint: string;
 }
 
-const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEditing }) => {
+const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleChildUpdate = (index: number, updatedChild: Block) => {
@@ -21,12 +22,18 @@ const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEdit
     });
   };
 
+  const containerStyles = {
+    ...block.styles,
+    display: 'flex',
+    flexDirection: block.styles?.flexDirection || 'column'
+  };
+
   return (
     <motion.div
       className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={block.styles}
+      style={containerStyles}
     >
       {isEditing && isHovered && (
         <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
@@ -39,6 +46,7 @@ const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEdit
           block={child}
           onUpdate={(updatedBlock) => handleChildUpdate(index, updatedBlock)}
           isEditing={isEditing}
+          breakpoint={breakpoint}
         />
       ))}
     </motion.div>

@@ -1,5 +1,3 @@
-import { Theme } from './theme';
-
 export interface Page {
   id: string;
   slug: string;
@@ -37,7 +35,6 @@ export interface Block {
     justifyContent?: string;
     alignItems?: string;
     gap?: string;
-    // Responsive styles
     mobile?: {
       width?: string;
       display?: string;

@@ -17,7 +17,6 @@ import {
   AlignRight,
   List,
   ListOrdered,
-  Type,
 } from 'lucide-react';
 
 const TextToolbar: React.FC = () => {
@@ -41,11 +40,11 @@ const TextToolbar: React.FC = () => {
         }
         return false;
       },
-      []
+      [1]
     );
   }, [editor]);
 
-  const formatText = (format: string) => {
+  const formatText = (format: 'bold' | 'italic' | 'underline' | 'strikethrough') => {
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
@@ -59,7 +58,7 @@ const TextToolbar: React.FC = () => {
     { icon: AlignRight, format: 'right', label: 'Align Right' },
     { icon: List, format: 'bullet', label: 'Bullet List' },
     { icon: ListOrdered, format: 'number', label: 'Numbered List' },
-  ];
+  ] as const;
 
   return (
     <motion.div
@@ -72,7 +71,7 @@ const TextToolbar: React.FC = () => {
           key={format}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => formatText(format)}
+          onClick={() => formatText(format as 'bold' | 'italic' | 'underline' | 'strikethrough')}
           className={`p-1.5 rounded ${
             activeStyles.has(format)
               ? 'bg-blue-500 text-white'
@@ -85,7 +84,7 @@ const TextToolbar: React.FC = () => {
       ))}
       <select
         className="bg-black/90 text-blue-400 border border-blue-400/30 rounded px-2 py-1 text-sm"
-        onChange={(e) => formatText(`heading-${e.target.value}`)}
+        onChange={(e) => formatText('bold')}
       >
         <option value="">Normal</option>
         <option value="h1">Heading 1</option>
