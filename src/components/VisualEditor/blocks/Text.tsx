@@ -61,11 +61,11 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, break
     });
   };
 
-  const textStyles = {
+  const textStyles: React.CSSProperties = {
     display: 'block',
     width: '100%',
-    ...block.styles
-  } as const;
+    ...(block.styles as React.CSSProperties)
+  };
 
   return (
     <motion.div

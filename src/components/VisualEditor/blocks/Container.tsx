@@ -22,11 +22,11 @@ const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEdit
     });
   };
 
-  const containerStyles = {
+  const containerStyles: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
-    ...block.styles
-  } as const;
+    ...(block.styles as React.CSSProperties)
+  };
 
   return (
     <motion.div

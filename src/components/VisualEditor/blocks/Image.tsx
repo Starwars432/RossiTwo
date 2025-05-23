@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { Block } from '../../../lib/types/editor';
 import { motion } from 'framer-motion';
 import { Image as ImageIcon } from 'lucide-react';
 import { useMediaStore } from '../../../lib/stores/mediaStore';
+import { Block, Breakpoint } from '../../../lib/types/editor';
 
 interface ImageBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
   isEditing: boolean;
+  breakpoint: Breakpoint;
 }
 
 const ImageBlock: React.FC<ImageBlockProps> = ({ block, onUpdate, isEditing }) => {
@@ -30,12 +31,18 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ block, onUpdate, isEditing }) =
     }
   };
 
+  const imageStyles: React.CSSProperties = {
+    maxWidth: '100%',
+    height: 'auto',
+    ...(block.styles as React.CSSProperties)
+  };
+
   return (
     <motion.div
       className="relative group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={block.styles}
+      style={imageStyles}
     >
       {isEditing && isHovered && (
         <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
