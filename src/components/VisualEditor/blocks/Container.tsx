@@ -24,7 +24,7 @@ const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEdit
 
   const containerStyles = {
     display: 'flex',
-    flexDirection: block.styles?.flexDirection || 'column',
+    flexDirection: 'column',
     ...block.styles
   } as const;
 

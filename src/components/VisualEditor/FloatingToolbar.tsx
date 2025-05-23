@@ -65,7 +65,7 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
         }
         return false;
       },
-      [1]
+      1
     );
   }, [editor]);
 
@@ -73,7 +73,11 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     editor.dispatchCommand(FORMAT_TEXT_COMMAND, format);
   };
 
-  const updateBlockStyle = (property: keyof Block['styles'], value: string) => {
+  type StyleProperty = keyof Required<Block>['styles'];
+  type MobileStyleProperty = keyof NonNullable<Required<Block>['styles']['mobile']>;
+  type TabletStyleProperty = keyof NonNullable<Required<Block>['styles']['tablet']>;
+
+  const updateBlockStyle = (property: StyleProperty | MobileStyleProperty | TabletStyleProperty, value: string) => {
     if (activeBreakpoint === 'desktop') {
       onUpdate({
         ...block,
@@ -96,18 +100,18 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     }
   };
 
-  const getStyleValue = (property: keyof Block['styles']) => {
+  const getStyleValue = (property: StyleProperty | MobileStyleProperty | TabletStyleProperty) => {
     if (activeBreakpoint === 'desktop') {
-      return block.styles?.[property];
+      return block.styles?.[property as StyleProperty];
     }
-    return block.styles?.[activeBreakpoint]?.[property as keyof typeof block.styles[typeof activeBreakpoint]];
+    return block.styles?.[activeBreakpoint]?.[property as MobileStyleProperty | TabletStyleProperty];
   };
 
   const breakpointButtons = [
     { value: 'desktop' as const, icon: Monitor, label: 'Desktop' },
     { value: 'tablet' as const, icon: Tablet, label: 'Tablet' },
     { value: 'mobile' as const, icon: Smartphone, label: 'Mobile' }
-  ];
+  ] as const;
 
   return (
     <AnimatePresence>
@@ -233,14 +237,14 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
                   <div>
                     <label className="block text-sm text-gray-400 mb-1">Padding</label>
                     <div className="grid grid-cols-4 gap-2">
-                      {['Top', 'Right', 'Bottom', 'Left'].map((side) => (
+                      {['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].map((side) => (
                         <input
                           key={side}
                           type="number"
-                          value={parseInt(getStyleValue(`padding${side}`) || '0')}
-                          onChange={(e) => updateBlockStyle(`padding${side}`, `${e.target.value}px`)}
+                          value={parseInt(getStyleValue(side as StyleProperty) || '0')}
+                          onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
                           className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                          placeholder={side}
+                          placeholder={side.replace('padding', '')}
                         />
                       ))}
                     </div>
@@ -249,14 +253,14 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
                   <div>
                     <label className="block text-sm text-gray-400 mb-1">Margin</label>
                     <div className="grid grid-cols-4 gap-2">
-                      {['Top', 'Right', 'Bottom', 'Left'].map((side) => (
+                      {['marginTop', 'marginRight', 'marginBottom', 'marginLeft'].map((side) => (
                         <input
                           key={side}
                           type="number"
-                          value={parseInt(getStyleValue(`margin${side}`) || '0')}
-                          onChange={(e) => updateBlockStyle(`margin${side}`, `${e.target.value}px`)}
+                          value={parseInt(getStyleValue(side as StyleProperty) || '0')}
+                          onChange={(e) => updateBlockStyle(side as StyleProperty, `${e.target.value}px`)}
                           className="w-full bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm"
-                          placeholder={side}
+                          placeholder={side.replace('margin', '')}
                         />
                       ))}
                     </div>

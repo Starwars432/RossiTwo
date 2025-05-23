@@ -40,7 +40,7 @@ const TextToolbar: React.FC = () => {
         }
         return false;
       },
-      [1]
+      1
     );
   }, [editor]);
 
@@ -49,15 +49,15 @@ const TextToolbar: React.FC = () => {
   };
 
   const tools = [
-    { icon: Bold, format: 'bold', label: 'Bold' },
-    { icon: Italic, format: 'italic', label: 'Italic' },
-    { icon: Underline, format: 'underline', label: 'Underline' },
-    { icon: Strikethrough, format: 'strikethrough', label: 'Strikethrough' },
-    { icon: AlignLeft, format: 'left', label: 'Align Left' },
-    { icon: AlignCenter, format: 'center', label: 'Align Center' },
-    { icon: AlignRight, format: 'right', label: 'Align Right' },
-    { icon: List, format: 'bullet', label: 'Bullet List' },
-    { icon: ListOrdered, format: 'number', label: 'Numbered List' },
+    { icon: Bold, format: 'bold' as const, label: 'Bold' },
+    { icon: Italic, format: 'italic' as const, label: 'Italic' },
+    { icon: Underline, format: 'underline' as const, label: 'Underline' },
+    { icon: Strikethrough, format: 'strikethrough' as const, label: 'Strikethrough' },
+    { icon: AlignLeft, format: 'left' as const, label: 'Align Left' },
+    { icon: AlignCenter, format: 'center' as const, label: 'Align Center' },
+    { icon: AlignRight, format: 'right' as const, label: 'Align Right' },
+    { icon: List, format: 'bullet' as const, label: 'Bullet List' },
+    { icon: ListOrdered, format: 'number' as const, label: 'Numbered List' },
   ] as const;
 
   return (
@@ -84,7 +84,7 @@ const TextToolbar: React.FC = () => {
       ))}
       <select
         className="bg-black/90 text-blue-400 border border-blue-400/30 rounded px-2 py-1 text-sm"
-        onChange={(e) => formatText('bold')}
+        onChange={() => formatText('bold')}
       >
         <option value="">Normal</option>
         <option value="h1">Heading 1</option>
