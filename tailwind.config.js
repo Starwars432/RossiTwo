@@ -4,31 +4,22 @@ export default {
   theme: {
     extend: {
       colors: {
-        'blue': {
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB'
-        }
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        background: 'var(--color-background)',
+        text: 'var(--color-text)',
+        accent: 'var(--color-accent)'
       },
       fontFamily: {
-        'serif': ['Playfair Display', 'serif']
+        heading: ['var(--font-heading)', 'serif'],
+        body: ['var(--font-body)', 'serif']
       },
-      screens: {
-        'xs': '475px'
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-in-out',
-        'slide-up': 'slideUp 0.5s ease-out'
-      },
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' }
-        },
-        slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' }
-        }
+      spacing: {
+        xs: 'var(--spacing-xs)',
+        sm: 'var(--spacing-sm)',
+        md: 'var(--spacing-md)',
+        lg: 'var(--spacing-lg)',
+        xl: 'var(--spacing-xl)'
       }
     },
   },

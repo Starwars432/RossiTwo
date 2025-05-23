@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, FileText, ChevronDown, ChevronRight, Trash2, Edit2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { Page } from '../../lib/types/editor';
 
 interface PageListProps {
-  onPageSelect: (page: any) => void;
-  currentPage: any;
+  onPageSelect: (page: Page) => void;
+  currentPage: Page | null;
 }
 
 const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
-  const [pages, setPages] = useState<any[]>([]);
+  const [pages, setPages] = useState<Page[]>([]);
   const [isExpanded, setIsExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingPage, setEditingPage] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState('');
 
   useEffect(() => {
     fetchPages();
@@ -49,7 +52,8 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
         .insert({
           title,
           slug,
-          content: { html: '' },
+          blocks: [],
+          metadata: {},
           is_draft: true,
         })
         .select()
@@ -66,6 +70,68 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
     }
   };
 
+  const startEditing = (page: Page) => {
+    setEditingPage(page.id);
+    setEditingTitle(page.title);
+  };
+
+  const handleRename = async (page: Page) => {
+    if (!editingTitle.trim() || editingTitle === page.title) {
+      setEditingPage(null);
+      return;
+    }
+
+    try {
+      setError(null);
+      const newSlug = editingTitle.toLowerCase().replace(/\s+/g, '-');
+      
+      const { data, error } = await supabase
+        .from('pages')
+        .update({
+          title: editingTitle,
+          slug: newSlug,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', page.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      if (data) {
+        setPages(pages.map(p => p.id === page.id ? data : p));
+        if (currentPage?.id === page.id) {
+          onPageSelect(data);
+        }
+      }
+    } catch (error) {
+      console.error('Error renaming page:', error);
+      setError('Failed to rename page');
+    } finally {
+      setEditingPage(null);
+    }
+  };
+
+  const deletePage = async (pageId: string) => {
+    if (!window.confirm('Are you sure you want to delete this page?')) return;
+
+    try {
+      setError(null);
+      const { error } = await supabase
+        .from('pages')
+        .delete()
+        .eq('id', pageId);
+
+      if (error) throw error;
+      setPages(pages.filter(p => p.id !== pageId));
+      if (currentPage?.id === pageId) {
+        onPageSelect(pages[0]);
+      }
+    } catch (error) {
+      console.error('Error deleting page:', error);
+      setError('Failed to delete page');
+    }
+  };
+
   return (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-4">
@@ -75,15 +141,18 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
           aria-label={isExpanded ? 'Collapse pages' : 'Expand pages'}
         >
           {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          <span className="ml-2">Pages</span>
+          <FileText className="w-4 h-4 ml-2 mr-2" />
+          <span>Pages</span>
         </button>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={createNewPage}
           className="p-1 text-blue-400 hover:text-blue-300"
           aria-label="Create new page"
         >
           <Plus className="w-4 h-4" />
-        </button>
+        </motion.button>
       </div>
 
       {error && (
@@ -100,26 +169,58 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
             <p className="text-sm text-gray-400">No pages yet</p>
           ) : (
             pages.map(page => (
-              <motion.button
+              <div
                 key={page.id}
-                onClick={() => onPageSelect(page)}
-                className={`w-full flex items-center px-3 py-2 rounded text-left text-sm ${
+                className={`group relative flex items-center justify-between px-3 py-2 rounded ${
                   currentPage?.id === page.id
                     ? 'bg-blue-500/20 text-blue-400'
                     : 'hover:bg-blue-500/10 text-gray-300'
                 }`}
-                whileHover={{ x: 4 }}
-                transition={{ duration: 0.2 }}
-                aria-label={`Edit ${page.title}`}
               >
-                <FileText className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span className="truncate">{page.title}</span>
-                {page.is_draft && (
-                  <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">
-                    Draft
-                  </span>
+                {editingPage === page.id ? (
+                  <input
+                    type="text"
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onBlur={() => handleRename(page)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRename(page)}
+                    className="flex-1 bg-transparent border-none focus:outline-none text-sm"
+                    autoFocus
+                  />
+                ) : (
+                  <button
+                    onClick={() => onPageSelect(page)}
+                    className="flex-1 text-left text-sm truncate"
+                  >
+                    {page.title}
+                    {page.is_draft && (
+                      <span className="ml-2 text-xs bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">
+                        Draft
+                      </span>
+                    )}
+                  </button>
                 )}
-              </motion.button>
+                <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => startEditing(page)}
+                    className="p-1 text-blue-400 hover:text-blue-300"
+                    aria-label={`Rename ${page.title}`}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => deletePage(page.id)}
+                    className="p-1 text-red-400 hover:text-red-300"
+                    aria-label={`Delete ${page.title}`}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </motion.button>
+                </div>
+              </div>
             ))
           )}
         </div>

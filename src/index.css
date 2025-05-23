@@ -2,10 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary: #3B82F6;
+  --color-secondary: #60A5FA;
+  --color-background: #000000;
+  --color-text: #FFFFFF;
+  --color-accent: #2563EB;
+  --font-heading: 'Playfair Display';
+  --font-body: 'Playfair Display';
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+}
+
 body {
-  font-family: 'Playfair Display', serif;
-  background: black;
-  color: white;
+  font-family: var(--font-body), serif;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif;
 }
 
 .service-card {
@@ -14,18 +33,18 @@ body {
 
 .service-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+  box-shadow: 0 10px 30px rgba(var(--color-primary), 0.2);
 }
 
 .drag-drop-zone {
-  border: 2px dashed #60a5fa;
+  border: 2px dashed var(--color-primary);
   border-radius: 1rem;
   transition: all 0.3s ease;
 }
 
 .drag-drop-zone.dragging {
-  background: rgba(96, 165, 250, 0.1);
-  border-color: #3b82f6;
+  background: rgba(var(--color-primary), 0.1);
+  border-color: var(--color-secondary);
 }
 
 .editable-content [data-editable="true"] {
@@ -36,12 +55,12 @@ body {
 }
 
 .editable-content [data-editable="true"]:hover {
-  outline-color: rgba(96, 165, 250, 0.3);
+  outline-color: rgba(var(--color-primary), 0.3);
 }
 
 .editable-content [data-editable="true"]:focus {
-  outline-color: rgba(96, 165, 250, 0.5);
-  background: rgba(96, 165, 250, 0.1);
+  outline-color: rgba(var(--color-primary), 0.5);
+  background: rgba(var(--color-primary), 0.1);
   padding: 2px;
   border-radius: 4px;
 }
@@ -54,12 +73,12 @@ body {
 }
 
 .editable-content img:hover {
-  outline: 2px solid rgba(96, 165, 250, 0.3);
+  outline: 2px solid rgba(var(--color-primary), 0.3);
 }
 
 .ProseMirror {
   min-height: 100px;
-  padding: 1rem;
+  padding: var(--spacing-md);
 }
 
 .ProseMirror:focus {
@@ -67,7 +86,7 @@ body {
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
+  color: rgba(var(--color-text), 0.5);
   content: attr(data-placeholder);
   float: left;
   height: 0;

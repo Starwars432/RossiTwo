@@ -1,139 +1,62 @@
 import React from 'react';
-import { Editor } from '@tiptap/react';
-import {
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Link,
-  Image,
-  Heading1,
-  Heading2,
-  Heading3,
-  Undo,
-  Redo,
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Type, Image, Layout, Plus, Undo, Redo } from 'lucide-react';
+import { Block } from '../../lib/types/editor';
+import { useEditorStore } from '../../lib/stores/editorStore';
 
 interface ToolbarProps {
-  editor: Editor;
+  onAddBlock?: (blockType: Block['type']) => void;
 }
 
-const Toolbar: React.FC<ToolbarProps> = ({ editor }) => {
-  if (!editor) return null;
+const Toolbar: React.FC<ToolbarProps> = ({ onAddBlock }) => {
+  const { undo, redo, canUndo, canRedo } = useEditorStore();
 
-  const addImage = () => {
-    const url = window.prompt('Enter the image URL');
-    if (url) {
-      editor.chain().focus().insertContent(`<img src="${url}" alt="" />`).run();
-    }
-  };
+  const blockTypes = [
+    { type: 'text', icon: Type, label: 'Add Text' },
+    { type: 'image', icon: Image, label: 'Add Image' },
+    { type: 'container', icon: Layout, label: 'Add Container' }
+  ] as const;
 
   return (
-    <div className="border-b border-blue-400/30 p-4 bg-black/50 flex items-center space-x-2">
-      <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('bold') ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Bold"
-      >
-        <Bold className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('italic') ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Italic"
-      >
-        <Italic className="w-5 h-5" />
-      </button>
-      <div className="w-px h-6 bg-blue-400/30" />
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('heading', { level: 1 }) ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Heading 1"
-      >
-        <Heading1 className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('heading', { level: 2 }) ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Heading 2"
-      >
-        <Heading2 className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('heading', { level: 3 }) ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Heading 3"
-      >
-        <Heading3 className="w-5 h-5" />
-      </button>
-      <div className="w-px h-6 bg-blue-400/30" />
-      <button
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('bulletList') ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Bullet List"
-      >
-        <List className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('orderedList') ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Ordered List"
-      >
-        <ListOrdered className="w-5 h-5" />
-      </button>
-      <div className="w-px h-6 bg-blue-400/30" />
-      <button
-        onClick={() => {
-          const url = window.prompt('Enter the URL');
-          if (url) {
-            editor.chain().focus().setLink({ href: url }).run();
-          }
-        }}
-        className={`p-2 rounded hover:bg-blue-500/20 ${
-          editor.isActive('link') ? 'text-blue-400' : 'text-white'
-        }`}
-        aria-label="Add Link"
-      >
-        <Link className="w-5 h-5" />
-      </button>
-      <button
-        onClick={addImage}
-        className="p-2 rounded hover:bg-blue-500/20 text-white"
-        aria-label="Add Image"
-      >
-        <Image className="w-5 h-5" />
-      </button>
-      <div className="w-px h-6 bg-blue-400/30" />
-      <button
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-        className="p-2 rounded hover:bg-blue-500/20 text-white disabled:opacity-50"
-        aria-label="Undo"
-      >
-        <Undo className="w-5 h-5" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-        className="p-2 rounded hover:bg-blue-500/20 text-white disabled:opacity-50"
-        aria-label="Redo"
-      >
-        <Redo className="w-5 h-5" />
-      </button>
+    <div className="border-t border-blue-400/30 px-6 py-2 flex items-center justify-between">
+      <div className="flex items-center space-x-2">
+        {blockTypes.map(({ type, icon: Icon, label }) => (
+          <motion.button
+            key={type}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onAddBlock?.(type)}
+            className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+            title={label}
+          >
+            <Icon className="w-4 h-4" />
+            <span className="text-sm">{label}</span>
+          </motion.button>
+        ))}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={undo}
+          disabled={!canUndo()}
+          className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-50 disabled:hover:bg-blue-500/10"
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo className="w-4 h-4" />
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={redo}
+          disabled={!canRedo()}
+          className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 disabled:opacity-50 disabled:hover:bg-blue-500/10"
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo className="w-4 h-4" />
+        </motion.button>
+      </div>
     </div>
   );
 };

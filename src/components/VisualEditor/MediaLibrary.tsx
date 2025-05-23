@@ -1,38 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Upload, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronDown, ChevronRight, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { supabase } from '../../lib/supabase';
+import { useMediaStore } from '../../lib/stores/mediaStore';
 
 const MediaLibrary: React.FC = () => {
-  const [media, setMedia] = useState<any[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { files, isLoading, error, loadFiles, uploadFile, deleteFile } = useMediaStore();
 
   useEffect(() => {
     if (isExpanded) {
-      fetchMedia();
+      loadFiles();
     }
   }, [isExpanded]);
-
-  const fetchMedia = async () => {
-    try {
-      setError(null);
-      const { data, error } = await supabase
-        .from('media')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setMedia(data || []);
-    } catch (error) {
-      console.error('Error fetching media:', error);
-      setError('Failed to load media');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -40,69 +20,21 @@ const MediaLibrary: React.FC = () => {
     },
     maxSize: 5242880, // 5MB
     onDrop: async (acceptedFiles) => {
-      setUploading(true);
-      setError(null);
       try {
         for (const file of acceptedFiles) {
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
-          const filePath = `${fileName}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from('media')
-            .upload(filePath, file);
-
-          if (uploadError) throw uploadError;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('media')
-            .getPublicUrl(filePath);
-
-          const { data, error } = await supabase
-            .from('media')
-            .insert({
-              filename: file.name,
-              url: publicUrl,
-              mime_type: file.type,
-              size: file.size,
-            })
-            .select()
-            .single();
-
-          if (error) throw error;
-          if (data) {
-            setMedia([data, ...media]);
-          }
+          await uploadFile(file);
         }
       } catch (error) {
-        console.error('Error uploading media:', error);
-        setError('Failed to upload media');
-      } finally {
-        setUploading(false);
+        console.error('Error uploading files:', error);
       }
     }
   });
 
-  const deleteMedia = async (id: string, filename: string) => {
+  const handleDelete = async (id: string, filename: string) => {
     try {
-      setError(null);
-      const { error: storageError } = await supabase.storage
-        .from('media')
-        .remove([filename]);
-
-      if (storageError) throw storageError;
-
-      const { error: dbError } = await supabase
-        .from('media')
-        .delete()
-        .eq('id', id);
-
-      if (dbError) throw dbError;
-
-      setMedia(media.filter(item => item.id !== id));
+      await deleteFile(id, filename);
     } catch (error) {
-      console.error('Error deleting media:', error);
-      setError('Failed to delete media');
+      console.error('Error deleting file:', error);
     }
   };
 
@@ -114,7 +46,8 @@ const MediaLibrary: React.FC = () => {
         aria-label={isExpanded ? 'Collapse media library' : 'Expand media library'}
       >
         {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-        <span className="ml-2">Media Library</span>
+        <ImageIcon className="w-4 h-4 ml-2 mr-2" />
+        <span>Media Library</span>
       </button>
 
       {isExpanded && (
@@ -128,41 +61,48 @@ const MediaLibrary: React.FC = () => {
           <div
             {...getRootProps()}
             className={`border-2 border-dashed border-blue-400/30 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400/50 transition-colors ${
-              uploading ? 'opacity-50 cursor-not-allowed' : ''
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
             }`}
-            aria-label="Drop zone for file upload"
           >
             <input {...getInputProps()} />
             <Upload className="w-6 h-6 mx-auto mb-2 text-blue-400" />
             <p className="text-sm text-gray-400">
-              {uploading ? 'Uploading...' : 'Drop images here or click to upload'}
+              {isLoading ? 'Uploading...' : 'Drop images here or click to upload'}
             </p>
+            <p className="text-xs text-gray-500 mt-1">Maximum file size: 5MB</p>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            {loading ? (
+            {isLoading && files.length === 0 ? (
               <p className="text-sm text-gray-400">Loading media...</p>
-            ) : media.length === 0 ? (
+            ) : files.length === 0 ? (
               <p className="text-sm text-gray-400">No media yet</p>
             ) : (
-              media.map(item => (
-                <div
-                  key={item.id}
+              files.map(file => (
+                <motion.div
+                  key={file.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   className="relative group"
                 >
                   <img
-                    src={item.url}
-                    alt={item.filename}
+                    src={file.url}
+                    alt={file.filename}
                     className="w-full h-20 object-cover rounded"
                   />
-                  <button
-                    onClick={() => deleteMedia(item.id, item.filename)}
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleDelete(file.id, file.filename)}
                     className="absolute top-1 right-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Delete ${item.filename}`}
+                    aria-label={`Delete ${file.filename}`}
                   >
                     <Trash2 className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
+                  </motion.button>
+                  <div className="absolute bottom-0 left-0 right-0 p-1 bg-black/50 text-xs text-gray-300 truncate">
+                    {file.filename}
+                  </div>
+                </motion.div>
               ))
             )}
           </div>
