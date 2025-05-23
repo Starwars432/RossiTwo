@@ -1,5 +1,4 @@
 import { CSSProperties } from 'react';
-import { MotionStyle } from 'framer-motion';
 
 export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
