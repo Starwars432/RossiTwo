@@ -5,8 +5,8 @@ import { supabase } from '../../lib/supabase';
 import { Page } from '../../lib/types/editor';
 
 interface PageListProps {
-  onPageSelect: (page: Page) => void;
-  currentPage?: Page | null;
+  onPageSelect: (id: string) => Promise<void>;
+  currentPage: Page | null;
 }
 
 const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
@@ -62,7 +62,7 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
       if (error) throw error;
       if (data) {
         setPages([data, ...pages]);
-        onPageSelect(data);
+        onPageSelect(data.id);
       }
     } catch (error) {
       console.error('Error creating page:', error);
@@ -99,9 +99,6 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
       if (error) throw error;
       if (data) {
         setPages(pages.map(p => p.id === page.id ? data : p));
-        if (currentPage?.id === page.id) {
-          onPageSelect(data);
-        }
       }
     } catch (error) {
       console.error('Error renaming page:', error);
@@ -122,16 +119,7 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
         .eq('id', pageId);
 
       if (error) throw error;
-      
-      const updatedPages = pages.filter(p => p.id !== pageId);
-      setPages(updatedPages);
-      
-      if (currentPage?.id === pageId) {
-        const firstPage = updatedPages[0];
-        if (firstPage) {
-          onPageSelect(firstPage);
-        }
-      }
+      setPages(pages.filter(p => p.id !== pageId));
     } catch (error) {
       console.error('Error deleting page:', error);
       setError('Failed to delete page');
@@ -195,7 +183,7 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
                   />
                 ) : (
                   <button
-                    onClick={() => onPageSelect(page)}
+                    onClick={() => onPageSelect(page.id)}
                     className="flex-1 text-left text-sm truncate"
                   >
                     {page.title}
