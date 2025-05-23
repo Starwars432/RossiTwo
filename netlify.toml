@@ -25,3 +25,4 @@
 [build.environment]
   NODE_VERSION = "20"
   ENABLE_VISUAL_EDITOR = "true"
+  CI = ""

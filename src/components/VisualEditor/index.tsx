@@ -45,7 +45,7 @@ const VisualEditor: React.FC = () => {
     <BreakpointProvider>
       <div className="min-h-screen bg-black text-white flex">
         <div className="w-64 bg-black/50 border-r border-blue-400/30 p-4">
-          <PageList onPageSelect={page => loadPage(page.id)} currentPage={currentPage} />
+          <PageList onPageSelect={loadPage} currentPage={currentPage} />
           <MediaLibrary />
           <ThemeSettings />
           {pageId && <GitHubSync pageId={pageId} />}
