@@ -13,6 +13,11 @@ import Tutorial from './Tutorial';
 import KeyboardShortcuts from './KeyboardShortcuts';
 import TabBar from './TabBar';
 import { BreakpointProvider } from '../../contexts/BreakpointContext';
+import Hero from '../Hero';
+import Services from '../Services';
+import CustomDesign from '../CustomDesign';
+import Contact from '../Contact';
+import Footer from '../Footer';
 
 const VisualEditor: React.FC = () => {
   const { pageId } = useParams();
@@ -61,7 +66,13 @@ const VisualEditor: React.FC = () => {
 
         <div className="flex-1 flex flex-col">
           <TabBar />
-          <Canvas isEditing={isEditing} />
+          <Canvas isEditing={isEditing}>
+            <Hero />
+            <Services />
+            <CustomDesign />
+            <Contact />
+            <Footer />
+          </Canvas>
         </div>
 
         <Tutorial />

@@ -14,9 +14,10 @@ import { useBreakpoint } from '../../contexts/BreakpointContext';
 
 interface CanvasProps {
   isEditing: boolean;
+  children: React.ReactNode;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
+const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
   const { activeTab, pages, updatePage } = useTabStore();
   const activePage = activeTab ? pages[activeTab] : null;
   const { moveBlock, updateBlock } = useEditorStore();
@@ -91,31 +92,6 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
     setDropTarget(null);
   };
 
-  const handleAddBlock = (blockType: Block['type']) => {
-    if (!activePage) return;
-
-    const newBlock: Block = {
-      id: crypto.randomUUID(),
-      type: blockType,
-      content: '',
-      styles: {}
-    };
-
-    const updatedBlocks = [...activePage.blocks, newBlock];
-    updatePage(activePage.id, {
-      ...activePage,
-      blocks: updatedBlocks
-    });
-  };
-
-  if (!activePage) {
-    return (
-      <div className="flex-1 flex items-center justify-center text-gray-400">
-        <p>Select or create a page to start editing</p>
-      </div>
-    );
-  }
-
   const getPreviewWidth = () => {
     switch (breakpoint) {
       case 'mobile':
@@ -130,7 +106,7 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
   return (
     <div className="flex-1 flex flex-col">
       <div className="border-b border-blue-400/30 p-4 bg-black/50 flex items-center justify-between">
-        <Toolbar onAddBlock={handleAddBlock} />
+        <Toolbar />
         <div className="flex items-center space-x-2">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -182,69 +158,8 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
             modifiers={[restrictToVerticalAxis]}
             collisionDetection={rectIntersection}
           >
-            <SortableContext
-              items={activePage.blocks.map(block => block.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <AnimatePresence>
-                {activePage.blocks.map((block) => (
-                  <motion.div
-                    key={block.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <DraggableBlock
-                      block={block}
-                      onUpdate={(updatedBlock) => {
-                        const index = activePage.blocks.findIndex(b => b.id === block.id);
-                        if (index !== -1) {
-                          const updatedBlocks = [...activePage.blocks];
-                          updatedBlocks[index] = updatedBlock;
-                          updatePage(activePage.id, {
-                            ...activePage,
-                            blocks: updatedBlocks
-                          });
-                        }
-                      }}
-                      isEditing={isEditing}
-                      isDropTarget={dropTarget === block.id}
-                      breakpoint={breakpoint}
-                    />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </SortableContext>
-
-            <DragOverlay>
-              {activeId ? (
-                <motion.div 
-                  initial={{ scale: 1 }}
-                  animate={{ scale: 1.02 }}
-                  className="opacity-50"
-                >
-                  <BlockRenderer
-                    block={activePage.blocks.find(block => block.id === activeId)!}
-                    onUpdate={() => {}}
-                    isEditing={false}
-                    breakpoint={breakpoint}
-                  />
-                </motion.div>
-              ) : null}
-            </DragOverlay>
+            {children}
           </DndContext>
-
-          {activePage.blocks.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="text-center py-12 text-gray-400"
-            >
-              <p>Add blocks using the toolbar above</p>
-            </motion.div>
-          )}
         </motion.div>
       </div>
     </div>
