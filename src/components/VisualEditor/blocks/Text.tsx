@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
-import { AutoFocusPlugin } from '@lexical/react/LexicalAutoFocusPlugin';
-import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
-import { $getRoot, EditorState } from 'lexical';
-import FloatingToolbar from '../FloatingToolbar';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextStyle from '@tiptap/extension-text-style';
+import FontFamily from '@tiptap/extension-font-family';
+import TextAlign from '@tiptap/extension-text-align';
 import { Block, Breakpoint } from '../../../lib/types/editor';
+import TextToolbar from './TextToolbar';
+import { useFloating, offset, flip, shift } from '@floating-ui/react';
 
 interface TextBlockProps {
   block: Block;
@@ -20,51 +18,38 @@ interface TextBlockProps {
 
 const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  const initialConfig = {
-    namespace: `editor-${block.id}`,
-    onError: (error: Error) => {
-      console.error('Lexical error:', error);
-    },
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      TextStyle,
+      FontFamily,
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+    ],
+    content: block.content || '<p>Start typing...</p>',
     editable: isEditing,
-    theme: {
-      text: {
-        base: block.styles?.color ? `text-[${block.styles.color}]` : 'text-white',
-        bold: 'font-bold',
-        italic: 'italic',
-        underline: 'underline',
-        strikethrough: 'line-through',
-        underlineStrikethrough: 'underline line-through',
-      },
-      paragraph: 'mb-4 last:mb-0',
-      heading: {
-        h1: 'text-4xl font-bold mb-4',
-        h2: 'text-3xl font-bold mb-3',
-        h3: 'text-2xl font-bold mb-2',
-      },
-      list: {
-        ul: 'list-disc ml-6 mb-4',
-        ol: 'list-decimal ml-6 mb-4',
-        listitem: 'mb-1 last:mb-0',
-      },
-    },
-  };
-
-  const handleChange = (editorState: EditorState) => {
-    editorState.read(() => {
-      const root = $getRoot();
-      const content = root.getTextContent();
+    onUpdate: ({ editor }) => {
       onUpdate({
         ...block,
-        content,
+        content: editor.getHTML(),
       });
-    });
-  };
+    },
+    onFocus: () => setIsFocused(true),
+    onBlur: () => setIsFocused(false),
+  });
+
+  const { refs, floatingStyles } = useFloating({
+    placement: 'top',
+    middleware: [offset(10), flip(), shift()],
+  });
 
   const textStyles: React.CSSProperties = {
     display: 'block',
     width: '100%',
-    ...(block.styles as React.CSSProperties)
+    ...(block.styles as React.CSSProperties),
   };
 
   return (
@@ -79,28 +64,24 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate, isEditing, break
           Text Block
         </div>
       )}
-      <LexicalComposer initialConfig={initialConfig}>
-        {isEditing && <FloatingToolbar block={block} onUpdate={onUpdate} breakpoint={breakpoint} />}
-        <div className="relative">
-          <RichTextPlugin
-            contentEditable={
-              <ContentEditable
-                className="outline-none min-h-[1em] text-white"
-                spellCheck={false}
-              />
-            }
-            placeholder={
-              <div className="absolute top-0 left-0 text-gray-400 pointer-events-none">
-                Start typing...
-              </div>
-            }
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-        </div>
-        <HistoryPlugin />
-        <AutoFocusPlugin />
-        <OnChangePlugin onChange={handleChange} />
-      </LexicalComposer>
+
+      <div ref={refs.setReference}>
+        <EditorContent 
+          editor={editor} 
+          className="prose prose-invert max-w-none focus:outline-none"
+        />
+      </div>
+
+      {editor && isFocused && isEditing && (
+        <TextToolbar
+          editor={editor}
+          block={block}
+          onUpdate={onUpdate}
+          breakpoint={breakpoint}
+          style={floatingStyles}
+          ref={refs.setFloating}
+        />
+      )}
     </motion.div>
   );
 };

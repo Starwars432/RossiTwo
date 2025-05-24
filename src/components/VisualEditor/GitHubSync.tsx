@@ -20,10 +20,12 @@ const GitHubSync: React.FC<GitHubSyncProps> = ({ pageId }) => {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const response = await fetch(`${process.env.VITE_SUPABASE_URL}/functions/v1/sync-github`, {
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sync-github`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ pageId }),
@@ -78,8 +80,7 @@ const GitHubSync: React.FC<GitHubSyncProps> = ({ pageId }) => {
           </motion.button>
 
           <p className="text-xs text-gray-400">
-            This will push the current page content to your connected GitHub repository.
-            Make sure you have configured your GitHub settings in the editor settings.
+            This will push the current page content to the connected GitHub repository.
           </p>
         </div>
       )}

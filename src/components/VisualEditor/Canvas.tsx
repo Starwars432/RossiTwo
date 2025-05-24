@@ -5,6 +5,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Block } from '../../lib/types/editor';
 import { useEditorStore } from '../../lib/stores/editorStore';
+import { useTabStore } from '../../lib/stores/tabStore';
 import DraggableBlock from './DraggableBlock';
 import BlockRenderer from './BlockRenderer';
 import Toolbar from './Toolbar';
@@ -16,7 +17,9 @@ interface CanvasProps {
 }
 
 const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
-  const { page, addBlock, moveBlock, updateBlock } = useEditorStore();
+  const { activeTab, pages, updatePage } = useTabStore();
+  const activePage = activeTab ? pages[activeTab] : null;
+  const { addBlock, moveBlock, updateBlock } = useEditorStore();
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [dropTarget, setDropTarget] = React.useState<string | null>(null);
   const { breakpoint, setBreakpoint } = useBreakpoint();
@@ -35,10 +38,10 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over || !page) return;
+    if (!over || !activePage) return;
 
-    const activeBlock = page.blocks.find(block => block.id === active.id);
-    const overBlock = page.blocks.find(block => block.id === over.id);
+    const activeBlock = activePage.blocks.find(block => block.id === active.id);
+    const overBlock = activePage.blocks.find(block => block.id === over.id);
 
     if (!activeBlock || !overBlock) return;
 
@@ -52,9 +55,9 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (over && page) {
-      const activeBlock = page.blocks.find(block => block.id === active.id);
-      const overBlock = page.blocks.find(block => block.id === over.id);
+    if (over && activePage) {
+      const activeBlock = activePage.blocks.find(block => block.id === active.id);
+      const overBlock = activePage.blocks.find(block => block.id === over.id);
 
       if (activeBlock && overBlock) {
         if (overBlock.type === 'container' && dropTarget === over.id) {
@@ -62,16 +65,20 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
             ...overBlock,
             children: [...(overBlock.children || []), activeBlock]
           };
-          updateBlock(page.blocks.indexOf(overBlock), updatedOverBlock);
+          updateBlock(activePage.blocks.indexOf(overBlock), updatedOverBlock);
           
-          const activeIndex = page.blocks.indexOf(activeBlock);
+          const activeIndex = activePage.blocks.indexOf(activeBlock);
           if (activeIndex !== -1) {
-            const newBlocks = [...page.blocks];
+            const newBlocks = [...activePage.blocks];
             newBlocks.splice(activeIndex, 1);
+            updatePage(activePage.id, {
+              ...activePage,
+              blocks: newBlocks
+            });
           }
         } else if (active.id !== over.id) {
-          const oldIndex = page.blocks.findIndex(block => block.id === active.id);
-          const newIndex = page.blocks.findIndex(block => block.id === over.id);
+          const oldIndex = activePage.blocks.findIndex(block => block.id === active.id);
+          const newIndex = activePage.blocks.findIndex(block => block.id === over.id);
 
           if (oldIndex !== undefined && newIndex !== undefined) {
             moveBlock(oldIndex, newIndex);
@@ -85,6 +92,8 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
   };
 
   const handleAddBlock = (blockType: Block['type']) => {
+    if (!activePage) return;
+
     const newBlock: Block = {
       id: crypto.randomUUID(),
       type: blockType,
@@ -92,10 +101,20 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
       styles: {}
     };
 
-    addBlock(newBlock);
+    const updatedBlocks = [...activePage.blocks, newBlock];
+    updatePage(activePage.id, {
+      ...activePage,
+      blocks: updatedBlocks
+    });
   };
 
-  if (!page) return null;
+  if (!activePage) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-400">
+        <p>Select or create a page to start editing</p>
+      </div>
+    );
+  }
 
   const getPreviewWidth = () => {
     switch (breakpoint) {
@@ -164,11 +183,11 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
             collisionDetection={rectIntersection}
           >
             <SortableContext
-              items={page.blocks.map(block => block.id)}
+              items={activePage.blocks.map(block => block.id)}
               strategy={verticalListSortingStrategy}
             >
               <AnimatePresence>
-                {page.blocks.map((block) => (
+                {activePage.blocks.map((block) => (
                   <motion.div
                     key={block.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -179,9 +198,14 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
                     <DraggableBlock
                       block={block}
                       onUpdate={(updatedBlock) => {
-                        const index = page.blocks.findIndex(b => b.id === block.id);
+                        const index = activePage.blocks.findIndex(b => b.id === block.id);
                         if (index !== -1) {
-                          updateBlock(index, updatedBlock);
+                          const updatedBlocks = [...activePage.blocks];
+                          updatedBlocks[index] = updatedBlock;
+                          updatePage(activePage.id, {
+                            ...activePage,
+                            blocks: updatedBlocks
+                          });
                         }
                       }}
                       isEditing={isEditing}
@@ -201,7 +225,7 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
                   className="opacity-50"
                 >
                   <BlockRenderer
-                    block={page.blocks.find(block => block.id === activeId)!}
+                    block={activePage.blocks.find(block => block.id === activeId)!}
                     onUpdate={() => {}}
                     isEditing={false}
                     breakpoint={breakpoint}
@@ -211,7 +235,7 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing }) => {
             </DragOverlay>
           </DndContext>
 
-          {page.blocks.length === 0 && (
+          {activePage.blocks.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

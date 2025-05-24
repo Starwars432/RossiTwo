@@ -1,5 +1,5 @@
 [build]
-  command = "CI='' npm run build"
+  command = "npm run build"
   publish = "dist"
 
 [dev]
@@ -26,3 +26,4 @@
   NODE_VERSION = "20"
   ENABLE_VISUAL_EDITOR = "true"
   CI = ""
+  NPM_FLAGS = "--include=dev"

@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.39.7';
+import { Octokit } from 'npm:@octokit/rest@20.0.2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,16 +50,10 @@ serve(async (req) => {
       throw new Error('Page not found');
     }
 
-    // Get GitHub settings
-    const { data: settings, error: settingsError } = await supabaseClient
-      .from('editor_settings')
-      .select('github_token, github_repo')
-      .eq('user_id', user.id)
-      .single();
-
-    if (settingsError || !settings?.github_token || !settings?.github_repo) {
-      throw new Error('GitHub settings not configured');
-    }
+    // Initialize Octokit with GitHub token from environment
+    const octokit = new Octokit({
+      auth: Deno.env.get('GITHUB_TOKEN'),
+    });
 
     // Prepare content for GitHub
     const content = {
@@ -66,53 +61,50 @@ serve(async (req) => {
       slug: page.slug,
       blocks: page.blocks,
       metadata: page.metadata,
-      theme: page.theme
     };
 
     const contentStr = JSON.stringify(content, null, 2);
-    const contentBase64 = btoa(contentStr);
-
-    // Get current file SHA (if exists)
-    const [owner, repo] = settings.github_repo.split('/');
-    const path = `content/pages/${page.slug}.json`;
-
-    const getFileResponse = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        headers: {
-          'Authorization': `token ${settings.github_token}`,
-          'Accept': 'application/vnd.github.v3+json',
-        },
-      }
+    
+    // Convert content to base64 safely handling UTF-8
+    const contentBase64 = btoa(
+      new TextEncoder()
+        .encode(contentStr)
+        .reduce((data, byte) => data + String.fromCharCode(byte), '')
     );
 
-    let sha = undefined;
-    if (getFileResponse.status === 200) {
-      const fileData = await getFileResponse.json();
-      sha = fileData.sha;
+    // Get current file SHA if it exists
+    let sha: string | undefined;
+    try {
+      const { data: existingFile } = await octokit.repos.getContent({
+        owner: 'Starwars432',
+        repo: 'Rossi',
+        path: `content/pages/${page.slug}.json`,
+      });
+      
+      if ('sha' in existingFile) {
+        sha = existingFile.sha;
+      }
+    } catch (error) {
+      console.log('File does not exist yet:', error);
     }
 
     // Commit to GitHub
-    const commitResponse = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${settings.github_token}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Update ${page.slug} page`,
-          content: contentBase64,
-          sha,
-        }),
-      }
-    );
-
-    if (!commitResponse.ok) {
-      throw new Error('Failed to commit to GitHub');
-    }
+    await octokit.repos.createOrUpdateFileContents({
+      owner: 'Starwars432',
+      repo: 'Rossi',
+      path: `content/pages/${page.slug}.json`,
+      message: `Update ${page.slug} page`,
+      content: contentBase64,
+      sha,
+      committer: {
+        name: 'Editor Bot',
+        email: 'editor@manifestillusions.com',
+      },
+      author: {
+        name: user.email || 'Editor User',
+        email: user.email || 'editor@manifestillusions.com',
+      },
+    });
 
     // Update page status
     const { error: updateError } = await supabaseClient
@@ -135,6 +127,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error('Error syncing with GitHub:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {

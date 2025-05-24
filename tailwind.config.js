@@ -27,8 +27,5 @@ export default {
   future: {
     hoverOnlyWhenSupported: true,
     respectDefaultRingColorOpacity: true
-  },
-  experimental: {
-    optimizeUniversalDefaults: true
   }
 }

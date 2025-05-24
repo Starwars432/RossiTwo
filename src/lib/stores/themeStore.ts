@@ -37,9 +37,14 @@ export const useThemeStore = create<ThemeState>()(
 
       saveTheme: async () => {
         const { currentTheme } = get();
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!user) return;
+
         const { error } = await supabase
           .from('editor_settings')
           .upsert({
+            user_id: user.id,
             theme: currentTheme,
             updated_at: new Date().toISOString()
           });
@@ -51,18 +56,44 @@ export const useThemeStore = create<ThemeState>()(
       },
 
       loadTheme: async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!user) {
+          // If no user is logged in, use default theme
+          get().setTheme(defaultPresets[0].theme);
+          return;
+        }
+
         const { data, error } = await supabase
           .from('editor_settings')
           .select('theme')
-          .single();
+          .eq('user_id', user.id)
+          .maybeSingle();
 
         if (error) {
           console.error('Error loading theme:', error);
+          // On error, fallback to default theme
+          get().setTheme(defaultPresets[0].theme);
           return;
         }
 
         if (data?.theme) {
           get().setTheme(data.theme as Theme);
+        } else {
+          // If no theme settings exist for the user, create default settings
+          const { error: createError } = await supabase
+            .from('editor_settings')
+            .insert({
+              user_id: user.id,
+              theme: defaultPresets[0].theme
+            });
+
+          if (createError) {
+            console.error('Error creating default theme settings:', createError);
+          }
+          
+          // Use default theme
+          get().setTheme(defaultPresets[0].theme);
         }
       },
 

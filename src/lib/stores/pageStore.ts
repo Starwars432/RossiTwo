@@ -8,7 +8,7 @@ interface PageState {
   loading: boolean;
   error: string | null;
   loadPages: () => Promise<void>;
-  loadPage: (id: string) => Promise<void>;
+  loadPage: (id: string) => Promise<Page | null>;
   savePage: (page: Page) => Promise<void>;
   createPage: (title: string) => Promise<Page>;
   deletePage: (id: string) => Promise<void>;
@@ -49,9 +49,11 @@ export const usePageStore = create<PageState>((set) => ({
 
       if (error) throw error;
       set({ currentPage: data });
+      return data;
     } catch (error) {
       console.error('Error loading page:', error);
       set({ error: 'Failed to load page' });
+      return null;
     } finally {
       set({ loading: false });
     }
@@ -102,6 +104,7 @@ export const usePageStore = create<PageState>((set) => ({
         .single();
 
       if (error) throw error;
+      if (!data) throw new Error('No data returned from insert');
 
       set(state => ({
         pages: [data, ...state.pages]

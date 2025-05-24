@@ -5,11 +5,10 @@ import { supabase } from '../../lib/supabase';
 import { Page } from '../../lib/types/editor';
 
 interface PageListProps {
-  onPageSelect: (id: string) => Promise<void>;
-  currentPage: Page | null;
+  onPageSelect: (id: string) => Promise<Page | null>;
 }
 
-const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
+const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
   const [pages, setPages] = useState<Page[]>([]);
   const [isExpanded, setIsExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -62,7 +61,10 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
       if (error) throw error;
       if (data) {
         setPages([data, ...pages]);
-        onPageSelect(data.id);
+        const loadedPage = await onPageSelect(data.id);
+        if (!loadedPage) {
+          throw new Error('Failed to load new page');
+        }
       }
     } catch (error) {
       console.error('Error creating page:', error);
@@ -165,11 +167,7 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect, currentPage }) => {
             pages.map(page => (
               <div
                 key={page.id}
-                className={`group relative flex items-center justify-between px-3 py-2 rounded ${
-                  currentPage?.id === page.id
-                    ? 'bg-blue-500/20 text-blue-400'
-                    : 'hover:bg-blue-500/10 text-gray-300'
-                }`}
+                className="group relative flex items-center justify-between px-3 py-2 rounded hover:bg-blue-500/10"
               >
                 {editingPage === page.id ? (
                   <input
