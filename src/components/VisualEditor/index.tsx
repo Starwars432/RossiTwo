@@ -1,11 +1,9 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePageStore } from '../../lib/stores/pageStore';
-import { useThemeStore } from '../../lib/stores/themeStore';
 import { useTabStore } from '../../lib/stores/tabStore';
 import PageList from './PageList';
 import MediaLibrary from './MediaLibrary';
-import ThemeSettings from './ThemeSettings';
 import GitHubSync from './GitHubSync';
 import Settings from './Settings';
 import Canvas from './Canvas';
@@ -13,6 +11,9 @@ import Tutorial from './Tutorial';
 import KeyboardShortcuts from './KeyboardShortcuts';
 import TabBar from './TabBar';
 import { BreakpointProvider } from '../../contexts/BreakpointContext';
+
+// Import website components
+import Navigation from '../Navigation';
 import Hero from '../Hero';
 import Services from '../Services';
 import CustomDesign from '../CustomDesign';
@@ -22,7 +23,6 @@ import Footer from '../Footer';
 const VisualEditor: React.FC = () => {
   const { pageId } = useParams();
   const { loadPage, loading, error } = usePageStore();
-  const { loadTheme } = useThemeStore();
   const { addTab } = useTabStore();
 
   useEffect(() => {
@@ -33,8 +33,7 @@ const VisualEditor: React.FC = () => {
         }
       });
     }
-    loadTheme();
-  }, [pageId, loadPage, loadTheme, addTab]);
+  }, [pageId, loadPage, addTab]);
 
   if (loading) {
     return (
@@ -58,7 +57,6 @@ const VisualEditor: React.FC = () => {
         <div className="w-64 bg-black/50 border-r border-blue-400/30 p-4">
           <PageList onPageSelect={loadPage} />
           <MediaLibrary />
-          <ThemeSettings />
           {pageId && <GitHubSync pageId={pageId} />}
           <Settings />
         </div>
@@ -66,6 +64,7 @@ const VisualEditor: React.FC = () => {
         <div className="flex-1 flex flex-col">
           <TabBar />
           <Canvas>
+            <Navigation onLoginClick={() => {}} />
             <Hero />
             <Services />
             <CustomDesign />

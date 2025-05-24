@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-scroll';
 import { motion } from 'framer-motion';
-import { Sparkles, ShoppingCart, LogIn, Menu, X, User } from 'lucide-react';
+import { ShoppingCart, LogIn, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import ProfileDropdown from './ProfileDropdown';
@@ -19,10 +19,11 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   return (
-    <nav className="fixed w-full z-50 px-6 py-4 bg-black/50 backdrop-blur-sm">
+    <nav className="w-full z-50 px-6 py-4 bg-black/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <Sparkles className="w-8 h-8 text-blue-400" />
+          {/* Empty div to maintain spacing */}
+          <div className="w-8 h-8" />
         </div>
 
         {/* Mobile Menu Button */}
