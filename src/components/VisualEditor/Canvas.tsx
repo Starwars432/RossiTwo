@@ -1,13 +1,8 @@
 import React from 'react';
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, useSensor, useSensors, PointerSensor, rectIntersection } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Block } from '../../lib/types/editor';
+import { DndContext, DragEndEvent, DragOverEvent, useSensor, useSensors, PointerSensor, rectIntersection } from '@dnd-kit/core';
+import { motion } from 'framer-motion';
 import { useEditorStore } from '../../lib/stores/editorStore';
 import { useTabStore } from '../../lib/stores/tabStore';
-import DraggableBlock from './DraggableBlock';
-import BlockRenderer from './BlockRenderer';
 import Toolbar from './Toolbar';
 import { Smartphone, Tablet, Monitor } from 'lucide-react';
 import { useBreakpoint } from '../../contexts/BreakpointContext';
@@ -18,10 +13,9 @@ interface CanvasProps {
 }
 
 const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
-  const { activeTab, pages, updatePage } = useTabStore();
+  const { activeTab, pages } = useTabStore();
   const activePage = activeTab ? pages[activeTab] : null;
-  const { moveBlock, updateBlock } = useEditorStore();
-  const [activeId, setActiveId] = React.useState<string | null>(null);
+  const { moveBlock } = useEditorStore();
   const [dropTarget, setDropTarget] = React.useState<string | null>(null);
   const { breakpoint, setBreakpoint } = useBreakpoint();
 
@@ -32,10 +26,6 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
       },
     })
   );
-
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
-  };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
@@ -60,35 +50,16 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
       const activeBlock = activePage.blocks.find(block => block.id === active.id);
       const overBlock = activePage.blocks.find(block => block.id === over.id);
 
-      if (activeBlock && overBlock) {
-        if (overBlock.type === 'container' && dropTarget === over.id) {
-          const updatedOverBlock = {
-            ...overBlock,
-            children: [...(overBlock.children || []), activeBlock]
-          };
-          updateBlock(activePage.blocks.indexOf(overBlock), updatedOverBlock);
-          
-          const activeIndex = activePage.blocks.indexOf(activeBlock);
-          if (activeIndex !== -1) {
-            const newBlocks = [...activePage.blocks];
-            newBlocks.splice(activeIndex, 1);
-            updatePage(activePage.id, {
-              ...activePage,
-              blocks: newBlocks
-            });
-          }
-        } else if (active.id !== over.id) {
-          const oldIndex = activePage.blocks.findIndex(block => block.id === active.id);
-          const newIndex = activePage.blocks.findIndex(block => block.id === over.id);
+      if (activeBlock && overBlock && active.id !== over.id) {
+        const oldIndex = activePage.blocks.findIndex(block => block.id === active.id);
+        const newIndex = activePage.blocks.findIndex(block => block.id === over.id);
 
-          if (oldIndex !== undefined && newIndex !== undefined) {
-            moveBlock(oldIndex, newIndex);
-          }
+        if (oldIndex !== undefined && newIndex !== undefined) {
+          moveBlock(oldIndex, newIndex);
         }
       }
     }
 
-    setActiveId(null);
     setDropTarget(null);
   };
 
@@ -152,10 +123,9 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
         >
           <DndContext
             sensors={sensors}
-            onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
+            modifiers={[]}
             collisionDetection={rectIntersection}
           >
             {children}
