@@ -4,9 +4,8 @@ import WebFont from 'webfontloader';
 
 interface Font {
   family: string;
-  variants: string[];
-  subsets: string[];
   category: string;
+  variants: string[];
 }
 
 interface FontPickerProps {
@@ -14,44 +13,40 @@ interface FontPickerProps {
   currentFont?: string;
 }
 
-const FONTS_STORAGE_KEY = 'google_fonts_list';
-const FONTS_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+const POPULAR_FONTS = [
+  'Inter',
+  'Roboto',
+  'Open Sans',
+  'Lato',
+  'Montserrat',
+  'Poppins',
+  'Playfair Display',
+  'Source Sans Pro',
+  'Raleway',
+  'Nunito'
+];
 
 const FontPicker: React.FC<FontPickerProps> = ({ onFontSelect, currentFont }) => {
-  const [fonts, setFonts] = useState<Font[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [fonts, setFonts] = useState<Font[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadFonts = async () => {
       try {
-        // Check cache first
-        const cached = localStorage.getItem(FONTS_STORAGE_KEY);
-        if (cached) {
-          const { data, timestamp } = JSON.parse(cached);
-          if (Date.now() - timestamp < FONTS_CACHE_DURATION) {
-            setFonts(data);
-            setLoading(false);
-            return;
+        // Load popular fonts immediately
+        WebFont.load({
+          google: {
+            families: POPULAR_FONTS
           }
-        }
+        });
 
-        // Fetch from API if cache is invalid or missing
+        // Fetch full font list from Google Fonts API
         const response = await fetch(
-          'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBP90V_OhccM2ydZrpHGwzXm45vubQ79uQ'
+          'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBP90V_OhccM2ydZrpHGwzXm45vubQ79uQ&sort=popularity'
         );
         const data = await response.json();
-        
-        // Cache the response
-        localStorage.setItem(
-          FONTS_STORAGE_KEY,
-          JSON.stringify({
-            data: data.items,
-            timestamp: Date.now()
-          })
-        );
-        
         setFonts(data.items);
       } catch (error) {
         console.error('Error loading fonts:', error);
@@ -70,6 +65,7 @@ const FontPicker: React.FC<FontPickerProps> = ({ onFontSelect, currentFont }) =>
       },
       active: () => {
         onFontSelect(fontFamily);
+        setIsOpen(false);
       }
     });
   };
@@ -110,13 +106,25 @@ const FontPicker: React.FC<FontPickerProps> = ({ onFontSelect, currentFont }) =>
             <div className="p-4 text-center text-gray-400">Loading fonts...</div>
           ) : (
             <div className="py-2">
-              {filteredFonts.map((font) => (
+              <div className="px-4 py-2 text-xs text-gray-400 font-medium">Popular Fonts</div>
+              {POPULAR_FONTS.map(font => (
+                <button
+                  key={font}
+                  onClick={() => loadFont(font)}
+                  className="w-full px-4 py-2 text-left hover:bg-blue-500/20 transition-colors"
+                  style={{ fontFamily: font }}
+                >
+                  {font}
+                </button>
+              ))}
+              
+              <div className="px-4 py-2 text-xs text-gray-400 font-medium border-t border-blue-400/30 mt-2">
+                All Fonts
+              </div>
+              {filteredFonts.map(font => (
                 <button
                   key={font.family}
-                  onClick={() => {
-                    loadFont(font.family);
-                    setIsOpen(false);
-                  }}
+                  onClick={() => loadFont(font.family)}
                   className="w-full px-4 py-2 text-left hover:bg-blue-500/20 transition-colors"
                   style={{ fontFamily: font.family }}
                 >
