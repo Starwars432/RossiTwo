@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePageStore } from '../../lib/stores/pageStore';
 import { useThemeStore } from '../../lib/stores/themeStore';
