@@ -24,7 +24,6 @@ const VisualEditor: React.FC = () => {
   const { loadPage, loading, error } = usePageStore();
   const { loadTheme } = useThemeStore();
   const { addTab } = useTabStore();
-  const [isEditing] = useState(true);
 
   useEffect(() => {
     if (pageId) {
@@ -66,7 +65,7 @@ const VisualEditor: React.FC = () => {
 
         <div className="flex-1 flex flex-col">
           <TabBar />
-          <Canvas isEditing={isEditing}>
+          <Canvas>
             <Hero />
             <Services />
             <CustomDesign />

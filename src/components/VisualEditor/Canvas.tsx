@@ -8,15 +8,13 @@ import { Smartphone, Tablet, Monitor } from 'lucide-react';
 import { useBreakpoint } from '../../contexts/BreakpointContext';
 
 interface CanvasProps {
-  isEditing: boolean;
   children: React.ReactNode;
 }
 
-const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
+const Canvas: React.FC<CanvasProps> = ({ children }) => {
   const { activeTab, pages } = useTabStore();
   const activePage = activeTab ? pages[activeTab] : null;
   const { moveBlock } = useEditorStore();
-  const [dropTarget, setDropTarget] = React.useState<string | null>(null);
   const { breakpoint, setBreakpoint } = useBreakpoint();
 
   const sensors = useSensors(
@@ -35,12 +33,6 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
     const overBlock = activePage.blocks.find(block => block.id === over.id);
 
     if (!activeBlock || !overBlock) return;
-
-    if (overBlock.type === 'container') {
-      setDropTarget(over.id as string);
-    } else {
-      setDropTarget(null);
-    }
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -59,8 +51,6 @@ const Canvas: React.FC<CanvasProps> = ({ isEditing, children }) => {
         }
       }
     }
-
-    setDropTarget(null);
   };
 
   const getPreviewWidth = () => {
