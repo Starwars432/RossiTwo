@@ -4,6 +4,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { FORMAT_TEXT_COMMAND, SELECTION_CHANGE_COMMAND } from 'lexical';
 import { Bold, Maximize2, Minimize2, Smartphone, Tablet, Monitor } from 'lucide-react';
 import { Block, Breakpoint } from '../../lib/types/editor';
+import FontPicker from './FontPicker';
 
 interface FloatingToolbarProps {
   block: Block;
@@ -85,6 +86,10 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
     }
   };
 
+  const handleFontSelect = (fontFamily: string) => {
+    updateBlockStyle('fontFamily', fontFamily);
+  };
+
   const getStyleValue = (property: StyleProperty | MobileStyleProperty | TabletStyleProperty): string => {
     if (activeBreakpoint === 'desktop') {
       return (block.styles?.[property as StyleProperty] as string) || '';
@@ -132,6 +137,11 @@ const FloatingToolbar: React.FC<FloatingToolbarProps> = ({ block, onUpdate, brea
                 </motion.button>
               ))}
             </div>
+
+            <FontPicker
+              onFontSelect={handleFontSelect}
+              currentFont={getStyleValue('fontFamily')}
+            />
 
             {block.type === 'text' && (
               <motion.button
