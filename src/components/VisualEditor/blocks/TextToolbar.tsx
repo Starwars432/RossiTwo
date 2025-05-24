@@ -1,19 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
-import { Block, Breakpoint } from '../../../lib/types/editor';
-import FontPicker from '../FontPicker';
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Type } from 'lucide-react';
+import { Block } from '../../../lib/types/editor';
+import { useFloating, offset, flip, shift } from '@floating-ui/react';
 
 interface TextToolbarProps {
-  editor: any;
   block: Block;
-  onUpdate: (updatedBlock: Block) => void;
-  breakpoint: Breakpoint;
+  onUpdate: (updates: Partial<Block>) => void;
   style?: React.CSSProperties;
 }
 
 const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
-  ({ editor, block, onUpdate, style }, ref) => {
+  ({ block, onUpdate, style }, ref) => {
     const tools = [
       { icon: Bold, format: 'bold', label: 'Bold' },
       { icon: Italic, format: 'italic', label: 'Italic' },
@@ -23,24 +21,11 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
       { icon: AlignRight, format: 'right', label: 'Align Right' },
     ];
 
-    const handleFontSelect = (fontFamily: string) => {
-      editor.chain().focus().setFontFamily(fontFamily).run();
-      onUpdate({
-        ...block,
-        styles: {
-          ...block.styles,
-          fontFamily,
-        },
-      });
-    };
-
     const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const fontSize = `${e.target.value}px`;
-      editor.chain().focus().setFontSize(fontSize).run();
       onUpdate({
-        ...block,
-        styles: {
-          ...block.styles,
+        style: {
+          ...block.style,
           fontSize,
         },
       });
@@ -48,14 +33,26 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
 
     const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const color = e.target.value;
-      editor.chain().focus().setColor(color).run();
       onUpdate({
-        ...block,
-        styles: {
-          ...block.styles,
+        style: {
+          ...block.style,
           color,
         },
       });
+    };
+
+    const handleFormatClick = (format: string) => {
+      document.execCommand(format, false);
+      const selection = window.getSelection();
+      if (selection && !selection.isCollapsed) {
+        const range = selection.getRangeAt(0);
+        const content = range.cloneContents();
+        const span = document.createElement('span');
+        span.appendChild(content);
+        range.deleteContents();
+        range.insertNode(span);
+        selection.removeAllRanges();
+      }
     };
 
     return (
@@ -64,14 +61,12 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
         style={style}
         className="z-50 bg-black/90 border border-blue-400/30 rounded-lg p-2 flex items-center space-x-2"
       >
-        <FontPicker onFontSelect={handleFontSelect} currentFont={block.styles?.fontFamily} />
-        
-        <div className="flex items-center space-x-2 border-l border-blue-400/30 pl-2">
+        <div className="flex items-center space-x-2 border-r border-blue-400/30 pr-2">
           <input
             type="number"
             min={8}
             max={200}
-            value={parseInt(block.styles?.fontSize as string || '16')}
+            value={parseInt(block.style?.fontSize as string || '16')}
             onChange={handleFontSizeChange}
             className="w-16 bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm text-blue-400"
             title="Font size"
@@ -79,25 +74,21 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
           
           <input
             type="color"
-            value={block.styles?.color || '#FFFFFF'}
+            value={block.style?.color || '#FFFFFF'}
             onChange={handleColorChange}
             className="w-8 h-8 bg-transparent border border-blue-400/30 rounded cursor-pointer"
             title="Text color"
           />
         </div>
 
-        <div className="flex items-center space-x-1 border-l border-blue-400/30 pl-2">
+        <div className="flex items-center space-x-1">
           {tools.map(({ icon: Icon, format, label }) => (
             <motion.button
               key={format}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => editor.chain().focus().toggleFormat(format).run()}
-              className={`p-1.5 rounded ${
-                editor.isActive(format)
-                  ? 'bg-blue-500 text-white'
-                  : 'text-blue-400 hover:bg-blue-500/20'
-              }`}
+              onClick={() => handleFormatClick(format)}
+              className="p-1.5 rounded hover:bg-blue-500/20 text-blue-400"
               title={label}
             >
               <Icon className="w-4 h-4" />

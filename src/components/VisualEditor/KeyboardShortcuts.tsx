@@ -10,28 +10,38 @@ interface Shortcut {
 
 const shortcuts: Shortcut[] = [
   { key: 'Z', description: 'Undo', modifier: 'Ctrl' },
-  { key: 'Z', description: 'Redo', modifier: 'Shift' },
-  { key: 'B', description: 'Bold text', modifier: 'Ctrl' },
-  { key: 'I', description: 'Italic text', modifier: 'Ctrl' },
-  { key: 'U', description: 'Underline text', modifier: 'Ctrl' },
-  { key: 'S', description: 'Save changes', modifier: 'Ctrl' },
-  { key: 'P', description: 'Preview', modifier: 'Ctrl' },
+  { key: 'Y', description: 'Redo', modifier: 'Ctrl' },
   { key: 'D', description: 'Duplicate block', modifier: 'Ctrl' },
   { key: 'Delete', description: 'Delete block' },
   { key: '↑↓', description: 'Navigate blocks' },
   { key: 'Space', description: 'Open block menu' },
-  { key: 'Esc', description: 'Close dialogs' },
+  { key: 'Esc', description: 'Close menus' },
+  { key: 'S', description: 'Save changes', modifier: 'Ctrl' },
+  { key: 'P', description: 'Preview', modifier: 'Ctrl' },
+  { key: '/', description: 'Show keyboard shortcuts', modifier: 'Ctrl' },
 ];
 
 const KeyboardShortcuts: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === '/') {
+        e.preventDefault();
+        setIsOpen(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 bg-blue-500/20 text-blue-400 p-2 rounded-lg hover:bg-blue-500/30 transition-colors"
-        aria-label="Show keyboard shortcuts"
+        className="fixed bottom-4 right-4 bg-blue-500/20 text-blue-400 p-2 rounded-lg hover:bg-blue-500/30 transition-colors"
+        title="Show keyboard shortcuts (Ctrl + /)"
       >
         <Keyboard className="w-5 h-5" />
       </button>
@@ -57,7 +67,6 @@ const KeyboardShortcuts: React.FC = () => {
                 <button
                   onClick={() => setIsOpen(false)}
                   className="text-gray-400 hover:text-gray-300"
-                  aria-label="Close keyboard shortcuts"
                 >
                   ✕
                 </button>

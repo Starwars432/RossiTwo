@@ -1,69 +1,30 @@
 import { CSSProperties } from 'react';
 
-export type Breakpoint = 'mobile' | 'tablet' | 'desktop';
+export type BlockType = 'text' | 'image' | 'container' | 'section' | 'row' | 'column';
 
-export type FlexDirection = 'row' | 'column' | 'row-reverse' | 'column-reverse';
-export type Display = 'flex' | 'block' | 'inline' | 'inline-block' | 'none';
-export type TextAlign = 'left' | 'center' | 'right' | 'justify';
-
-export interface BlockStyles extends Omit<CSSProperties, 'flexDirection'> {
-  flexDirection?: FlexDirection;
-  display?: Display;
-  mobile?: {
-    width?: string;
-    display?: Display;
-    flexDirection?: FlexDirection;
-    padding?: string;
-    margin?: string;
-    fontSize?: string;
-    textAlign?: TextAlign;
-  };
-  tablet?: {
-    width?: string;
-    display?: Display;
-    flexDirection?: FlexDirection;
-    padding?: string;
-    margin?: string;
-    fontSize?: string;
-    textAlign?: TextAlign;
-  };
+export interface BlockStyle extends CSSProperties {
+  mobile?: Partial<CSSProperties>;
+  tablet?: Partial<CSSProperties>;
+  desktop?: Partial<CSSProperties>;
 }
 
 export interface Block {
   id: string;
-  type: 'text' | 'image' | 'container' | 'row' | 'column' | 'section' | 'component';
+  type: BlockType;
   content?: string;
   src?: string;
   alt?: string;
+  style?: BlockStyle;
   children?: Block[];
-  componentId?: string;
-  styles?: BlockStyles;
+  parentId?: string;
+  order: number;
 }
 
 export interface Page {
   id: string;
-  slug: string;
   title: string;
+  slug: string;
   blocks: Block[];
-  metadata: {
-    description?: string;
-    keywords?: string[];
-    [key: string]: any;
-  };
-  is_draft: boolean;
-  created_at: string;
-  updated_at: string;
-  published_at?: string;
-}
-
-export interface Component {
-  id: string;
-  name: string;
-  description?: string;
-  category: string;
-  blocks: Block[];
-  thumbnail?: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
+  metadata: Record<string, unknown>;
+  updatedAt: string;
 }

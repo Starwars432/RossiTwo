@@ -50,9 +50,26 @@ serve(async (req) => {
       throw new Error('Page not found');
     }
 
-    // Initialize Octokit with GitHub token from environment
+    // Get GitHub settings
+    const { data: settings, error: settingsError } = await supabaseClient
+      .from('editor_settings')
+      .select('github_token, github_repo')
+      .eq('user_id', user.id)
+      .single();
+
+    if (settingsError || !settings?.github_token || !settings?.github_repo) {
+      throw new Error('GitHub settings not configured');
+    }
+
+    // Parse owner and repo from github_repo setting
+    const [owner, repo] = settings.github_repo.split('/');
+    if (!owner || !repo) {
+      throw new Error('Invalid GitHub repository format. Expected format: owner/repo');
+    }
+
+    // Initialize Octokit with user's GitHub token
     const octokit = new Octokit({
-      auth: Deno.env.get('GITHUB_TOKEN'),
+      auth: settings.github_token,
     });
 
     // Prepare content for GitHub
@@ -76,8 +93,8 @@ serve(async (req) => {
     let sha: string | undefined;
     try {
       const { data: existingFile } = await octokit.repos.getContent({
-        owner: 'Starwars432',
-        repo: 'Rossi',
+        owner,
+        repo,
         path: `content/pages/${page.slug}.json`,
       });
       
@@ -90,8 +107,8 @@ serve(async (req) => {
 
     // Commit to GitHub
     await octokit.repos.createOrUpdateFileContents({
-      owner: 'Starwars432',
-      repo: 'Rossi',
+      owner,
+      repo,
       path: `content/pages/${page.slug}.json`,
       message: `Update ${page.slug} page`,
       content: contentBase64,

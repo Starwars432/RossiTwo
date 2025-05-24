@@ -1,148 +1,125 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
-import { Block, Page } from '../types/editor';
+import { Block } from '../types/editor';
 
 interface EditorState {
-  page: Page | null;
-  history: Page[];
+  blocks: Block[];
+  selectedBlockId: string | null;
+  history: Block[][];
   currentIndex: number;
-  setPage: (page: Page) => void;
-  updateBlock: (blockIndex: number, updatedBlock: Block) => void;
-  addBlock: (block: Block) => void;
-  removeBlock: (blockIndex: number) => void;
-  moveBlock: (fromIndex: number, toIndex: number) => void;
+  addBlock: (block: Omit<Block, 'id' | 'order'>) => void;
+  updateBlock: (id: string, updates: Partial<Block>) => void;
+  deleteBlock: (id: string) => void;
+  moveBlock: (id: string, newParentId?: string, newOrder?: number) => void;
+  selectBlock: (id: string | null) => void;
   undo: () => void;
   redo: () => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
-  clearHistory: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
-  page: null,
+  blocks: [],
+  selectedBlockId: null,
   history: [],
   currentIndex: -1,
 
-  setPage: (page) => {
-    set({
-      page,
-      history: [page],
-      currentIndex: 0
-    });
+  addBlock: (blockData) => {
+    set(produce(state => {
+      const newBlock: Block = {
+        id: crypto.randomUUID(),
+        order: state.blocks.length,
+        ...blockData,
+      };
+      state.blocks.push(newBlock);
+      
+      // Add to history
+      state.history = state.history.slice(0, state.currentIndex + 1);
+      state.history.push([...state.blocks]);
+      state.currentIndex++;
+    }));
   },
 
-  updateBlock: (blockIndex, updatedBlock) => {
-    const { page, history, currentIndex } = get();
-    if (!page) return;
-
-    const newPage = produce(page, draft => {
-      draft.blocks[blockIndex] = updatedBlock;
-      draft.updated_at = new Date().toISOString();
-    });
-
-    const newHistory = history.slice(0, currentIndex + 1);
-    newHistory.push(newPage);
-
-    set({
-      page: newPage,
-      history: newHistory,
-      currentIndex: newHistory.length - 1
-    });
+  updateBlock: (id, updates) => {
+    set(produce(state => {
+      const blockIndex = state.blocks.findIndex(b => b.id === id);
+      if (blockIndex !== -1) {
+        state.blocks[blockIndex] = { ...state.blocks[blockIndex], ...updates };
+        
+        // Add to history
+        state.history = state.history.slice(0, state.currentIndex + 1);
+        state.history.push([...state.blocks]);
+        state.currentIndex++;
+      }
+    }));
   },
 
-  addBlock: (block) => {
-    const { page, history, currentIndex } = get();
-    if (!page) return;
-
-    const newPage = produce(page, draft => {
-      draft.blocks.push(block);
-      draft.updated_at = new Date().toISOString();
-    });
-
-    const newHistory = history.slice(0, currentIndex + 1);
-    newHistory.push(newPage);
-
-    set({
-      page: newPage,
-      history: newHistory,
-      currentIndex: newHistory.length - 1
-    });
+  deleteBlock: (id) => {
+    set(produce(state => {
+      state.blocks = state.blocks.filter(b => b.id !== id);
+      if (state.selectedBlockId === id) {
+        state.selectedBlockId = null;
+      }
+      
+      // Add to history
+      state.history = state.history.slice(0, state.currentIndex + 1);
+      state.history.push([...state.blocks]);
+      state.currentIndex++;
+    }));
   },
 
-  removeBlock: (blockIndex) => {
-    const { page, history, currentIndex } = get();
-    if (!page) return;
+  moveBlock: (id, newParentId, newOrder) => {
+    set(produce(state => {
+      const block = state.blocks.find(b => b.id === id);
+      if (!block) return;
 
-    const newPage = produce(page, draft => {
-      draft.blocks.splice(blockIndex, 1);
-      draft.updated_at = new Date().toISOString();
-    });
-
-    const newHistory = history.slice(0, currentIndex + 1);
-    newHistory.push(newPage);
-
-    set({
-      page: newPage,
-      history: newHistory,
-      currentIndex: newHistory.length - 1
-    });
+      if (newParentId) {
+        block.parentId = newParentId;
+      }
+      
+      if (typeof newOrder === 'number') {
+        block.order = newOrder;
+        // Reorder other blocks
+        state.blocks
+          .filter(b => b.parentId === block.parentId && b.id !== id)
+          .forEach((b, i) => {
+            if (b.order >= newOrder) {
+              b.order = newOrder + i + 1;
+            }
+          });
+      }
+      
+      // Add to history
+      state.history = state.history.slice(0, state.currentIndex + 1);
+      state.history.push([...state.blocks]);
+      state.currentIndex++;
+    }));
   },
 
-  moveBlock: (fromIndex, toIndex) => {
-    const { page, history, currentIndex } = get();
-    if (!page) return;
-
-    const newPage = produce(page, draft => {
-      const [movedBlock] = draft.blocks.splice(fromIndex, 1);
-      draft.blocks.splice(toIndex, 0, movedBlock);
-      draft.updated_at = new Date().toISOString();
-    });
-
-    const newHistory = history.slice(0, currentIndex + 1);
-    newHistory.push(newPage);
-
-    set({
-      page: newPage,
-      history: newHistory,
-      currentIndex: newHistory.length - 1
-    });
+  selectBlock: (id) => {
+    set({ selectedBlockId: id });
   },
 
   undo: () => {
-    const { history, currentIndex } = get();
-    if (currentIndex <= 0) return;
-
-    set({
-      page: history[currentIndex - 1],
-      currentIndex: currentIndex - 1
-    });
+    const { currentIndex, history } = get();
+    if (currentIndex > 0) {
+      set({
+        blocks: [...history[currentIndex - 1]],
+        currentIndex: currentIndex - 1
+      });
+    }
   },
 
   redo: () => {
-    const { history, currentIndex } = get();
-    if (currentIndex >= history.length - 1) return;
-
-    set({
-      page: history[currentIndex + 1],
-      currentIndex: currentIndex + 1
-    });
+    const { currentIndex, history } = get();
+    if (currentIndex < history.length - 1) {
+      set({
+        blocks: [...history[currentIndex + 1]],
+        currentIndex: currentIndex + 1
+      });
+    }
   },
 
-  canUndo: () => {
-    const { currentIndex } = get();
-    return currentIndex > 0;
-  },
-
-  canRedo: () => {
-    const { history, currentIndex } = get();
-    return currentIndex < history.length - 1;
-  },
-
-  clearHistory: () => {
-    const { page } = get();
-    set({
-      history: page ? [page] : [],
-      currentIndex: 0
-    });
-  }
+  canUndo: () => get().currentIndex > 0,
+  canRedo: () => get().currentIndex < get().history.length - 1,
 }));

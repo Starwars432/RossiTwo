@@ -11,10 +11,11 @@ interface PageState {
   loadPage: (id: string) => Promise<Page | null>;
   savePage: (page: Page) => Promise<void>;
   createPage: (title: string) => Promise<Page>;
+  renamePage: (id: string, title: string) => Promise<void>;
   deletePage: (id: string) => Promise<void>;
 }
 
-export const usePageStore = create<PageState>((set) => ({
+export const usePageStore = create<PageState>((set, get) => ({
   pages: [],
   currentPage: null,
   loading: false,
@@ -29,12 +30,14 @@ export const usePageStore = create<PageState>((set) => ({
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      set({ pages: data || [] });
+      set({ pages: data || [], loading: false, error: null });
     } catch (error) {
       console.error('Error loading pages:', error);
-      set({ error: 'Failed to load pages' });
-    } finally {
-      set({ loading: false });
+      set({ 
+        loading: false, 
+        error: 'Failed to load pages. Please check your connection and try again.',
+        pages: [] // Reset pages on error
+      });
     }
   },
 
@@ -48,14 +51,15 @@ export const usePageStore = create<PageState>((set) => ({
         .single();
 
       if (error) throw error;
-      set({ currentPage: data });
+      set({ currentPage: data, loading: false, error: null });
       return data;
     } catch (error) {
       console.error('Error loading page:', error);
-      set({ error: 'Failed to load page' });
+      set({ 
+        loading: false, 
+        error: 'Failed to load page. Please check your connection and try again.' 
+      });
       return null;
-    } finally {
-      set({ loading: false });
     }
   },
 
@@ -75,13 +79,16 @@ export const usePageStore = create<PageState>((set) => ({
       
       set(state => ({
         currentPage: data,
-        pages: state.pages.map(p => p.id === data.id ? data : p)
+        pages: state.pages.map(p => p.id === data.id ? data : p),
+        loading: false,
+        error: null
       }));
     } catch (error) {
       console.error('Error saving page:', error);
-      set({ error: 'Failed to save page' });
-    } finally {
-      set({ loading: false });
+      set({ 
+        loading: false, 
+        error: 'Failed to save page. Please check your connection and try again.' 
+      });
     }
   },
 
@@ -94,7 +101,9 @@ export const usePageStore = create<PageState>((set) => ({
         slug,
         blocks: [],
         metadata: {},
-        is_draft: true
+        is_draft: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       };
 
       const { data, error } = await supabase
@@ -107,16 +116,47 @@ export const usePageStore = create<PageState>((set) => ({
       if (!data) throw new Error('No data returned from insert');
 
       set(state => ({
-        pages: [data, ...state.pages]
+        pages: [data, ...state.pages],
+        loading: false,
+        error: null
       }));
 
       return data;
     } catch (error) {
       console.error('Error creating page:', error);
-      set({ error: 'Failed to create page' });
+      set({ 
+        loading: false, 
+        error: 'Failed to create page. Please check your connection and try again.' 
+      });
       throw error;
-    } finally {
-      set({ loading: false });
+    }
+  },
+
+  renamePage: async (id, title) => {
+    set({ loading: true, error: null });
+    try {
+      const slug = title.toLowerCase().replace(/\s+/g, '-');
+      const { error } = await supabase
+        .from('pages')
+        .update({ title, slug, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      set(state => ({
+        pages: state.pages.map(p => p.id === id ? { ...p, title, slug } : p),
+        currentPage: state.currentPage?.id === id 
+          ? { ...state.currentPage, title, slug }
+          : state.currentPage,
+        loading: false,
+        error: null
+      }));
+    } catch (error) {
+      console.error('Error renaming page:', error);
+      set({ 
+        loading: false, 
+        error: 'Failed to rename page. Please check your connection and try again.' 
+      });
     }
   },
 
@@ -132,13 +172,16 @@ export const usePageStore = create<PageState>((set) => ({
 
       set(state => ({
         pages: state.pages.filter(p => p.id !== id),
-        currentPage: state.currentPage?.id === id ? null : state.currentPage
+        currentPage: state.currentPage?.id === id ? null : state.currentPage,
+        loading: false,
+        error: null
       }));
     } catch (error) {
       console.error('Error deleting page:', error);
-      set({ error: 'Failed to delete page' });
-    } finally {
-      set({ loading: false });
+      set({ 
+        loading: false, 
+        error: 'Failed to delete page. Please check your connection and try again.' 
+      });
     }
   }
 }));

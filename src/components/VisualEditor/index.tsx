@@ -64,12 +64,14 @@ const VisualEditor: React.FC = () => {
         <div className="flex-1 flex flex-col">
           <TabBar />
           <Canvas>
-            <Navigation onLoginClick={() => {}} />
-            <Hero />
-            <Services />
-            <CustomDesign />
-            <Contact />
-            <Footer />
+            <div className="website-content">
+              <Navigation onLoginClick={() => {}} />
+              <Hero />
+              <Services />
+              <CustomDesign />
+              <Contact />
+              <Footer />
+            </div>
           </Canvas>
         </div>
 

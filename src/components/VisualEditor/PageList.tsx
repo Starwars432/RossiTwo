@@ -1,130 +1,52 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, FileText, ChevronDown, ChevronRight, Trash2, Edit2 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import { Page } from '../../lib/types/editor';
+import { usePageStore } from '../../lib/stores/pageStore';
+import { useTabStore } from '../../lib/stores/tabStore';
 
-interface PageListProps {
-  onPageSelect: (id: string) => Promise<Page | null>;
-}
-
-const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
-  const [pages, setPages] = useState<Page[]>([]);
+const PageList: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [editingPage, setEditingPage] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const { pages, loading, error, loadPages, createPage, renamePage, deletePage } = usePageStore();
+  const { addTab, activeTab } = useTabStore();
 
   useEffect(() => {
-    fetchPages();
+    loadPages();
   }, []);
 
-  const fetchPages = async () => {
-    try {
-      setError(null);
-      const { data, error } = await supabase
-        .from('pages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPages(data || []);
-    } catch (error) {
-      console.error('Error fetching pages:', error);
-      setError('Failed to load pages');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createNewPage = async () => {
+  const handleCreatePage = async () => {
     const title = window.prompt('Enter page title:');
     if (!title) return;
 
-    const slug = title.toLowerCase().replace(/\s+/g, '-');
-
     try {
-      setError(null);
-      const { data, error } = await supabase
-        .from('pages')
-        .insert({
-          title,
-          slug,
-          blocks: [],
-          metadata: {},
-          is_draft: true,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setPages([data, ...pages]);
-        const loadedPage = await onPageSelect(data.id);
-        if (!loadedPage) {
-          throw new Error('Failed to load new page');
-        }
-      }
+      const newPage = await createPage(title);
+      addTab(newPage.id, newPage);
     } catch (error) {
       console.error('Error creating page:', error);
-      setError('Failed to create page');
     }
   };
 
-  const startEditing = (page: Page) => {
-    setEditingPage(page.id);
-    setEditingTitle(page.title);
-  };
-
-  const handleRename = async (page: Page) => {
-    if (!editingTitle.trim() || editingTitle === page.title) {
+  const handleRename = async (id: string) => {
+    if (!editingTitle.trim()) {
       setEditingPage(null);
       return;
     }
 
     try {
-      setError(null);
-      const newSlug = editingTitle.toLowerCase().replace(/\s+/g, '-');
-      
-      const { data, error } = await supabase
-        .from('pages')
-        .update({
-          title: editingTitle,
-          slug: newSlug,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', page.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setPages(pages.map(p => p.id === page.id ? data : p));
-      }
+      await renamePage(id, editingTitle);
+      setEditingPage(null);
     } catch (error) {
       console.error('Error renaming page:', error);
-      setError('Failed to rename page');
-    } finally {
-      setEditingPage(null);
     }
   };
 
-  const deletePage = async (pageId: string) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this page?')) return;
-
     try {
-      setError(null);
-      const { error } = await supabase
-        .from('pages')
-        .delete()
-        .eq('id', pageId);
-
-      if (error) throw error;
-      setPages(pages.filter(p => p.id !== pageId));
+      await deletePage(id);
     } catch (error) {
       console.error('Error deleting page:', error);
-      setError('Failed to delete page');
     }
   };
 
@@ -134,7 +56,6 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center text-blue-400 hover:text-blue-300"
-          aria-label={isExpanded ? 'Collapse pages' : 'Expand pages'}
         >
           {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
           <FileText className="w-4 h-4 ml-2 mr-2" />
@@ -143,9 +64,8 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={createNewPage}
+          onClick={handleCreatePage}
           className="p-1 text-blue-400 hover:text-blue-300"
-          aria-label="Create new page"
         >
           <Plus className="w-4 h-4" />
         </motion.button>
@@ -167,21 +87,23 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
             pages.map(page => (
               <div
                 key={page.id}
-                className="group relative flex items-center justify-between px-3 py-2 rounded hover:bg-blue-500/10"
+                className={`group relative flex items-center justify-between px-3 py-2 rounded hover:bg-blue-500/10 ${
+                  activeTab === page.id ? 'bg-blue-500/20' : ''
+                }`}
               >
                 {editingPage === page.id ? (
                   <input
                     type="text"
                     value={editingTitle}
                     onChange={(e) => setEditingTitle(e.target.value)}
-                    onBlur={() => handleRename(page)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleRename(page)}
+                    onBlur={() => handleRename(page.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRename(page.id)}
                     className="flex-1 bg-transparent border-none focus:outline-none text-sm"
                     autoFocus
                   />
                 ) : (
                   <button
-                    onClick={() => onPageSelect(page.id)}
+                    onClick={() => addTab(page.id, page)}
                     className="flex-1 text-left text-sm truncate"
                   >
                     {page.title}
@@ -196,18 +118,19 @@ const PageList: React.FC<PageListProps> = ({ onPageSelect }) => {
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => startEditing(page)}
+                    onClick={() => {
+                      setEditingPage(page.id);
+                      setEditingTitle(page.title);
+                    }}
                     className="p-1 text-blue-400 hover:text-blue-300"
-                    aria-label={`Rename ${page.title}`}
                   >
                     <Edit2 className="w-3 h-3" />
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => deletePage(page.id)}
+                    onClick={() => handleDelete(page.id)}
                     className="p-1 text-red-400 hover:text-red-300"
-                    aria-label={`Delete ${page.title}`}
                   >
                     <Trash2 className="w-3 h-3" />
                   </motion.button>

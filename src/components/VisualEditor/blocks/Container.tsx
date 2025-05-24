@@ -1,55 +1,23 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Block, Breakpoint } from '../../../lib/types/editor';
-import BlockRenderer from '../BlockRenderer';
+import React from 'react';
+import { Block } from '../../../lib/types/editor';
+import DraggableBlock from './DraggableBlock';
 
 interface ContainerBlockProps {
   block: Block;
-  onUpdate: (updatedBlock: Block) => void;
-  isEditing: boolean;
-  breakpoint: Breakpoint;
+  onUpdate: (updates: Partial<Block>) => void;
 }
 
-const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleChildUpdate = (index: number, updatedChild: Block) => {
-    const updatedChildren = [...(block.children || [])];
-    updatedChildren[index] = updatedChild;
-    onUpdate({
-      ...block,
-      children: updatedChildren
-    });
-  };
-
-  const containerStyles: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    ...(block.styles as React.CSSProperties)
-  };
-
+const ContainerBlock: React.FC<ContainerBlockProps> = ({ block, onUpdate }) => {
   return (
-    <motion.div
-      className="relative group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={containerStyles}
-    >
-      {isEditing && isHovered && (
-        <div className="absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-          Container Block
-        </div>
-      )}
-      {block.children?.map((child, index) => (
-        <BlockRenderer
-          key={child.id}
-          block={child}
-          onUpdate={(updatedBlock) => handleChildUpdate(index, updatedBlock)}
-          isEditing={isEditing}
-          breakpoint={breakpoint}
-        />
-      ))}
-    </motion.div>
+    <DraggableBlock block={block} onUpdate={onUpdate}>
+      <div className="w-full h-full min-h-[100px] bg-blue-500/10 border-2 border-dashed border-blue-400/30 rounded-lg p-4">
+        {block.children?.map(child => (
+          <div key={child.id} className="mb-4 last:mb-0">
+            {/* Child blocks will be rendered here */}
+          </div>
+        ))}
+      </div>
+    </DraggableBlock>
   );
 };
 

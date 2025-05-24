@@ -27,68 +27,77 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading), serif;
 }
 
-.service-card {
-  transition: all 0.3s ease;
+/* Grid system */
+.editor-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+  padding: 1rem;
 }
 
-.service-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(var(--color-primary), 0.2);
-}
-
-.drag-drop-zone {
-  border: 2px dashed var(--color-primary);
-  border-radius: 1rem;
-  transition: all 0.3s ease;
-}
-
-.drag-drop-zone.dragging {
-  background: rgba(var(--color-primary), 0.1);
-  border-color: var(--color-secondary);
-}
-
-.editable-content [data-editable="true"] {
-  cursor: text;
-  outline: 2px solid transparent;
-  transition: outline-color 0.2s;
-  min-height: 1em;
-}
-
-.editable-content [data-editable="true"]:hover {
-  outline-color: rgba(var(--color-primary), 0.3);
-}
-
-.editable-content [data-editable="true"]:focus {
-  outline-color: rgba(var(--color-primary), 0.5);
-  background: rgba(var(--color-primary), 0.1);
-  padding: 2px;
-  border-radius: 4px;
-}
-
-.editable-content img {
-  max-width: 100%;
-  height: auto;
-  cursor: pointer;
-  transition: outline-color 0.2s;
-}
-
-.editable-content img:hover {
-  outline: 2px solid rgba(var(--color-primary), 0.3);
-}
-
-.ProseMirror {
-  min-height: 100px;
-  padding: var(--spacing-md);
-}
-
-.ProseMirror:focus {
-  outline: none;
-}
-
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: rgba(var(--color-text), 0.5);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
+.editor-grid-overlay {
+  position: fixed;
+  inset: 0;
   pointer-events: none;
+  z-index: 100;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(96, 165, 250, 0.05) 0px,
+    rgba(96, 165, 250, 0.05) calc(100% / 12),
+    transparent calc(100% / 12),
+    transparent calc(200% / 12)
+  );
+}
+
+/* Block styles */
+.block {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.block:hover {
+  outline: 2px solid rgba(96, 165, 250, 0.3);
+}
+
+.block.selected {
+  outline: 2px solid rgba(96, 165, 250, 0.5);
+}
+
+.block-handle {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.block:hover .block-handle {
+  opacity: 1;
+}
+
+/* Context menu */
+.context-menu {
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  min-width: 160px;
+}
+
+.context-menu-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-radius: 0.25rem;
+}
+
+.context-menu-item:hover {
+  background: rgba(96, 165, 250, 0.2);
+}
+
+/* Keyboard shortcuts */
+kbd {
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  color: #60A5FA;
 }

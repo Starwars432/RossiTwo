@@ -1,60 +1,57 @@
 import React from 'react';
-import { Block, Breakpoint } from '../../lib/types/editor';
+import { Block } from '../../lib/types/editor';
 import TextBlock from './blocks/Text';
 import ImageBlock from './blocks/Image';
 import ContainerBlock from './blocks/Container';
 
 interface BlockRendererProps {
   block: Block;
-  onUpdate: (updatedBlock: Block) => void;
-  isEditing: boolean;
-  breakpoint: Breakpoint;
+  onUpdate: (block: Block) => void;
+  isEditing?: boolean;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditing, breakpoint }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditing = true }) => {
   const components = {
     text: TextBlock,
     image: ImageBlock,
     container: ContainerBlock,
+    section: ContainerBlock,
     row: ContainerBlock,
     column: ContainerBlock,
-    section: ContainerBlock,
-    component: ContainerBlock
   } as const;
 
   const Component = components[block.type];
+
   if (!Component) {
     console.warn(`No component found for block type: ${block.type}`);
     return null;
   }
 
-  // Merge responsive styles based on breakpoint
-  const getResponsiveStyles = () => {
-    const baseStyles = { ...block.styles };
-    if (!baseStyles) return {};
-    
-    const { mobile, tablet, ...rest } = baseStyles;
-    
-    if (breakpoint === 'mobile' && mobile) {
-      return { ...rest, ...mobile };
-    }
-    if (breakpoint === 'tablet' && tablet) {
-      return { ...rest, ...tablet };
-    }
-    return rest;
+  const handleUpdate = (updates: Partial<Block>) => {
+    onUpdate({
+      ...block,
+      ...updates,
+    });
   };
 
-  const blockWithResponsiveStyles = {
-    ...block,
-    styles: getResponsiveStyles()
+  const handleChildUpdate = (childBlock: Block) => {
+    if (!block.children) return;
+    
+    const updatedChildren = block.children.map(child => 
+      child.id === childBlock.id ? childBlock : child
+    );
+
+    handleUpdate({ children: updatedChildren });
   };
 
-  return <Component 
-    block={blockWithResponsiveStyles} 
-    onUpdate={onUpdate} 
-    isEditing={isEditing} 
-    breakpoint={breakpoint} 
-  />;
+  return (
+    <Component
+      block={block}
+      onUpdate={handleUpdate}
+      onChildUpdate={handleChildUpdate}
+      isEditing={isEditing}
+    />
+  );
 };
 
 export default BlockRenderer;
