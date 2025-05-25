@@ -7,10 +7,10 @@ import { useCart } from '../contexts/CartContext';
 import ProfileDropdown from './ProfileDropdown';
 
 interface NavigationProps {
-  onLoginClick: () => void;
+  onLoginClick?: () => void;
 }
 
-const Navigation: React.FC<NavigationProps> = ({ onLoginClick }) => {
+const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user } = useAuth();

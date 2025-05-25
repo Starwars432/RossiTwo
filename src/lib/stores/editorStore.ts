@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { produce } from 'immer';
 import { Block } from '../types/editor';
+import { createBlock } from '../utils/blockId';
 
 interface EditorState {
   blocks: Block[];
   selectedBlockId: string | null;
   history: Block[][];
   currentIndex: number;
-  addBlock: (block: Omit<Block, 'id' | 'order'>) => void;
+  addBlock: (blockData: Omit<Block, 'id' | 'order' | 'metadata'>) => void;
   updateBlock: (id: string, updates: Partial<Block>) => void;
   deleteBlock: (id: string) => void;
-  moveBlock: (id: string, newParentId?: string, newOrder?: number) => void;
+  moveBlock: (oldIndex: number, newIndex: number) => void;
   selectBlock: (id: string | null) => void;
   undo: () => void;
   redo: () => void;
@@ -26,10 +27,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   addBlock: (blockData) => {
     set(produce(state => {
+      const { id, metadata } = createBlock(blockData.type, state.blocks.length + 1);
       const newBlock: Block = {
-        id: crypto.randomUUID(),
-        order: state.blocks.length,
         ...blockData,
+        id,
+        metadata,
+        order: state.blocks.length
       };
       state.blocks.push(newBlock);
       
@@ -68,26 +71,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }));
   },
 
-  moveBlock: (id, newParentId, newOrder) => {
+  moveBlock: (oldIndex: number, newIndex: number) => {
     set(produce(state => {
-      const block = state.blocks.find(b => b.id === id);
-      if (!block) return;
-
-      if (newParentId) {
-        block.parentId = newParentId;
-      }
+      const block = state.blocks[oldIndex];
+      state.blocks.splice(oldIndex, 1);
+      state.blocks.splice(newIndex, 0, block);
       
-      if (typeof newOrder === 'number') {
-        block.order = newOrder;
-        // Reorder other blocks
-        state.blocks
-          .filter(b => b.parentId === block.parentId && b.id !== id)
-          .forEach((b, i) => {
-            if (b.order >= newOrder) {
-              b.order = newOrder + i + 1;
-            }
-          });
-      }
+      // Update order property
+      state.blocks.forEach((block, index) => {
+        block.order = index;
+      });
       
       // Add to history
       state.history = state.history.slice(0, state.currentIndex + 1);

@@ -8,6 +8,7 @@ import BlockRenderer from './BlockRenderer';
 interface DraggableBlockProps {
   block: Block;
   onUpdate: (updatedBlock: Block) => void;
+  onChildUpdate?: (child: Block) => void;
   isEditing: boolean;
   isDropTarget?: boolean;
   breakpoint: Breakpoint;
@@ -16,6 +17,7 @@ interface DraggableBlockProps {
 const DraggableBlock: React.FC<DraggableBlockProps> = ({
   block,
   onUpdate,
+  onChildUpdate,
   isEditing,
   isDropTarget,
   breakpoint
@@ -65,6 +67,7 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
       <BlockRenderer
         block={block}
         onUpdate={onUpdate}
+        onChildUpdate={onChildUpdate}
         isEditing={isEditing}
         breakpoint={breakpoint}
       />

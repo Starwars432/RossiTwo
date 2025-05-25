@@ -1,16 +1,24 @@
 import React from 'react';
-import { Block } from '../../lib/types/editor';
-import TextBlock from './blocks/Text';
+import { Block, Breakpoint } from '../../lib/types/editor';
+import TextBlock from './blocks/TextBlock';
 import ImageBlock from './blocks/Image';
 import ContainerBlock from './blocks/Container';
 
 interface BlockRendererProps {
   block: Block;
   onUpdate: (block: Block) => void;
+  onChildUpdate?: (child: Block) => void;
   isEditing?: boolean;
+  breakpoint?: Breakpoint;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditing = true }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ 
+  block, 
+  onUpdate, 
+  onChildUpdate,
+  isEditing = true,
+  breakpoint = 'desktop'
+}) => {
   const components = {
     text: TextBlock,
     image: ImageBlock,
@@ -27,29 +35,13 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, onUpdate, isEditin
     return null;
   }
 
-  const handleUpdate = (updates: Partial<Block>) => {
-    onUpdate({
-      ...block,
-      ...updates,
-    });
-  };
-
-  const handleChildUpdate = (childBlock: Block) => {
-    if (!block.children) return;
-    
-    const updatedChildren = block.children.map(child => 
-      child.id === childBlock.id ? childBlock : child
-    );
-
-    handleUpdate({ children: updatedChildren });
-  };
-
   return (
     <Component
       block={block}
-      onUpdate={handleUpdate}
-      onChildUpdate={handleChildUpdate}
+      onUpdate={onUpdate}
+      onChildUpdate={onChildUpdate}
       isEditing={isEditing}
+      breakpoint={breakpoint}
     />
   );
 };

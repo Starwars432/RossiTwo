@@ -1,0 +1,83 @@
+import Quill from 'quill';
+import 'quill/dist/quill.snow.css';
+
+export const quillBlock = (editor: any) => {
+  const blockManager = editor.BlockManager;
+
+  blockManager.add('quill', {
+    label: 'Text Editor',
+    category: 'Text Editors',
+    content: {
+      type: 'div',
+      classes: ['quill-container'],
+      style: { 
+        padding: '20px',
+        minHeight: '200px',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        border: '1px solid rgba(96, 165, 250, 0.3)',
+        borderRadius: '4px'
+      }
+    },
+    activate: true,
+    select: true
+  });
+
+  // Initialize Quill when a block is added
+  editor.on('component:add', (component: any) => {
+    if (component.getClasses().includes('quill-container')) {
+      const editorContainer = component.getEl();
+      
+      // Create toolbar container
+      const toolbarContainer = document.createElement('div');
+      editorContainer.appendChild(toolbarContainer);
+      
+      // Create editor container
+      const contentContainer = document.createElement('div');
+      editorContainer.appendChild(contentContainer);
+
+      const quillInstance = new Quill(contentContainer, {
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            ['clean']
+          ]
+        },
+        theme: 'snow',
+        placeholder: 'Start writing here...'
+      });
+
+      // Get saved content if it exists
+      const savedContent = component.get('quill-content');
+      if (savedContent) {
+        quillInstance.root.innerHTML = savedContent;
+      }
+
+      // Handle content changes
+      quillInstance.on('text-change', () => {
+        const content = quillInstance.root.innerHTML;
+        component.set('quill-content', content);
+      });
+
+      component.set('quill-instance', quillInstance);
+    }
+  });
+
+  // Clean up Quill instance when component is removed
+  editor.on('component:remove', (component: any) => {
+    const quillInstance = component.get('quill-instance');
+    if (quillInstance) {
+      component.set('quill-instance', null);
+    }
+  });
+};

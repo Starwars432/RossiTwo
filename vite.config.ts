@@ -25,7 +25,25 @@ export default defineConfig(({ command, mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: true,
-      manifest: true
+      manifest: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'editor-vendor': [
+              '@editorjs/editorjs',
+              'quill',
+              '@tiptap/react',
+              'grapesjs'
+            ],
+            'ui-vendor': [
+              'framer-motion',
+              '@headlessui/react',
+              'lucide-react'
+            ],
+          },
+        },
+      },
     },
     resolve: {
       alias: {

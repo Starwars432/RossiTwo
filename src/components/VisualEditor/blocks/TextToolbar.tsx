@@ -1,8 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Type } from 'lucide-react';
-import { Block } from '../../../lib/types/editor';
-import { useFloating, offset, flip, shift } from '@floating-ui/react';
+import { Block, BlockStyle } from '../../../lib/types/editor';
 
 interface TextToolbarProps {
   block: Block;
@@ -25,7 +24,7 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
       const fontSize = `${e.target.value}px`;
       onUpdate({
         style: {
-          ...block.style,
+          ...(block.style as BlockStyle),
           fontSize,
         },
       });
@@ -35,7 +34,7 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
       const color = e.target.value;
       onUpdate({
         style: {
-          ...block.style,
+          ...(block.style as BlockStyle),
           color,
         },
       });
@@ -66,7 +65,7 @@ const TextToolbar = React.forwardRef<HTMLDivElement, TextToolbarProps>(
             type="number"
             min={8}
             max={200}
-            value={parseInt(block.style?.fontSize as string || '16')}
+            value={parseInt((block.style?.fontSize as string) || '16')}
             onChange={handleFontSizeChange}
             className="w-16 bg-black/50 border border-blue-400/30 rounded px-2 py-1 text-sm text-blue-400"
             title="Font size"
