@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePageStore } from '../../lib/stores/pageStore';
 import { useTabStore } from '../../lib/stores/tabStore';
-import grapesjs from 'grapesjs';
+import grapesjs, { Editor } from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import 'grapesjs-preset-webpage';
 import ReactDOMServer from 'react-dom/server';
@@ -21,7 +21,7 @@ import Contact from '../Contact';
 import Footer from '../Footer';
 
 interface EditorInstance {
-  editor: grapesjs.Editor | null;
+  editor: Editor | null;
 }
 
 const VisualEditor: React.FC = () => {
@@ -47,9 +47,9 @@ const VisualEditor: React.FC = () => {
       // Get block data with error handling
       const getBlockData = (selector: string, dataKey: string) => {
         try {
-          return editorRef.current.editor?.getComponents()
-            .filter((comp: any) => comp.getClasses().includes(selector))
-            .map((comp: any) => ({
+          return editorRef.current.editor?.DomComponents.getComponents()
+            .filter((comp) => comp.getClasses().includes(selector))
+            .map((comp) => ({
               id: comp.getId(),
               data: comp.get(dataKey)
             })) || [];
@@ -97,7 +97,6 @@ const VisualEditor: React.FC = () => {
         container: containerRef.current,
         height: '100vh',
         width: 'auto',
-        fromElement: false,
         storageManager: false,
         plugins: ['gjs-preset-webpage'],
         pluginsOpts: {
@@ -109,24 +108,8 @@ const VisualEditor: React.FC = () => {
             'https://cdn.tailwindcss.com'
           ]
         },
-        styleManager: {
-          sectors: [
-            {
-              name: 'Dimension',
-              open: false,
-              properties: ['width', 'height', 'min-width', 'min-height', 'margin', 'padding']
-            },
-            {
-              name: 'Typography',
-              open: false,
-              properties: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'color', 'line-height', 'text-align']
-            },
-            {
-              name: 'Decorations',
-              open: false,
-              properties: ['background-color', 'border-radius', 'border', 'box-shadow', 'opacity']
-            }
-          ]
+        blockManager: {
+          blocks: []
         },
         panels: {
           defaults: [

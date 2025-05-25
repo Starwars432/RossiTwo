@@ -1,77 +1,157 @@
-import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { Rnd } from 'react-rnd';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Block, Breakpoint } from '../../lib/types/editor';
-import BlockRenderer from './BlockRenderer';
+import { GripVertical, Copy, Trash2 } from 'lucide-react';
 
 interface DraggableBlockProps {
   block: Block;
-  onUpdate: (updatedBlock: Block) => void;
+  onUpdate: (updates: Partial<Block>) => void;
   onChildUpdate?: (child: Block) => void;
-  isEditing: boolean;
-  isDropTarget?: boolean;
-  breakpoint: Breakpoint;
+  children: React.ReactNode;
+  isEditing?: boolean;
 }
 
-const DraggableBlock: React.FC<DraggableBlockProps> = ({
-  block,
+const DraggableBlock: React.FC<DraggableBlockProps> = ({ 
+  block, 
   onUpdate,
   onChildUpdate,
-  isEditing,
-  isDropTarget,
-  breakpoint
+  children,
+  isEditing = true
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: block.id });
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    position: 'relative' as const,
-    zIndex: isDragging ? 1 : 'auto'
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "solid 1px rgba(96, 165, 250, 0.3)",
+    background: "rgba(0, 0, 0, 0.5)",
+    borderRadius: "0.5rem",
+    padding: "1rem",
+    ...block.style
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPosition({ x: e.clientX, y: e.clientY });
+    setShowContextMenu(true);
+  };
+
+  const handleClickOutside = () => {
+    setShowContextMenu(false);
+  };
+
+  const handleDuplicate = () => {
+    if (!onChildUpdate) return;
+    
+    const newBlock: Block = {
+      ...block,
+      id: crypto.randomUUID(),
+      metadata: {
+        ...block.metadata,
+        instance: block.metadata.instance + 1,
+        createdAt: new Date().toISOString()
+      }
+    };
+    onChildUpdate(newBlock);
+    setShowContextMenu(false);
+  };
+
+  const handleDelete = () => {
+    onUpdate({ parentId: undefined });
+    setShowContextMenu(false);
   };
 
   return (
-    <motion.div
-      ref={setNodeRef}
-      style={style}
-      className={`group relative ${isDropTarget ? 'ring-2 ring-blue-400 ring-offset-2' : ''}`}
-      {...attributes}
-      whileHover={{ scale: isEditing ? 1.005 : 1 }}
-      transition={{ duration: 0.2 }}
-    >
-      {isEditing && (
+    <>
+      <Rnd
+        style={style}
+        default={{
+          x: 0,
+          y: 0,
+          width: block.style?.width || '100%',
+          height: block.style?.height || 'auto'
+        }}
+        onDragStop={(_e, d) => {
+          onUpdate({
+            style: {
+              ...block.style,
+              transform: `translate(${d.x}px, ${d.y}px)`
+            }
+          });
+        }}
+        onResizeStop={(_e, _direction, ref, _delta, position) => {
+          onUpdate({
+            style: {
+              ...block.style,
+              width: ref.style.width,
+              height: ref.style.height,
+              transform: `translate(${position.x}px, ${position.y}px)`
+            }
+          });
+        }}
+        bounds="parent"
+        dragHandleClassName="drag-handle"
+      >
         <motion.div
-          {...listeners}
-          className="absolute -left-6 top-1/2 -translate-y-1/2 p-1 cursor-move opacity-0 group-hover:opacity-100"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
+          className="relative group w-full h-full"
+          whileHover={{ scale: 1.005 }}
           transition={{ duration: 0.2 }}
+          onContextMenu={handleContextMenu}
         >
-          <motion.div 
-            className="w-2 h-6 rounded-full bg-blue-400/30"
-            whileHover={{ backgroundColor: 'rgba(96, 165, 250, 0.5)' }}
-            transition={{ duration: 0.2 }}
-          />
+          {isEditing && (
+            <motion.div 
+              className="drag-handle absolute -top-6 left-0 p-2 cursor-move opacity-0 group-hover:opacity-100 bg-black/90 border border-blue-400/30 rounded flex items-center space-x-2"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <GripVertical className="w-4 h-4 text-blue-400" />
+              <span className="text-xs text-blue-400">{block.type}</span>
+            </motion.div>
+          )}
+          {children}
         </motion.div>
-      )}
-      <BlockRenderer
-        block={block}
-        onUpdate={onUpdate}
-        onChildUpdate={onChildUpdate}
-        isEditing={isEditing}
-        breakpoint={breakpoint}
-      />
-    </motion.div>
+      </Rnd>
+
+      <AnimatePresence>
+        {showContextMenu && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={handleClickOutside}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed z-50 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1"
+              style={{
+                left: contextMenuPosition.x,
+                top: contextMenuPosition.y
+              }}
+            >
+              <button
+                onClick={handleDuplicate}
+                className="w-full px-4 py-2 text-sm text-left hover:bg-blue-500/20 flex items-center space-x-2"
+              >
+                <Copy className="w-4 h-4" />
+                <span>Duplicate</span>
+              </button>
+              <button
+                onClick={handleDelete}
+                className="w-full px-4 py-2 text-sm text-left hover:bg-blue-500/20 flex items-center space-x-2 text-red-400"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete</span>
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

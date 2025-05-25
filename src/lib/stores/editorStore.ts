@@ -27,13 +27,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   addBlock: (blockData) => {
     set(produce(state => {
-      const { id, metadata } = createBlock(blockData.type, state.blocks.length + 1);
-      const newBlock: Block = {
-        ...blockData,
-        id,
-        metadata,
-        order: state.blocks.length
-      };
+      const newBlock = createBlock(blockData.type, blockData);
       state.blocks.push(newBlock);
       
       // Add to history

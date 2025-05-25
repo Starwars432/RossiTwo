@@ -9,6 +9,12 @@ export interface BlockStyle extends CSSProperties {
   desktop?: Partial<CSSProperties>;
 }
 
+export interface BlockMetadata {
+  type: BlockType;
+  instance: number;
+  createdAt: string;
+}
+
 export interface Block {
   id: string;
   type: BlockType;
@@ -21,11 +27,7 @@ export interface Block {
   order: number;
   className?: string;
   tag?: keyof JSX.IntrinsicElements;
-  metadata: {
-    type: string;
-    instance: number;
-    createdAt: string;
-  };
+  metadata: BlockMetadata;
 }
 
 export interface Page {

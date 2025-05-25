@@ -32,7 +32,8 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
     background: "rgba(0, 0, 0, 0.5)",
     borderRadius: "0.5rem",
     padding: "1rem",
-    ...block.style
+    ...block.style,
+    ...(block.style?.[breakpoint] || {})
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -46,6 +47,8 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
   };
 
   const handleDuplicate = () => {
+    if (!onChildUpdate) return;
+    
     const newBlock: Block = {
       ...block,
       id: crypto.randomUUID(),
@@ -55,18 +58,12 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
         createdAt: new Date().toISOString()
       }
     };
-    onChildUpdate?.(newBlock);
+    onChildUpdate(newBlock);
     setShowContextMenu(false);
   };
 
   const handleDelete = () => {
-    const parentBlock = document.querySelector(`[data-block-id="${block.parentId}"]`);
-    if (parentBlock) {
-      const parentComponent = parentBlock.getAttribute('data-component-id');
-      if (parentComponent) {
-        onUpdate({ parentId: undefined });
-      }
-    }
+    onUpdate({ parentId: undefined });
     setShowContextMenu(false);
   };
 
@@ -80,7 +77,7 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
           width: block.style?.width || '100%',
           height: block.style?.height || 'auto'
         }}
-        onDragStop={(e, d) => {
+        onDragStop={(_e, d) => {
           onUpdate({
             style: {
               ...block.style,
@@ -88,7 +85,7 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
             }
           });
         }}
-        onResizeStop={(e, direction, ref, delta, position) => {
+        onResizeStop={(_e, _direction, ref, _delta, position) => {
           onUpdate({
             style: {
               ...block.style,

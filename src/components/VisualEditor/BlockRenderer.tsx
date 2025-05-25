@@ -14,7 +14,7 @@ interface BlockRendererProps {
 
 const BlockRenderer: React.FC<BlockRendererProps> = ({ 
   block, 
-  onUpdate, 
+  onUpdate,
   onChildUpdate,
   isEditing = true,
   breakpoint = 'desktop'
