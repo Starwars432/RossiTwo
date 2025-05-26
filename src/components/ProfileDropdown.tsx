@@ -15,21 +15,24 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClose }) =>
   const [error, setError] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
-  const handleSignOut = async () => {
+  const handleSignOut = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     try {
       setIsSigningOut(true);
       setError(null);
       await signOut();
-      onClose();
-      // Show toast notification
+      
+      // Show success toast
       const toast = document.createElement('div');
       toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-[9999]';
       toast.textContent = 'Successfully signed out';
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
       
-      // Redirect to home page
-      navigate('/');
+      onClose();
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
       setError(error instanceof Error ? error.message : 'Failed to sign out');
@@ -38,8 +41,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClose }) =>
     }
   };
 
-  const handleNavigation = (path: string) => {
-    setError(null);
+  const handleNavigation = (path: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     navigate(path);
     onClose();
   };
@@ -48,19 +52,16 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClose }) =>
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[998]"
+          <div 
+            className="fixed inset-0 z-[998]" 
             onClick={onClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
             className="fixed right-4 top-16 w-64 bg-black/90 border border-blue-400/30 rounded-lg shadow-lg py-1 z-[999]"
-            style={{ pointerEvents: 'auto' }}
           >
             <div className="px-4 py-2 border-b border-blue-400/30">
               <div className="flex items-center space-x-2">
@@ -70,24 +71,26 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClose }) =>
             </div>
 
             {error && (
-              <div className="px-4 py-2 text-sm text-red-400 bg-red-500/10 border-b border-red-500/30">
+              <div className="px-4 py-2 text-sm text-red-400 bg-red-500/10">
                 {error}
               </div>
             )}
 
             <button
-              onClick={() => handleNavigation('/profile')}
+              onClick={handleNavigation('/profile')}
               className="block w-full px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors text-left"
             >
               View Profile
             </button>
+
             <button
-              onClick={() => handleNavigation('/purchases')}
+              onClick={handleNavigation('/purchases')}
               className="block w-full px-4 py-2 text-sm text-white hover:bg-blue-500/20 transition-colors flex items-center space-x-2"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Purchase History</span>
             </button>
+
             <button
               onClick={handleSignOut}
               disabled={isSigningOut}

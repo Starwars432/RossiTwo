@@ -17,9 +17,10 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
   const { items } = useCart();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
   return (
-    <nav className="w-full z-50 px-6 py-4 bg-black/50 backdrop-blur-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-black/50 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center">
           {/* Empty div to maintain spacing */}
@@ -111,26 +112,27 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  onClick={toggleProfile}
                   className="bg-blue-500/20 text-blue-400 p-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
                 >
                   <User className="w-5 h-5" />
                   <span className="max-w-[120px] truncate">{user.email}</span>
                 </motion.button>
-                <ProfileDropdown isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
+                <ProfileDropdown 
+                  isOpen={isProfileOpen} 
+                  onClose={() => setIsProfileOpen(false)} 
+                />
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={onLoginClick}
-                  className="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
-                >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login</span>
-                </motion.button>
-              </div>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onLoginClick}
+                className="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Login</span>
+              </motion.button>
             )}
           </div>
         </div>
@@ -220,16 +222,19 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
               {user ? (
                 <div className="flex-1">
                   <button
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    onClick={toggleProfile}
                     className="w-full bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg hover:bg-blue-500/30 transition-all flex items-center space-x-2"
                   >
                     <User className="w-4 h-4" />
                     <span className="text-sm truncate">{user.email}</span>
                   </button>
-                  <ProfileDropdown isOpen={isProfileOpen} onClose={() => {
-                    setIsProfileOpen(false);
-                    setIsMenuOpen(false);
-                  }} />
+                  <ProfileDropdown 
+                    isOpen={isProfileOpen} 
+                    onClose={() => {
+                      setIsProfileOpen(false);
+                      setIsMenuOpen(false);
+                    }} 
+                  />
                 </div>
               ) : (
                 <motion.button
