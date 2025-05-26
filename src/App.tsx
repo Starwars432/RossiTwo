@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import Services from './components/Services';
@@ -11,60 +12,57 @@ import VisualEditor from './components/VisualEditor';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 
-function App() {
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState<'home' | 'profile' | 'vos'>('home');
-
+const ScrollToTop = () => {
+  const location = useLocation();
+  
   useEffect(() => {
-    window.history.scrollRestoration = 'manual';
     window.scrollTo(0, 0);
+  }, [location]);
 
-    const handleNavigation = () => {
-      const path = window.location.pathname;
-      if (path === '/profile') {
-        setCurrentPage('profile');
-      } else if (path.startsWith('/vos')) {
-        setCurrentPage('vos');
-      } else {
-        setCurrentPage('home');
-      }
-    };
+  return null;
+};
 
-    handleNavigation();
-    window.addEventListener('popstate', handleNavigation);
-    window.addEventListener('load', handleNavigation);
-
-    return () => {
-      window.removeEventListener('popstate', handleNavigation);
-      window.removeEventListener('load', handleNavigation);
-    };
-  }, []);
+const AppContent = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const location = useLocation();
+  const isVisualEditor = location.pathname.startsWith('/vos');
 
   return (
-    <AuthProvider>
-      <CartProvider>
-        <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-          {currentPage !== 'vos' && (
-            <Navigation onLoginClick={() => setIsLoginOpen(true)} />
-          )}
-          
-          {currentPage === 'home' && (
-            <>
-              <Hero />
-              <Services />
-              <CustomDesign />
-              <Contact />
-              <Footer />
-            </>
-          )}
-          
-          {currentPage === 'profile' && <ProfilePage />}
-          {currentPage === 'vos' && <VisualEditor />}
-          
-          <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
-        </div>
-      </CartProvider>
-    </AuthProvider>
+    <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
+      {!isVisualEditor && (
+        <Navigation onLoginClick={() => setIsLoginOpen(true)} />
+      )}
+      
+      <Routes>
+        <Route path="/" element={
+          <>
+            <Hero />
+            <Services />
+            <CustomDesign />
+            <Contact />
+            <Footer />
+          </>
+        } />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/purchases" element={<ProfilePage />} />
+        <Route path="/vos/*" element={<VisualEditor />} />
+      </Routes>
+      
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+    </div>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <CartProvider>
+          <ScrollToTop />
+          <AppContent />
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
