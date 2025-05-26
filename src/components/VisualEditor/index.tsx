@@ -92,8 +92,7 @@ const VisualEditor: React.FC = () => {
     const initEditor = async () => {
       if (!containerRef.current) return;
 
-      // Initialize GrapesJS
-      editorRef.current.editor = grapesjs.init({
+      const editor = grapesjs.init({
         container: containerRef.current,
         height: '100vh',
         width: 'auto',
@@ -110,31 +109,26 @@ const VisualEditor: React.FC = () => {
         },
         blockManager: {
           blocks: []
-        },
-        panels: {
-          defaults: [
-            {
-              id: 'actions',
-              buttons: [
-                {
-                  id: 'save',
-                  className: 'btn-save',
-                  label: 'Save',
-                  command: () => handleSave()
-                }
-              ]
-            }
-          ]
         }
       });
 
+      // Add save button to panel
+      editor.Panels.addButton('options', {
+        id: 'save',
+        className: 'btn-save',
+        label: 'Save',
+        command: () => handleSave()
+      });
+
+      editorRef.current.editor = editor;
+
       // Initialize blocks
-      editorJSBlock(editorRef.current.editor);
-      quillBlock(editorRef.current.editor);
-      tipTapBlock(editorRef.current.editor);
+      editorJSBlock(editor);
+      quillBlock(editor);
+      tipTapBlock(editor);
 
       // Wait for editor to be ready
-      editorRef.current.editor.on('load', () => {
+      editor.on('load', () => {
         setIsEditorReady(true);
       });
     };

@@ -25,8 +25,8 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   history: [],
   currentIndex: -1,
 
-  addBlock: (blockData) => {
-    set(produce(state => {
+  addBlock: (blockData: Omit<Block, 'id' | 'order' | 'metadata'>) => {
+    set(produce((state: EditorState) => {
       const newBlock = createBlock(blockData.type, blockData);
       state.blocks.push(newBlock);
       
@@ -37,9 +37,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }));
   },
 
-  updateBlock: (id, updates) => {
-    set(produce(state => {
-      const blockIndex = state.blocks.findIndex(b => b.id === id);
+  updateBlock: (id: string, updates: Partial<Block>) => {
+    set(produce((state: EditorState) => {
+      const blockIndex = state.blocks.findIndex((block: Block) => block.id === id);
       if (blockIndex !== -1) {
         state.blocks[blockIndex] = { ...state.blocks[blockIndex], ...updates };
         
@@ -51,9 +51,9 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }));
   },
 
-  deleteBlock: (id) => {
-    set(produce(state => {
-      state.blocks = state.blocks.filter(b => b.id !== id);
+  deleteBlock: (id: string) => {
+    set(produce((state: EditorState) => {
+      state.blocks = state.blocks.filter((block: Block) => block.id !== id);
       if (state.selectedBlockId === id) {
         state.selectedBlockId = null;
       }
@@ -66,13 +66,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   moveBlock: (oldIndex: number, newIndex: number) => {
-    set(produce(state => {
+    set(produce((state: EditorState) => {
       const block = state.blocks[oldIndex];
       state.blocks.splice(oldIndex, 1);
       state.blocks.splice(newIndex, 0, block);
       
       // Update order property
-      state.blocks.forEach((block, index) => {
+      state.blocks.forEach((block: Block, index: number) => {
         block.order = index;
       });
       
@@ -83,7 +83,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }));
   },
 
-  selectBlock: (id) => {
+  selectBlock: (id: string | null) => {
     set({ selectedBlockId: id });
   },
 

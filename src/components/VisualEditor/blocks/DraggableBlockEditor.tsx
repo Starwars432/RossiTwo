@@ -94,17 +94,16 @@ const DraggableBox: React.FC<DraggableBoxProps> = ({
       position={item.position}
       size={item.size}
       onDragStart={() => setIsDragging(true)}
-      onDragStop={(e, d) => {
+      onDragStop={(_event, data) => {
         setIsDragging(false);
-        onUpdate({ position: { x: d.x, y: d.y } });
+        onUpdate({ position: { x: data.x, y: data.y } });
       }}
-      onResize={(e, direction, ref, delta, position) => {
+      onResize={(_event, _direction, ref) => {
         onUpdate({
           size: {
             width: parseInt(ref.style.width),
             height: parseInt(ref.style.height)
-          },
-          position
+          }
         });
       }}
       bounds="parent"

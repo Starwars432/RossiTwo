@@ -17,6 +17,8 @@ declare module 'grapesjs' {
 
   interface DomComponents {
     addType(type: string, options: ComponentOptions): void;
+    getComponents(): Component[];
+    getWrapper(): Component;
   }
 
   interface Block {
@@ -45,6 +47,12 @@ declare module 'grapesjs' {
     getEl(): HTMLElement;
     get(property: string): any;
     set(property: string, value: any): void;
+    getId(): string;
+    getType(): string;
+    getAttributes(): Record<string, any>;
+    getStyle(): Record<string, any>;
+    remove(): void;
+    toHTML(): string;
   }
 
   interface ComponentOptions {

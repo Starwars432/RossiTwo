@@ -6,7 +6,7 @@ import ContainerBlock from './blocks/Container';
 
 interface BlockRendererProps {
   block: Block;
-  onUpdate: (block: Block) => void;
+  onUpdate: (updates: Partial<Block>) => void;
   onChildUpdate?: (child: Block) => void;
   isEditing?: boolean;
   breakpoint?: Breakpoint;

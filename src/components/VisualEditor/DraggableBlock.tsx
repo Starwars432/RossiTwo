@@ -10,6 +10,7 @@ interface DraggableBlockProps {
   onChildUpdate?: (child: Block) => void;
   children: React.ReactNode;
   isEditing?: boolean;
+  breakpoint?: Breakpoint;
 }
 
 const DraggableBlock: React.FC<DraggableBlockProps> = ({ 
@@ -17,7 +18,8 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
   onUpdate,
   onChildUpdate,
   children,
-  isEditing = true
+  isEditing = true,
+  breakpoint = 'desktop'
 }) => {
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
@@ -30,7 +32,8 @@ const DraggableBlock: React.FC<DraggableBlockProps> = ({
     background: "rgba(0, 0, 0, 0.5)",
     borderRadius: "0.5rem",
     padding: "1rem",
-    ...block.style
+    ...block.style,
+    ...(block.style?.[breakpoint] || {})
   };
 
   const handleContextMenu = (e: React.MouseEvent) => {

@@ -1,17 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Block } from '../../../lib/types/editor';
+import { Block, Breakpoint } from '../../../lib/types/editor';
 import TextToolbar from './TextToolbar';
 import { useFloating, offset, flip, shift } from '@floating-ui/react';
-import DraggableBlock from './DraggableBlock';
+import DraggableBlock from '../DraggableBlock';
 
 interface TextBlockProps {
   block: Block;
   onUpdate: (updates: Partial<Block>) => void;
+  onChildUpdate?: (child: Block) => void;
+  isEditing?: boolean;
+  breakpoint?: Breakpoint;
 }
 
-const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const TextBlock: React.FC<TextBlockProps> = ({ 
+  block, 
+  onUpdate,
+  onChildUpdate,
+  isEditing = true,
+  breakpoint = 'desktop'
+}) => {
+  const [isEditingState, setIsEditingState] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -21,7 +29,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate }) => {
   });
 
   useEffect(() => {
-    if (isEditing && editorRef.current) {
+    if (isEditingState && editorRef.current) {
       editorRef.current.focus();
       const range = document.createRange();
       const sel = window.getSelection();
@@ -30,7 +38,7 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate }) => {
       sel?.removeAllRanges();
       sel?.addRange(range);
     }
-  }, [isEditing]);
+  }, [isEditingState]);
 
   const handleSelectionChange = () => {
     const selection = window.getSelection();
@@ -45,9 +53,8 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate }) => {
   }, []);
 
   const handleBlur = () => {
-    // Small delay to allow toolbar clicks to register
     setTimeout(() => {
-      setIsEditing(false);
+      setIsEditingState(false);
       setShowToolbar(false);
     }, 200);
   };
@@ -57,16 +64,22 @@ const TextBlock: React.FC<TextBlockProps> = ({ block, onUpdate }) => {
   };
 
   return (
-    <DraggableBlock block={block} onUpdate={onUpdate}>
+    <DraggableBlock 
+      block={block} 
+      onUpdate={onUpdate}
+      onChildUpdate={onChildUpdate}
+      isEditing={isEditing}
+      breakpoint={breakpoint}
+    >
       <div ref={refs.setReference}>
         <div
           ref={editorRef}
-          contentEditable={true}
-          onFocus={() => setIsEditing(true)}
+          contentEditable={isEditing}
+          onFocus={() => setIsEditingState(true)}
           onBlur={handleBlur}
           onInput={handleInput}
           className={`outline-none min-h-[1em] w-full ${
-            isEditing ? 'ring-2 ring-blue-400 rounded px-1' : ''
+            isEditingState ? 'ring-2 ring-blue-400 rounded px-1' : ''
           }`}
           dangerouslySetInnerHTML={{ __html: block.content || '' }}
           style={block.style}
