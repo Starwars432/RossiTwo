@@ -2,6 +2,12 @@ declare module 'grapesjs' {
   export interface Editor {
     BlockManager: BlockManager;
     DomComponents: DomComponents;
+    Canvas: {
+      getDocument(): Document;
+      getWindow(): Window;
+      getBody(): HTMLElement;
+      getFrame(): HTMLIFrameElement;
+    };
     getHtml(): string;
     getCss(): string;
     setComponents(components: string | Component[]): void;
@@ -86,5 +92,3 @@ declare module 'grapesjs' {
 
   export default grapesjs;
 }
-
-declare module 'grapesjs-preset-webpage';

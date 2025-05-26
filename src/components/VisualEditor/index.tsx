@@ -50,7 +50,6 @@ const VisualEditor: React.FC = () => {
       const html = editorRef.current.editor.getHtml();
       const css = editorRef.current.editor.getCss();
 
-      // Get block data with error handling
       const getBlockData = (selector: string, dataKey: string) => {
         try {
           return editorRef.current.editor?.DomComponents.getComponents()
@@ -91,7 +90,6 @@ const VisualEditor: React.FC = () => {
     }
   }, [pageId, savePage]);
 
-  // Initialize editor
   useEffect(() => {
     if (!containerRef.current || editorRef.current.editor) return;
 
@@ -109,6 +107,7 @@ const VisualEditor: React.FC = () => {
         },
         canvas: {
           styles: [
+            '/assets/index-xuDJ4M-J.css',
             'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
             'https://cdn.tailwindcss.com'
           ]
@@ -118,7 +117,6 @@ const VisualEditor: React.FC = () => {
         }
       });
 
-      // Add save button to panel
       const extendedEditor = editor as ExtendedEditor;
       extendedEditor.Panels?.addButton('options', {
         id: 'save',
@@ -129,12 +127,10 @@ const VisualEditor: React.FC = () => {
 
       editorRef.current.editor = editor;
 
-      // Initialize blocks
       editorJSBlock(editor);
       quillBlock(editor);
       tipTapBlock(editor);
 
-      // Wait for editor to be ready
       editor.on('load', () => {
         setIsEditorReady(true);
       });
@@ -153,7 +149,6 @@ const VisualEditor: React.FC = () => {
     };
   }, [handleSave]);
 
-  // Load content after editor is ready
   useEffect(() => {
     if (!isEditorReady || !editorRef.current.editor || !pageId) return;
 
@@ -161,7 +156,6 @@ const VisualEditor: React.FC = () => {
 
     const loadContent = async () => {
       try {
-        // Load initial website content
         const content = ReactDOMServer.renderToString(
           <>
             <Navigation />
@@ -177,7 +171,6 @@ const VisualEditor: React.FC = () => {
 
         editorRef.current.editor.setComponents(content);
 
-        // Load page-specific content if pageId exists
         const page = await loadPage(pageId);
         if (!isSubscribed || !editorRef.current.editor) return;
 
@@ -190,7 +183,6 @@ const VisualEditor: React.FC = () => {
             (editorRef.current.editor as any).setStyle(page.metadata.css as string);
           }
 
-          // Set up auto-save
           if (autoSaveIntervalRef.current) {
             clearInterval(autoSaveIntervalRef.current);
           }

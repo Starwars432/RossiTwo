@@ -45,7 +45,7 @@ const AppContent = () => {
         } />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/purchases" element={<ProfilePage />} />
-        <Route path="/vos/*" element={<VisualEditor />} />
+        <Route path="/vos" element={<VisualEditor />} />
       </Routes>
       
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
