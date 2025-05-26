@@ -14,10 +14,12 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { user } = useAuth();
-  const { items } = useCart();
+  const { items = [] } = useCart();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
+
+  const itemCount = Array.isArray(items) ? items.length : 0;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 bg-black/50 backdrop-blur-sm">
@@ -98,12 +100,12 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="text-blue-400 hover:text-blue-300 relative"
-              aria-label={`Shopping Cart with ${items.length} items`}
+              aria-label={`Shopping Cart with ${itemCount} items`}
             >
               <ShoppingCart className="w-6 h-6" />
-              {items.length > 0 && (
+              {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {items.length}
+                  {itemCount}
                 </span>
               )}
             </motion.button>
@@ -210,12 +212,12 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="text-blue-400 hover:text-blue-300 relative"
-                aria-label={`Shopping Cart with ${items.length} items`}
+                aria-label={`Shopping Cart with ${itemCount} items`}
               >
                 <ShoppingCart className="w-6 h-6" />
-                {items.length > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {items.length}
+                    {itemCount}
                   </span>
                 )}
               </motion.button>

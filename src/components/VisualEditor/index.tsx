@@ -5,20 +5,11 @@ import { useTabStore } from '../../lib/stores/tabStore';
 import grapesjs, { Editor } from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import 'grapesjs-preset-webpage';
-import ReactDOMServer from 'react-dom/server';
 import { editorJSBlock } from './blocks/EditorJSBlock';
 import { quillBlock } from './blocks/QuillBlock';
 import { tipTapBlock } from './blocks/TipTapBlock';
 import ErrorBoundary from './ErrorBoundary';
 import { logger } from '../../lib/utils/logger';
-
-// Import website components
-import Navigation from '../Navigation';
-import Hero from '../Hero';
-import Services from '../Services';
-import CustomDesign from '../CustomDesign';
-import Contact from '../Contact';
-import Footer from '../Footer';
 
 interface EditorInstance {
   editor: Editor | null;
@@ -93,50 +84,44 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current || editorRef.current.editor) return;
 
-    const initEditor = async () => {
-      if (!containerRef.current) return;
+    const editor = grapesjs.init({
+      container: containerRef.current,
+      height: '100vh',
+      width: 'auto',
+      storageManager: false,
+      plugins: ['gjs-preset-webpage'],
+      pluginsOpts: {
+        'gjs-preset-webpage': {}
+      },
+      canvas: {
+        styles: [
+          '/assets/index-xuDJ4M-J.css',
+          'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
+          'https://cdn.tailwindcss.com'
+        ]
+      },
+      blockManager: {
+        blocks: []
+      }
+    });
 
-      const editor = grapesjs.init({
-        container: containerRef.current,
-        height: '100vh',
-        width: 'auto',
-        storageManager: false,
-        plugins: ['gjs-preset-webpage'],
-        pluginsOpts: {
-          'gjs-preset-webpage': {}
-        },
-        canvas: {
-          styles: [
-            '/assets/index-xuDJ4M-J.css',
-            'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
-            'https://cdn.tailwindcss.com'
-          ]
-        },
-        blockManager: {
-          blocks: []
-        }
-      });
+    const extendedEditor = editor as ExtendedEditor;
+    extendedEditor.Panels?.addButton('options', {
+      id: 'save',
+      className: 'btn-save',
+      label: 'Save',
+      command: () => handleSave()
+    });
 
-      const extendedEditor = editor as ExtendedEditor;
-      extendedEditor.Panels?.addButton('options', {
-        id: 'save',
-        className: 'btn-save',
-        label: 'Save',
-        command: () => handleSave()
-      });
+    editorRef.current.editor = editor;
 
-      editorRef.current.editor = editor;
+    editorJSBlock(editor);
+    quillBlock(editor);
+    tipTapBlock(editor);
 
-      editorJSBlock(editor);
-      quillBlock(editor);
-      tipTapBlock(editor);
-
-      editor.on('load', () => {
-        setIsEditorReady(true);
-      });
-    };
-
-    initEditor();
+    editor.on('load', () => {
+      setIsEditorReady(true);
+    });
 
     return () => {
       if (editorRef.current.editor) {
@@ -156,20 +141,20 @@ const VisualEditor: React.FC = () => {
 
     const loadContent = async () => {
       try {
-        const content = ReactDOMServer.renderToString(
-          <>
-            <Navigation />
-            <Hero />
-            <Services />
-            <CustomDesign />
-            <Contact />
-            <Footer />
-          </>
-        );
+        const initialContent = `
+          <div class="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
+            <nav class="w-full z-50 px-6 py-4 bg-black/50 backdrop-blur-sm"></nav>
+            <section id="home" class="relative min-h-screen flex items-center justify-center overflow-hidden"></section>
+            <section id="services" class="relative py-20 px-6"></section>
+            <section id="custom-design" class="relative py-20 px-6 bg-blue-900/10"></section>
+            <section id="contact" class="relative py-20 px-6 bg-black"></section>
+            <footer class="bg-black/50 backdrop-blur-lg py-16 px-6"></footer>
+          </div>
+        `;
 
         if (!isSubscribed || !editorRef.current.editor) return;
 
-        editorRef.current.editor.setComponents(content);
+        editorRef.current.editor.setComponents(initialContent);
 
         const page = await loadPage(pageId);
         if (!isSubscribed || !editorRef.current.editor) return;
@@ -180,7 +165,7 @@ const VisualEditor: React.FC = () => {
             editorRef.current.editor.setComponents(page.content);
           }
           if (page.metadata?.css) {
-            (editorRef.current.editor as any).setStyle(page.metadata.css as string);
+            editorRef.current.editor.setStyle(page.metadata.css as string);
           }
 
           if (autoSaveIntervalRef.current) {

@@ -11,6 +11,7 @@ declare module 'grapesjs' {
     getHtml(): string;
     getCss(): string;
     setComponents(components: string | Component[]): void;
+    setStyle(style: string | object): void;
     on(event: string, callback: Function): void;
     destroy(): void;
   }

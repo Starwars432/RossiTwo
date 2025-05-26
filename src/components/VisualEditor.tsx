@@ -33,36 +33,45 @@ const VisualEditor: React.FC = () => {
 
     editorRef.current = editor;
 
-    // Load initial content
-    const initialContent = ReactDOMServer.renderToString(
-      <>
-        <Navigation onLoginClick={() => {}} />
-        <Hero />
-        <Services />
-        <CustomDesign />
-        <Contact />
-        <Footer />
-      </>
-    );
+    // Wait for the editor to be ready before manipulating the canvas
+    editor.on('load', () => {
+      try {
+        // Load initial content
+        const initialContent = ReactDOMServer.renderToString(
+          <>
+            <Navigation onLoginClick={() => {}} />
+            <Hero />
+            <Services />
+            <CustomDesign />
+            <Contact />
+            <Footer />
+          </>
+        );
 
-    // Get the document from the canvas frame
-    const canvasDoc = editor.Canvas.getDocument();
-    
-    // Add styles to the canvas document head
-    const styleEl = canvasDoc.createElement('style');
-    styleEl.innerHTML = `
-      /* Add any additional styles needed */
-      body {
-        margin: 0;
-        font-family: var(--font-body), serif;
-        background: var(--color-background);
-        color: var(--color-text);
+        // Get the document from the canvas frame after the editor is loaded
+        const canvasDoc = editor.Canvas.getDocument();
+        
+        if (canvasDoc) {
+          // Add styles to the canvas document head
+          const styleEl = canvasDoc.createElement('style');
+          styleEl.innerHTML = `
+            /* Add any additional styles needed */
+            body {
+              margin: 0;
+              font-family: var(--font-body), serif;
+              background: var(--color-background);
+              color: var(--color-text);
+            }
+          `;
+          canvasDoc.head.appendChild(styleEl);
+
+          // Set the initial content
+          editor.setComponents(initialContent);
+        }
+      } catch (error) {
+        console.error('Error initializing visual editor:', error);
       }
-    `;
-    canvasDoc.head.appendChild(styleEl);
-
-    // Set the initial content
-    editor.setComponents(initialContent);
+    });
 
     return () => {
       if (editorRef.current) {
