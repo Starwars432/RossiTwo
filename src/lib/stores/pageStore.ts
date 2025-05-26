@@ -15,7 +15,7 @@ interface PageState {
   deletePage: (id: string) => Promise<void>;
 }
 
-export const usePageStore = create<PageState>((set, get) => ({
+export const usePageStore = create<PageState>((set) => ({
   pages: [],
   currentPage: null,
   loading: false,

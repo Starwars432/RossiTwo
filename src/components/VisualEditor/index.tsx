@@ -24,6 +24,12 @@ interface EditorInstance {
   editor: Editor | null;
 }
 
+interface ExtendedEditor extends Editor {
+  Panels?: {
+    addButton: (panelId: string, options: any) => void;
+  };
+}
+
 const VisualEditor: React.FC = () => {
   const { pageId } = useParams();
   const { loadPage, savePage } = usePageStore();
@@ -113,7 +119,8 @@ const VisualEditor: React.FC = () => {
       });
 
       // Add save button to panel
-      editor.Panels.addButton('options', {
+      const extendedEditor = editor as ExtendedEditor;
+      extendedEditor.Panels?.addButton('options', {
         id: 'save',
         className: 'btn-save',
         label: 'Save',
@@ -180,7 +187,7 @@ const VisualEditor: React.FC = () => {
             editorRef.current.editor.setComponents(page.content);
           }
           if (page.metadata?.css) {
-            editorRef.current.editor.setStyle(page.metadata.css as string);
+            (editorRef.current.editor as any).setStyle(page.metadata.css as string);
           }
 
           // Set up auto-save
