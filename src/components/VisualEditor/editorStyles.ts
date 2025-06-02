@@ -27,37 +27,50 @@ export const initializeEditorStyles = (editor: Editor) => {
 
       body {
         margin: 0;
-        font-family: var(--font-body), serif;
-        background: var(--color-background);
-        color: var(--color-text);
-      }
-
-      h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-heading), serif;
-      }
-
-      .min-h-screen {
+        font-family: var(--font-body), serif !important;
+        background-color: var(--color-background) !important;
+        color: var(--color-text) !important;
         min-height: 100vh;
       }
 
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading), serif !important;
+      }
+
+      /* Force dark theme */
       .bg-black {
-        background-color: #000000;
+        background-color: var(--color-background) !important;
       }
 
       .text-white {
-        color: #FFFFFF;
+        color: var(--color-text) !important;
       }
 
       .text-blue-400 {
-        color: #60A5FA;
+        color: var(--color-secondary) !important;
       }
 
       .font-serif {
-        font-family: var(--font-body), serif;
+        font-family: var(--font-body), serif !important;
       }
 
-      .italic {
-        font-style: italic;
+      /* Button styles */
+      .bg-blue-500 {
+        background-color: var(--color-primary) !important;
+      }
+
+      .hover\\:bg-blue-600:hover {
+        background-color: var(--color-accent) !important;
+      }
+
+      /* Override any light theme styles */
+      * {
+        color-scheme: dark;
+      }
+
+      /* Editor-specific overrides */
+      .gjs-frame-wrapper {
+        background-color: var(--color-background) !important;
       }
     `;
     iframeDoc.head.appendChild(styleEl);
@@ -81,11 +94,22 @@ export const initializeEditorStyles = (editor: Editor) => {
     }
   });
 
+  // Customize editor UI
+  editor.Panels.getPanel('options').get('buttons').each(btn => {
+    btn.set('attributes', { ...btn.get('attributes'), style: 'color: #60A5FA' });
+  });
+
   // Update editor UI colors
-  editor.setStyle(`
+  const style = document.createElement('style');
+  style.innerHTML = `
     .gjs-one-bg { background-color: #1a1a1a !important; }
     .gjs-two-color { color: #60A5FA !important; }
     .gjs-three-bg { background-color: #2563EB !important; }
     .gjs-four-color, .gjs-four-color-h:hover { color: #FFFFFF !important; }
-  `);
+    .gjs-pn-btn.gjs-pn-active { background-color: #2563EB !important; }
+    .gjs-pn-panel { border-color: rgba(96, 165, 250, 0.3) !important; }
+    .gjs-cv-canvas { background-color: #000000 !important; }
+    .gjs-frame-wrapper { padding: 1rem !important; }
+  `;
+  document.head.appendChild(style);
 };

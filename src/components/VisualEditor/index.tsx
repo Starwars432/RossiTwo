@@ -39,10 +39,68 @@ const VisualEditor: React.FC = () => {
       width: 'auto',
       storageManager: false,
       plugins: ['gjs-preset-webpage'],
+      pluginsOpts: {
+        'gjs-preset-webpage': {
+          textCleanCanvas: true,
+          showStylesOnChange: true,
+          exportOpts: false,
+          modalImportContent: false,
+          formsOpts: false,
+          navbarOpts: false,
+          countdownOpts: false,
+        }
+      },
       canvas: {
         styles: [
           'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
           '/tailwind.output.css'
+        ]
+      },
+      deviceManager: {
+        devices: [
+          {
+            name: 'Desktop',
+            width: '',
+          },
+          {
+            name: 'Mobile',
+            width: '375px',
+            widthMedia: '375px',
+          },
+          {
+            name: 'Tablet',
+            width: '768px',
+            widthMedia: '768px',
+          }
+        ]
+      },
+      styleManager: {
+        sectors: [
+          {
+            name: 'General',
+            open: false,
+            buildProps: ['float', 'display', 'position', 'top', 'right', 'left', 'bottom']
+          },
+          {
+            name: 'Dimension',
+            open: false,
+            buildProps: ['width', 'height', 'max-width', 'min-height', 'margin', 'padding']
+          },
+          {
+            name: 'Typography',
+            open: false,
+            buildProps: ['font-family', 'font-size', 'font-weight', 'letter-spacing', 'color', 'line-height', 'text-align', 'text-decoration', 'font-style']
+          },
+          {
+            name: 'Decorations',
+            open: false,
+            buildProps: ['background-color', 'border', 'border-radius', 'box-shadow']
+          },
+          {
+            name: 'Extra',
+            open: false,
+            buildProps: ['opacity', 'transition', 'transform']
+          }
         ]
       }
     });
@@ -51,19 +109,24 @@ const VisualEditor: React.FC = () => {
     initializeEditorStyles(editor);
 
     editor.on('canvas:frame:load', () => {
-      // Set initial content
-      const initialContent = ReactDOMServer.renderToString(
-        <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-          <Navigation onLoginClick={() => {}} />
-          <Hero />
-          <Services />
-          <CustomDesign />
-          <Contact />
-          <Footer />
-        </div>
-      );
+      const iframe = editor.Canvas.getFrameEl();
+      const iframeDoc = iframe?.contentDocument;
+      
+      if (iframeDoc) {
+        // Set initial content
+        const initialContent = ReactDOMServer.renderToString(
+          <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
+            <Navigation onLoginClick={() => {}} />
+            <Hero />
+            <Services />
+            <CustomDesign />
+            <Contact />
+            <Footer />
+          </div>
+        );
 
-      editor.setComponents(initialContent);
+        editor.setComponents(initialContent);
+      }
     });
 
     editorRef.current.editor = editor;
