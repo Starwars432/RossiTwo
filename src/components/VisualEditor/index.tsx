@@ -8,6 +8,7 @@ import 'grapesjs-preset-webpage';
 import { editorJSBlock } from './blocks/EditorJSBlock';
 import { quillBlock } from './blocks/QuillBlock';
 import { tipTapBlock } from './blocks/TipTapBlock';
+import { initializeEditorStyles } from './editorStyles';
 import ErrorBoundary from './ErrorBoundary';
 import { logger } from '../../lib/utils/logger';
 import ReactDOMServer from 'react-dom/server';
@@ -46,56 +47,23 @@ const VisualEditor: React.FC = () => {
       }
     });
 
+    // Initialize editor styles
+    initializeEditorStyles(editor);
+
     editor.on('canvas:frame:load', () => {
-      const iframe = editor.Canvas.getFrameEl();
-      const iframeHead = iframe?.contentDocument?.head;
+      // Set initial content
+      const initialContent = ReactDOMServer.renderToString(
+        <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
+          <Navigation onLoginClick={() => {}} />
+          <Hero />
+          <Services />
+          <CustomDesign />
+          <Contact />
+          <Footer />
+        </div>
+      );
 
-      if (iframeHead) {
-        // Add theme variables
-        const themeStyles = document.createElement('style');
-        themeStyles.innerHTML = `
-          :root {
-            --color-primary: #3B82F6;
-            --color-secondary: #60A5FA;
-            --color-background: #000000;
-            --color-text: #FFFFFF;
-            --color-accent: #2563EB;
-            --font-heading: 'Playfair Display';
-            --font-body: 'Playfair Display';
-            --spacing-xs: 0.5rem;
-            --spacing-sm: 1rem;
-            --spacing-md: 1.5rem;
-            --spacing-lg: 2rem;
-            --spacing-xl: 3rem;
-          }
-
-          body {
-            margin: 0;
-            font-family: var(--font-body), serif;
-            background: var(--color-background);
-            color: var(--color-text);
-          }
-
-          h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-heading), serif;
-          }
-        `;
-        iframeHead.appendChild(themeStyles);
-
-        // Set initial content
-        const initialContent = ReactDOMServer.renderToString(
-          <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-            <Navigation onLoginClick={() => {}} />
-            <Hero />
-            <Services />
-            <CustomDesign />
-            <Contact />
-            <Footer />
-          </div>
-        );
-
-        editor.setComponents(initialContent);
-      }
+      editor.setComponents(initialContent);
     });
 
     editorRef.current.editor = editor;
