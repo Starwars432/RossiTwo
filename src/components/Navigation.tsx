@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-scroll';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useIsomorphicLayoutEffect } from 'framer-motion';
 import { ShoppingCart, LogIn, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
@@ -17,8 +17,8 @@ const Navigation: React.FC<NavigationProps> = ({ onLoginClick = () => {} }) => {
   const { user } = useAuth();
   const { items = [] } = useCart();
 
-  // Only enable animations after component mounts on client
-  useEffect(() => {
+  // Use isomorphicLayoutEffect to avoid SSR warnings
+  useIsomorphicLayoutEffect(() => {
     setIsMounted(true);
   }, []);
 

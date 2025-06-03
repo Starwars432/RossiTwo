@@ -5,8 +5,14 @@ declare module 'grapesjs' {
     Canvas: {
       getDocument(): Document;
       getWindow(): Window;
-      getBody(): HTMLElement;
-      getFrame(): HTMLIFrameElement;
+      getFrame(): HTMLIFrameElement & {
+        contentDocument: Document;
+        contentWindow: Window;
+        getBody(): HTMLElement;
+      };
+    };
+    Panels: {
+      getPanel(id: string): Panel;
     };
     getHtml(): string;
     getCss(): string;
@@ -14,6 +20,12 @@ declare module 'grapesjs' {
     setStyle(style: string | object): void;
     on(event: string, callback: Function): void;
     destroy(): void;
+  }
+
+  interface Panel {
+    get(property: string): {
+      each(callback: (btn: any) => void): void;
+    };
   }
 
   interface BlockManager {
@@ -80,14 +92,24 @@ declare module 'grapesjs' {
       components?: string | Component[];
       style?: string | object[];
       plugins?: string[];
-      pluginsOpts?: Record<string, any>;
-      storageManager?: boolean | object;
-      blockManager?: {
-        blocks?: BlockOptions[];
+      deviceManager?: {
+        devices?: Array<{
+          name: string;
+          width: string;
+          widthMedia?: string;
+        }>;
+      };
+      styleManager?: {
+        sectors?: Array<{
+          name: string;
+          open?: boolean;
+          buildProps?: string[];
+        }>;
       };
       canvas?: {
         styles?: string[];
       };
+      storageManager?: boolean | object;
     }): Editor;
   };
 
