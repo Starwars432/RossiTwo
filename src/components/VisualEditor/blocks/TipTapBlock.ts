@@ -7,17 +7,13 @@ export const tipTapBlock = (editor: Editor) => {
   const blockManager = editor.BlockManager;
 
   blockManager.add('tiptap', {
-    label: 'TipTap Editor',
-    category: 'Text Editors',
+    label: 'Rich Text Editor',
+    category: 'Basic',
     content: {
       type: 'div',
-      classes: ['tiptap-container'],
+      classes: ['tiptap-editor'],
       style: { 
-        padding: '20px',
-        minHeight: '200px',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        border: '1px solid rgba(96, 165, 250, 0.3)',
-        borderRadius: '4px'
+        minHeight: '200px'
       }
     },
     activate: true,
@@ -26,17 +22,13 @@ export const tipTapBlock = (editor: Editor) => {
 
   // Initialize TipTap when a block is added
   editor.on('component:add', (component: any) => {
-    if (component.getClasses().includes('tiptap-container')) {
+    if (component.getClasses().includes('tiptap-editor')) {
       const container = component.getEl();
-      
-      // Create a wrapper for React
       const editorRoot = document.createElement('div');
       container.appendChild(editorRoot);
 
-      // Get saved content if it exists
       const savedContent = component.get('tiptap-content') || '';
 
-      // Render TipTap editor
       ReactDOM.render(
         React.createElement(TipTapBlockEditor, {
           content: savedContent,
@@ -51,7 +43,7 @@ export const tipTapBlock = (editor: Editor) => {
     }
   });
 
-  // Clean up React component when block is removed
+  // Clean up when component is removed
   editor.on('component:remove', (component: any) => {
     const root = component.get('tiptap-root');
     if (root) {

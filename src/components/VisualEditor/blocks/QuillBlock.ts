@@ -6,16 +6,12 @@ export const quillBlock = (editor: any) => {
 
   blockManager.add('quill', {
     label: 'Text Editor',
-    category: 'Text Editors',
+    category: 'Basic',
     content: {
       type: 'div',
-      classes: ['quill-container'],
+      classes: ['quill-editor'],
       style: { 
-        padding: '20px',
-        minHeight: '200px',
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        border: '1px solid rgba(96, 165, 250, 0.3)',
-        borderRadius: '4px'
+        minHeight: '200px'
       }
     },
     activate: true,
@@ -24,7 +20,7 @@ export const quillBlock = (editor: any) => {
 
   // Initialize Quill when a block is added
   editor.on('component:add', (component: any) => {
-    if (component.getClasses().includes('quill-container')) {
+    if (component.getClasses().includes('quill-editor')) {
       const editorContainer = component.getEl();
       
       // Create toolbar container
@@ -38,19 +34,12 @@ export const quillBlock = (editor: any) => {
       const quillInstance = new Quill(contentContainer, {
         modules: {
           toolbar: [
-            ['bold', 'italic', 'underline', 'strike'],
+            ['bold', 'italic', 'underline'],
             ['blockquote', 'code-block'],
-            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'header': [1, 2, 3, false] }],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'script': 'sub'}, { 'script': 'super' }],
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
-            [{ 'direction': 'rtl' }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'font': [] }],
             [{ 'align': [] }],
-            ['clean']
+            ['link']
           ]
         },
         theme: 'snow',

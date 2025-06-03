@@ -15,15 +15,26 @@ const TipTapBlockEditor: React.FC<TipTapBlockEditorProps> = ({ content = '', onC
     extensions: [
       StarterKit,
       Underline,
-      Link,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-400 underline'
+        }
+      }),
       Placeholder.configure({
-        placeholder: 'Start typing...'
+        placeholder: 'Start typing...',
+        emptyEditorClass: 'is-editor-empty'
       })
     ],
     content,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       onChange?.(html);
+    },
+    editorProps: {
+      attributes: {
+        class: 'tiptap-editor'
+      }
     }
   });
 
@@ -33,11 +44,7 @@ const TipTapBlockEditor: React.FC<TipTapBlockEditorProps> = ({ content = '', onC
     };
   }, [editor]);
 
-  return (
-    <div className="tiptap-container">
-      <EditorContent editor={editor} />
-    </div>
-  );
+  return <EditorContent editor={editor} />;
 };
 
 export default TipTapBlockEditor;

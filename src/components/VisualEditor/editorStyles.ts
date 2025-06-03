@@ -16,11 +16,6 @@ export const initializeEditorStyles = (editor: Editor) => {
         --color-accent: #2563EB;
         --font-heading: 'Playfair Display';
         --font-body: 'Playfair Display';
-        --spacing-xs: 0.5rem;
-        --spacing-sm: 1rem;
-        --spacing-md: 1.5rem;
-        --spacing-lg: 2rem;
-        --spacing-xl: 3rem;
       }
 
       body {
@@ -33,6 +28,14 @@ export const initializeEditorStyles = (editor: Editor) => {
 
       h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-heading), serif !important;
+      }
+
+      .gjs-selected {
+        outline: 2px solid var(--color-primary) !important;
+      }
+
+      .gjs-hovered {
+        outline: 1px solid var(--color-secondary) !important;
       }
     `;
     frame.contentDocument.head.appendChild(styleEl);
@@ -48,27 +51,9 @@ export const initializeEditorStyles = (editor: Editor) => {
     tailwindLink.rel = 'stylesheet';
     tailwindLink.href = '/tailwind.output.css';
     frame.contentDocument.head.appendChild(tailwindLink);
-
-    // Set editor canvas background
-    if (frame.contentDocument.body) {
-      frame.contentDocument.body.style.background = 'var(--color-background)';
-    }
   });
 
   // Customize editor UI
-  const panel = editor.Panels.getPanel('options');
-  if (panel) {
-    const buttons = panel.get('buttons');
-    if (buttons?.each) {
-      buttons.each((btn: any) => {
-        if (btn?.set) {
-          btn.set('attributes', { ...btn.get('attributes'), style: 'color: #60A5FA' });
-        }
-      });
-    }
-  }
-
-  // Update editor UI colors
   const style = document.createElement('style');
   style.innerHTML = `
     .gjs-one-bg { background-color: #1a1a1a !important; }
