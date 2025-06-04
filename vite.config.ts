@@ -31,7 +31,6 @@ export default defineConfig(({ command, mode }) => {
           manualChunks: {
             'react-vendor': ['react', 'react-dom'],
             'editor-vendor': [
-              '@editorjs/editorjs',
               'quill',
               '@tiptap/react',
               'grapesjs'
