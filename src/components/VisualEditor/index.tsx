@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import grapesjs, { Editor } from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
-import 'grapesjs-preset-webpage';
+import grapesjsPresetWebpage from 'grapesjs-preset-webpage';
 import { initializeEditorStyles } from './editorStyles';
 import ReactDOMServer from 'react-dom/server';
 import Navigation from '../Navigation';
@@ -27,10 +27,43 @@ const VisualEditor: React.FC = () => {
       height: '100vh',
       width: 'auto',
       storageManager: false,
-      plugins: ['gjs-preset-webpage'],
+      plugins: [grapesjsPresetWebpage],
+      pageManager: {
+        pages: [
+          {
+            id: 'home',
+            name: 'Home',
+            component: ReactDOMServer.renderToString(
+              <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
+                <Navigation onLoginClick={() => {}} />
+                <Hero />
+                <Services />
+                <CustomDesign />
+                <Contact />
+                <Footer />
+              </div>
+            )
+          },
+          {
+            id: 'services',
+            name: 'Services',
+            component: ReactDOMServer.renderToString(<Services />)
+          },
+          {
+            id: 'custom-design',
+            name: 'Custom Design',
+            component: ReactDOMServer.renderToString(<CustomDesign />)
+          },
+          {
+            id: 'contact',
+            name: 'Contact',
+            component: ReactDOMServer.renderToString(<Contact />)
+          }
+        ]
+      },
       canvas: {
         styles: [
-          'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
+          'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
           '/tailwind.output.css'
         ]
       },
@@ -55,22 +88,17 @@ const VisualEditor: React.FC = () => {
     });
 
     // Initialize editor styles
-    initializeEditorStyles(editor);
-
-    // Set initial content when the frame is ready
     editor.on('canvas:frame:load', () => {
-      const initialContent = ReactDOMServer.renderToString(
-        <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-          <Navigation onLoginClick={() => {}} />
-          <Hero />
-          <Services />
-          <CustomDesign />
-          <Contact />
-          <Footer />
-        </div>
-      );
+      initializeEditorStyles(editor);
+    });
 
-      editor.setComponents(initialContent);
+    // Handle page changes
+    editor.on('page:select', (page: any) => {
+      console.log('Page selected:', page);
+      const selectedPage = editor.Pages.getSelected();
+      if (selectedPage) {
+        editor.setComponents(selectedPage.get('component'));
+      }
     });
 
     editorRef.current.editor = editor;

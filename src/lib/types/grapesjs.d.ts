@@ -2,6 +2,12 @@ declare module 'grapesjs' {
   export interface Editor {
     BlockManager: BlockManager;
     DomComponents: DomComponents;
+    Pages: {
+      getSelected(): Page;
+      getAll(): Page[];
+      add(options: PageOptions): Page;
+      remove(page: Page | string): void;
+    };
     Canvas: {
       getDocument(): Document;
       getWindow(): Window;
@@ -20,6 +26,21 @@ declare module 'grapesjs' {
     setStyle(style: string | object): void;
     on(event: string, callback: Function): void;
     destroy(): void;
+  }
+
+  interface Page {
+    id: string;
+    name: string;
+    component: string;
+    get(property: string): any;
+    set(property: string, value: any): void;
+  }
+
+  interface PageOptions {
+    id: string;
+    name: string;
+    component: string;
+    styles?: string;
   }
 
   interface Panel {
@@ -91,7 +112,10 @@ declare module 'grapesjs' {
       width?: string | number;
       components?: string | Component[];
       style?: string | object[];
-      plugins?: string[];
+      plugins?: any[];
+      pageManager?: {
+        pages?: PageOptions[];
+      };
       deviceManager?: {
         devices?: Array<{
           name: string;

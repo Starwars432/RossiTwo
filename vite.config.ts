@@ -33,11 +33,11 @@ export default defineConfig(({ command, mode }) => {
             'editor-vendor': [
               'quill',
               '@tiptap/react',
-              'grapesjs'
+              'grapesjs',
+              'grapesjs-preset-webpage'
             ],
             'ui-vendor': [
               'framer-motion',
-              '@headlessui/react',
               'lucide-react'
             ],
           },
