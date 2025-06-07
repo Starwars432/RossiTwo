@@ -1915,41 +1915,6 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #1d4ed8 !important;
 }
 
-/* Editor.js styles */
-
-.editorjs-container {
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  border: 1px solid rgba(96, 165, 250, 0.3) !important;
-  border-radius: 4px !important;
-  padding: 20px !important;
-  min-height: 200px !important;
-  color: #FFFFFF !important;
-}
-
-.editorjs-container .ce-block__content,
-.editorjs-container .ce-toolbar__content {
-  max-width: 100% !important;
-}
-
-.editorjs-container .ce-paragraph {
-  color: #FFFFFF !important;
-}
-
-.editorjs-container .ce-toolbar__actions {
-  background-color: #1a1a1a !important;
-  border: 1px solid rgba(96, 165, 250, 0.3) !important;
-}
-
-.editorjs-container .ce-toolbar__plus,
-.editorjs-container .ce-toolbar__settings-btn {
-  color: #60A5FA !important;
-}
-
-.editorjs-container .cdx-search-field {
-  background-color: #1a1a1a !important;
-  border: 1px solid rgba(96, 165, 250, 0.3) !important;
-  color: #FFFFFF !important;
-}
 
 /* Quill styles */
 

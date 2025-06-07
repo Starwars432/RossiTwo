@@ -1,18 +1,11 @@
 import { useEffect, useRef } from "react";
-import grapesjs, { Editor } from 'grapesjs';
+import grapesjs from 'grapesjs';
+import preset from 'grapesjs-preset-webpage';
 import 'grapesjs/dist/css/grapes.min.css';
-import grapesjsPresetWebpage from 'grapesjs-preset-webpage';
 import { initializeEditorStyles } from './editorStyles';
-import ReactDOMServer from 'react-dom/server';
-import Navigation from '../Navigation';
-import Hero from '../Hero';
-import Services from '../Services';
-import CustomDesign from '../CustomDesign';
-import Contact from '../Contact';
-import Footer from '../Footer';
 
 interface EditorInstance {
-  editor: Editor | null;
+  editor: any | null;
 }
 
 const VisualEditor: React.FC = () => {
@@ -24,48 +17,15 @@ const VisualEditor: React.FC = () => {
 
     const editor = grapesjs.init({
       container: containerRef.current,
+      fromElement: false,
       height: '100vh',
-      width: 'auto',
       storageManager: false,
-      plugins: [grapesjsPresetWebpage],
-      pageManager: {
-        pages: [
-          {
-            id: 'home',
-            name: 'Home',
-            component: ReactDOMServer.renderToString(
-              <div className="min-h-screen bg-black text-white relative font-serif overflow-x-hidden">
-                <Navigation onLoginClick={() => {}} />
-                <Hero />
-                <Services />
-                <CustomDesign />
-                <Contact />
-                <Footer />
-              </div>
-            )
-          },
-          {
-            id: 'services',
-            name: 'Services',
-            component: ReactDOMServer.renderToString(<Services />)
-          },
-          {
-            id: 'custom-design',
-            name: 'Custom Design',
-            component: ReactDOMServer.renderToString(<CustomDesign />)
-          },
-          {
-            id: 'contact',
-            name: 'Contact',
-            component: ReactDOMServer.renderToString(<Contact />)
-          }
-        ]
-      },
+      plugins: [preset],
       canvas: {
         styles: [
+          '/tailwind.output.css',
           'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
-          '/tailwind.output.css'
-        ]
+        ],
       },
       deviceManager: {
         devices: [
@@ -87,7 +47,7 @@ const VisualEditor: React.FC = () => {
       }
     });
 
-    // Initialize editor styles
+    // Initialize editor styles when canvas loads
     editor.on('canvas:frame:load', () => {
       initializeEditorStyles(editor);
     });
@@ -95,11 +55,15 @@ const VisualEditor: React.FC = () => {
     // Handle page changes
     editor.on('page:select', (page: any) => {
       console.log('Page selected:', page);
-      const selectedPage = editor.Pages.getSelected();
-      if (selectedPage) {
-        editor.setComponents(selectedPage.get('component'));
-      }
     });
+
+    // Inject a default homepage layout so the canvas isn't empty
+    editor.setComponents(`
+      <section class="min-h-screen bg-black text-white font-serif p-8">
+        <h1 class="text-4xl mb-4">Manifest Illusions</h1>
+        <p class="text-lg">Start editing your page content here…</p>
+      </section>
+    `);
 
     editorRef.current.editor = editor;
 

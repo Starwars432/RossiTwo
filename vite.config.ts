@@ -26,6 +26,7 @@ export default defineConfig(({ command, mode }) => {
       outDir: 'dist',
       sourcemap: true,
       manifest: true,
+      assetsDir: 'assets',
       rollupOptions: {
         output: {
           manualChunks: {
@@ -43,6 +44,7 @@ export default defineConfig(({ command, mode }) => {
           },
         },
       },
+      copyPublicDir: true,
     },
     resolve: {
       alias: {
