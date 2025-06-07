@@ -49,6 +49,16 @@ const VisualEditor: React.FC = () => {
 
     // Initialize editor styles when canvas loads
     editor.on('canvas:frame:load', () => {
+      const frame = editor.Canvas.getFrameEl();
+      const head = frame?.contentDocument?.head;
+
+      if (head) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/tailwind.output.css';
+        head.appendChild(link);
+      }
+
       initializeEditorStyles(editor);
     });
 
