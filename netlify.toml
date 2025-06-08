@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_ENV = "production"
+  NODE_ENV = "development"
   VITE_SUPABASE_URL = "https://mgibojfvdjvzjnbewszy.supabase.co"
   VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1naWJvamZ2ZGp2empuYmV3c3p5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0Nzg5NTQsImV4cCI6MjA2MjA1NDk1NH0.UHNbuSa3o4v_7amOsIbyzWA2JPsk4-UCSqoYzQIPAKo"
   VITE_GOOGLE_CLIENT_ID = "1027575518474-0vt94136alk1vhdr9djc5e3djgs12q3h.apps.googleusercontent.com"
