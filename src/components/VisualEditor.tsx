@@ -16,6 +16,7 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (editorRef.current) return;
 
+    // Cast as any to avoid TypeScript issues with undocumented properties
     const editor = grapesjs.init({
       container: "#editor",
       height: "100vh",
@@ -24,19 +25,72 @@ const VisualEditor: React.FC = () => {
       plugins: ['gjs-preset-webpage'],
       canvas: {
         styles: [
-          '/assets/index-xuDJ4M-J.css',
+          '/tailwind.output.css',
           'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap',
-          'https://cdn.tailwindcss.com'
         ]
       }
-    });
+    } as any);
 
     editorRef.current = editor;
 
-    // Wait for the editor to be ready before manipulating the canvas
-    editor.on('load', () => {
+    editor.on('canvas:frame:load', () => {
+      const frame = editor.Canvas.getFrame();
+      const head = frame?.contentDocument?.head;
+
+      if (head) {
+        // Add Tailwind CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/tailwind.output.css';
+        head.appendChild(link);
+
+        // Add debug styles to force visibility
+        const debugStyle = document.createElement('style');
+        debugStyle.innerHTML = `
+          /* Debug styles to ensure content is visible */
+          * {
+            opacity: 1 !important;
+            transform: none !important;
+          }
+          
+          /* Specific fixes for common hidden elements */
+          [id*="iwysl"], [id*="ielwx"], [id*="i"] {
+            opacity: 1 !important;
+            transform: none !important;
+            visibility: visible !important;
+          }
+          
+          /* Ensure all sections are visible */
+          section, div, nav, header, footer {
+            opacity: 1 !important;
+            transform: none !important;
+          }
+        `;
+        head.appendChild(debugStyle);
+      }
+
+      const body = frame?.contentDocument?.body;
+      if (body) {
+        // Force visibility on all elements with IDs
+        body.querySelectorAll('[id]').forEach(el => {
+          (el as HTMLElement).style.opacity = '1';
+          (el as HTMLElement).style.transform = 'none';
+          (el as HTMLElement).style.visibility = 'visible';
+        });
+
+        // Also fix any elements that might be hidden by animation classes
+        body.querySelectorAll('*').forEach(el => {
+          const element = el as HTMLElement;
+          const computedStyle = window.getComputedStyle(element);
+          if (computedStyle.opacity === '0' || computedStyle.visibility === 'hidden') {
+            element.style.opacity = '1';
+            element.style.visibility = 'visible';
+            element.style.transform = 'none';
+          }
+        });
+      }
+
       try {
-        // Load initial content
         const initialContent = ReactDOMServer.renderToString(
           <>
             <Navigation onLoginClick={() => {}} />
@@ -48,28 +102,9 @@ const VisualEditor: React.FC = () => {
           </>
         );
 
-        // Get the document from the canvas frame after the editor is loaded
-        const canvasDoc = editor.Canvas.getDocument();
-        
-        if (canvasDoc) {
-          // Add styles to the canvas document head
-          const styleEl = canvasDoc.createElement('style');
-          styleEl.innerHTML = `
-            /* Add any additional styles needed */
-            body {
-              margin: 0;
-              font-family: var(--font-body), serif;
-              background: var(--color-background);
-              color: var(--color-text);
-            }
-          `;
-          canvasDoc.head.appendChild(styleEl);
-
-          // Set the initial content
-          editor.setComponents(initialContent);
-        }
+        editor.setComponents(initialContent);
       } catch (error) {
-        console.error('Error initializing visual editor:', error);
+        console.error('Error rendering content to editor:', error);
       }
     });
 
@@ -82,10 +117,7 @@ const VisualEditor: React.FC = () => {
   }, []);
 
   return (
-    <div 
-      id="editor" 
-      className="min-h-screen w-full bg-white text-black"
-    />
+    <div id="editor" className="min-h-screen w-full bg-white text-black" />
   );
 };
 
