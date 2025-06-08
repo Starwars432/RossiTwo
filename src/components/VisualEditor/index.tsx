@@ -17,7 +17,6 @@ const VisualEditor: React.FC = () => {
 
     const editor = grapesjs.init({
       container: containerRef.current,
-      fromElement: false,
       height: '100vh',
       storageManager: false,
       plugins: [preset],
@@ -49,7 +48,7 @@ const VisualEditor: React.FC = () => {
 
     // Initialize editor styles when canvas loads
     editor.on('canvas:frame:load', () => {
-      const frame = editor.Canvas.getFrameEl();
+      const frame = editor.Canvas.getFrame();
       const head = frame?.contentDocument?.head;
 
       if (head) {
