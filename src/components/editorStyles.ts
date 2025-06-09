@@ -4,8 +4,8 @@ export const initializeEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     const frame = editor.Canvas.getFrame();
     if (!frame?.contentDocument) return;
-    
-    // Add base styles to iframe head
+
+    // Add base + fix styles inside the iframe
     const styleEl = frame.contentDocument.createElement('style');
     styleEl.innerHTML = `
       :root {
@@ -28,6 +28,25 @@ export const initializeEditorStyles = (editor: Editor) => {
 
       h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-heading), serif !important;
+      }
+
+      /* 🔧 Force visibility for any Tailwind-style hidden elements */
+      *, *::before, *::after {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        animation: none !important;
+        transition: none !important;
+      }
+
+      .opacity-0, .translate-y-1, .translate-y-2, .translate-y-3,
+      .translate-y-4, .translate-y-5, .hidden, .invisible,
+      .animate-fade-in, .animate-fade-up, .delay-100, .delay-200,
+      .delay-300, .duration-300, .ease-in-out {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        display: block !important;
       }
 
       .gjs-selected {
@@ -53,7 +72,7 @@ export const initializeEditorStyles = (editor: Editor) => {
     frame.contentDocument.head.appendChild(tailwindLink);
   });
 
-  // Customize editor UI
+  // 🌙 Style GrapesJS editor UI itself (outside the iframe)
   const style = document.createElement('style');
   style.innerHTML = `
     .gjs-one-bg { background-color: #1a1a1a !important; }
