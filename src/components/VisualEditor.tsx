@@ -60,12 +60,9 @@ const VisualEditor: React.FC = () => {
           * {
             opacity: 1 !important;
             transform: none !important;
-          }
-          [id*="iwysl"], [id*="ielwx"], [id*="i"] {
-            opacity: 1 !important;
-            transform: none !important;
             visibility: visible !important;
           }
+
           section, div, nav, header, footer {
             opacity: 1 !important;
             transform: none !important;
@@ -76,45 +73,22 @@ const VisualEditor: React.FC = () => {
 
       const body = frame?.contentDocument?.body;
       if (body) {
-        body.querySelectorAll("[id]").forEach((el) => {
+        body.querySelectorAll("*").forEach((el) => {
           const element = el as HTMLElement;
           element.style.opacity = "1";
           element.style.transform = "none";
           element.style.visibility = "visible";
         });
-
-        body.querySelectorAll("*").forEach((el) => {
-          const element = el as HTMLElement;
-          const computedStyle = window.getComputedStyle(element);
-          if (
-            computedStyle.opacity === "0" ||
-            computedStyle.visibility === "hidden"
-          ) {
-            element.style.opacity = "1";
-            element.style.visibility = "visible";
-            element.style.transform = "none";
-          }
-        });
       }
 
-      // Inject components one-by-one
       try {
-        const components = [
-          <Navigation onLoginClick={() => {}} />,
-          <Hero />,
-          <Services />,
-          <CustomDesign />,
-          <Contact />,
-          <Footer />,
-        ];
-
-        for (let i = 0; i < components.length; i++) {
-          const html = ReactDOMServer.renderToString(components[i]);
-          editor.setComponents(html);
-          break; // 👈 Temporarily render only the first component
-        }
+        // TEST MODE: Render only one component to isolate issues
+        const html = ReactDOMServer.renderToString(
+          <Navigation onLoginClick={() => {}} />
+        );
+        editor.setComponents(html);
       } catch (error) {
-        console.error("Error rendering content to editor:", error);
+        console.error("❌ Error rendering component:", error);
       }
 
       initializeEditorStyles(editor);
