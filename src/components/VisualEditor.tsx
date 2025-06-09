@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import grapesjs from "grapesjs";
-import preset from "grapesjs-preset-webpage";
+import presetWebpage from "grapesjs-preset-webpage";
 import "grapesjs/dist/css/grapes.min.css";
 import Navigation from "./Navigation";
 import Hero from "./Hero";
@@ -9,7 +9,7 @@ import CustomDesign from "./CustomDesign";
 import Contact from "./Contact";
 import Footer from "./Footer";
 import ReactDOMServer from "react-dom/server";
-import { initializeEditorStyles } from "./VisualEditor/editorStyles";
+import { initializeEditorStyles } from "./editorStyles";
 
 const VisualEditor: React.FC = () => {
   const editorRef = useRef<any | null>(null);
@@ -18,12 +18,14 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current || editorRef.current) return;
 
+    console.log("🧪 Initializing GrapesJS...");
+
     const editor = grapesjs.init({
       container: containerRef.current,
       height: "100vh",
       width: "100%",
       storageManager: false,
-      plugins: [preset],
+      plugins: [presetWebpage],
       canvas: {
         styles: [
           "/tailwind.output.css",
@@ -37,11 +39,13 @@ const VisualEditor: React.FC = () => {
           { name: "Mobile", width: "375px", widthMedia: "375px" },
         ],
       },
-    } as any);
+    });
 
     editorRef.current = editor;
 
     editor.on("canvas:frame:load", () => {
+      console.log("✅ GrapesJS iframe loaded");
+
       const frame = editor.Canvas.getFrame();
       const head = frame?.contentDocument?.head;
 
@@ -93,18 +97,22 @@ const VisualEditor: React.FC = () => {
         });
       }
 
+      // Inject components one-by-one
       try {
-        const initialContent = ReactDOMServer.renderToString(
-          <>
-            <Navigation onLoginClick={() => {}} />
-            <Hero />
-            <Services />
-            <CustomDesign />
-            <Contact />
-            <Footer />
-          </>
-        );
-        editor.setComponents(initialContent);
+        const components = [
+          <Navigation onLoginClick={() => {}} />,
+          <Hero />,
+          <Services />,
+          <CustomDesign />,
+          <Contact />,
+          <Footer />,
+        ];
+
+        for (let i = 0; i < components.length; i++) {
+          const html = ReactDOMServer.renderToString(components[i]);
+          editor.setComponents(html);
+          break; // 👈 Temporarily render only the first component
+        }
       } catch (error) {
         console.error("Error rendering content to editor:", error);
       }
