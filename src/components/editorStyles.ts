@@ -12,11 +12,19 @@ export const initializeEditorStyles = (editor: Editor) => {
 
       if (!doc || !head || !body) {
         console.warn("⏳ Retrying DOM access...");
-        setTimeout(tryInject, 100); // retry every 100ms
+        setTimeout(tryInject, 100);
         return;
       }
 
-      // ✅ Inject base styles
+      // 🔁 Wait for GrapesJS wrapper to be available
+      const wrapper = editor.getWrapper();
+      if (!wrapper) {
+        console.warn("⏳ Waiting for wrapper...");
+        setTimeout(tryInject, 100);
+        return;
+      }
+
+      // ✅ Inject custom styles
       const styleEl = doc.createElement('style');
       styleEl.innerHTML = `
         body {
@@ -44,20 +52,25 @@ export const initializeEditorStyles = (editor: Editor) => {
       font.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap";
       head.appendChild(font);
 
+      // ✅ Force background for visibility
+      body.style.backgroundColor = "black";
+      body.style.color = "white";
+
+      // ✅ Inject test HTML once wrapper is ready
       editor.setComponents(`
         <section class="min-h-screen bg-black text-white p-8">
           <h1 class="text-4xl font-bold">✅ GrapesJS Canvas Renders</h1>
-          <p>This was injected after successful DOM access.</p>
+          <p>This was injected after successful DOM + wrapper readiness.</p>
         </section>
       `);
 
-      console.log("✅ Styles + components injected!");
+      console.log("✅ Styles and components injected!");
     };
 
     tryInject();
   });
 
-  // Optional outer GrapesJS UI styling
+  // Optional: style GrapesJS outer editor UI
   const outerStyle = document.createElement('style');
   outerStyle.innerHTML = `
     .gjs-cv-canvas { background-color: #000 !important; }
