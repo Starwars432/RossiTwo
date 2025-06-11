@@ -62,7 +62,6 @@ const VisualEditor: React.FC = () => {
             transform: none !important;
             visibility: visible !important;
           }
-
           section, div, nav, header, footer {
             opacity: 1 !important;
             transform: none !important;
@@ -82,7 +81,7 @@ const VisualEditor: React.FC = () => {
       }
 
       try {
-        // TEST MODE: Render only one component to isolate issues
+        // ✅ TEST MODE: Render only <Navigation />
         const html = ReactDOMServer.renderToString(
           <Navigation onLoginClick={() => {}} />
         );
