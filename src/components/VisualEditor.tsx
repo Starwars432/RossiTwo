@@ -5,13 +5,13 @@ import "grapesjs/dist/css/grapes.min.css";
 import { initializeEditorStyles } from "./editorStyles";
 
 const VisualEditor: React.FC = () => {
-  const editorRef = useRef<any | null>(null);
+  const editorRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current || editorRef.current) return;
 
-    console.log("🧪 Initializing GrapesJS...");
+    console.log("🧪 Initializing GrapesJS editor...");
 
     const editor = grapesjs.init({
       container: containerRef.current,
@@ -22,18 +22,16 @@ const VisualEditor: React.FC = () => {
       canvas: {
         styles: [
           "/tailwind.output.css",
-          "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap",
+          "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
         ],
       },
     });
 
     editorRef.current = editor;
-
-    // Initialize editor styles and handle all iframe setup
     initializeEditorStyles(editor);
 
     return () => {
-      editorRef.current?.destroy();
+      editor.destroy();
       editorRef.current = null;
     };
   }, []);
