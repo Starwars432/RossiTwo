@@ -2,87 +2,77 @@ import { Editor } from 'grapesjs';
 
 export const initializeEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
-    const frame = editor.Canvas.getFrame();
-    if (!frame?.contentDocument) return;
+    console.log("🎯 Frame load event triggered");
 
-    // Add base + fix styles inside the iframe
-    const styleEl = frame.contentDocument.createElement('style');
+    const frame = editor.Canvas.getFrame();
+    const doc = frame?.contentDocument;
+
+    if (!doc) {
+      console.warn("⏳ Document not ready, retrying...");
+      setTimeout(() => initializeEditorStyles(editor), 50); // Re-call until ready
+      return;
+    }
+
+    const head = doc.head;
+    const body = doc.body;
+
+    if (!head || !body) {
+      console.warn("⏳ Head/body missing, retrying...");
+      setTimeout(() => initializeEditorStyles(editor), 50);
+      return;
+    }
+
+    // ✅ Inject CSS styles
+    const styleEl = doc.createElement('style');
     styleEl.innerHTML = `
       :root {
         --color-primary: #3B82F6;
-        --color-secondary: #60A5FA;
-        --color-background: #000000;
-        --color-text: #FFFFFF;
-        --color-accent: #2563EB;
-        --font-heading: 'Playfair Display';
-        --font-body: 'Playfair Display';
+        --color-background: #000;
+        --color-text: #FFF;
       }
 
       body {
         margin: 0;
-        font-family: var(--font-body), serif !important;
         background-color: var(--color-background) !important;
         color: var(--color-text) !important;
-        min-height: 100vh;
       }
 
-      h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-heading), serif !important;
-      }
-
-      /* 🔧 Force visibility for any Tailwind-style hidden elements */
       *, *::before, *::after {
         opacity: 1 !important;
         transform: none !important;
         visibility: visible !important;
-        animation: none !important;
-        transition: none !important;
-      }
-
-      .opacity-0, .translate-y-1, .translate-y-2, .translate-y-3,
-      .translate-y-4, .translate-y-5, .hidden, .invisible,
-      .animate-fade-in, .animate-fade-up, .delay-100, .delay-200,
-      .delay-300, .duration-300, .ease-in-out {
-        opacity: 1 !important;
-        transform: none !important;
-        visibility: visible !important;
-        display: block !important;
-      }
-
-      .gjs-selected {
-        outline: 2px solid var(--color-primary) !important;
-      }
-
-      .gjs-hovered {
-        outline: 1px solid var(--color-secondary) !important;
       }
     `;
-    frame.contentDocument.head.appendChild(styleEl);
+    head.appendChild(styleEl);
 
-    // Add Google Fonts
-    const fontLink = frame.contentDocument.createElement('link');
-    fontLink.rel = 'stylesheet';
-    fontLink.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap';
-    frame.contentDocument.head.appendChild(fontLink);
+    // Tailwind
+    const tailwind = doc.createElement('link');
+    tailwind.rel = 'stylesheet';
+    tailwind.href = '/tailwind.output.css';
+    head.appendChild(tailwind);
 
-    // Add Tailwind output CSS
-    const tailwindLink = frame.contentDocument.createElement('link');
-    tailwindLink.rel = 'stylesheet';
-    tailwindLink.href = '/tailwind.output.css';
-    frame.contentDocument.head.appendChild(tailwindLink);
+    // Google Font
+    const font = doc.createElement('link');
+    font.rel = 'stylesheet';
+    font.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
+    head.appendChild(font);
+
+    // Inject minimal HTML
+    editor.setComponents(`
+      <section class="min-h-screen bg-black text-white p-8">
+        <h1 class="text-4xl font-bold mb-4">✅ Canvas Rendered</h1>
+        <p>This confirms the iframe DOM is fully accessible.</p>
+      </section>
+    `);
+
+    console.log("✅ Styles and HTML injected into canvas");
   });
 
-  // 🌙 Style GrapesJS editor UI itself (outside the iframe)
-  const style = document.createElement('style');
-  style.innerHTML = `
-    .gjs-one-bg { background-color: #1a1a1a !important; }
-    .gjs-two-color { color: #60A5FA !important; }
-    .gjs-three-bg { background-color: #2563EB !important; }
-    .gjs-four-color, .gjs-four-color-h:hover { color: #FFFFFF !important; }
-    .gjs-pn-btn.gjs-pn-active { background-color: #2563EB !important; }
-    .gjs-pn-panel { border-color: rgba(96, 165, 250, 0.3) !important; }
-    .gjs-cv-canvas { background-color: #000000 !important; }
+  // Outer UI styles
+  const outerStyle = document.createElement('style');
+  outerStyle.innerHTML = `
+    .gjs-cv-canvas { background-color: #000 !important; }
     .gjs-frame-wrapper { padding: 1rem !important; }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(outerStyle);
 };
