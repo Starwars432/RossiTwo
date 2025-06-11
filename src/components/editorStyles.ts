@@ -1,53 +1,31 @@
-import { Editor } from "grapesjs";
+import { Editor } from 'grapesjs';
 
 export const initializeEditorStyles = (editor: Editor) => {
-  // Wait for the editor to be fully loaded before accessing Canvas
-  editor.on('load', () => {
-    // Delay setup until iframe document is reliably available
-    const waitForIframe = () => {
+  editor.on('canvas:frame:load', () => {
+    console.log("📦 canvas:frame:load triggered");
+
+    const tryInject = () => {
       const frame = editor.Canvas.getFrame();
       const doc = frame?.contentDocument;
+      const head = doc?.head;
+      const body = doc?.body;
 
-      if (!doc) {
-        console.warn("⏳ Waiting for iframe contentDocument...");
-        setTimeout(waitForIframe, 100); // Retry in 100ms
+      if (!doc || !head || !body) {
+        console.warn("⏳ Retrying DOM access...");
+        setTimeout(tryInject, 100); // retry every 100ms
         return;
       }
 
-      const head = doc.head;
-      const body = doc.body;
-
-      if (!head || !body) {
-        console.warn("⏳ Waiting for head/body...");
-        setTimeout(waitForIframe, 100); // Retry again
-        return;
-      }
-
-      console.log("✅ iframe DOM ready for injection");
-
-      // Inject CSS files
-      const tailwind = doc.createElement("link");
-      tailwind.rel = "stylesheet";
-      tailwind.href = "/tailwind.output.css";
-      head.appendChild(tailwind);
-
-      const font = doc.createElement("link");
-      font.rel = "stylesheet";
-      font.href =
-        "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap";
-      head.appendChild(font);
-
-      // Inject inline base styles
-      const styleEl = doc.createElement("style");
+      // ✅ Inject base styles
+      const styleEl = doc.createElement('style');
       styleEl.innerHTML = `
         body {
-          margin: 0;
-          font-family: 'Playfair Display', serif;
           background-color: black;
           color: white;
+          margin: 0;
+          font-family: 'Playfair Display', serif;
           min-height: 100vh;
         }
-
         *, *::before, *::after {
           opacity: 1 !important;
           transform: none !important;
@@ -56,21 +34,31 @@ export const initializeEditorStyles = (editor: Editor) => {
       `;
       head.appendChild(styleEl);
 
-      // Inject test component to confirm
+      const tailwind = doc.createElement("link");
+      tailwind.rel = "stylesheet";
+      tailwind.href = "/tailwind.output.css";
+      head.appendChild(tailwind);
+
+      const font = doc.createElement("link");
+      font.rel = "stylesheet";
+      font.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap";
+      head.appendChild(font);
+
       editor.setComponents(`
         <section class="min-h-screen bg-black text-white p-8">
-          <h1 class="text-4xl font-bold mb-4">✅ DOM Ready!</h1>
-          <p>This was injected once iframe DOM was available.</p>
+          <h1 class="text-4xl font-bold">✅ GrapesJS Canvas Renders</h1>
+          <p>This was injected after successful DOM access.</p>
         </section>
       `);
+
+      console.log("✅ Styles + components injected!");
     };
 
-    // Start polling after short delay
-    setTimeout(waitForIframe, 50);
+    tryInject();
   });
 
-  // Style the outer GrapesJS editor UI
-  const outerStyle = document.createElement("style");
+  // Optional outer GrapesJS UI styling
+  const outerStyle = document.createElement('style');
   outerStyle.innerHTML = `
     .gjs-cv-canvas { background-color: #000 !important; }
     .gjs-frame-wrapper { padding: 1rem !important; }
