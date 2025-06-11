@@ -3,11 +3,6 @@ import grapesjs from "grapesjs";
 import presetWebpage from "grapesjs-preset-webpage";
 import "grapesjs/dist/css/grapes.min.css";
 import Navigation from "./Navigation";
-import Hero from "./Hero";
-import Services from "./Services";
-import CustomDesign from "./CustomDesign";
-import Contact from "./Contact";
-import Footer from "./Footer";
 import ReactDOMServer from "react-dom/server";
 import { initializeEditorStyles } from "./editorStyles";
 
@@ -62,6 +57,7 @@ const VisualEditor: React.FC = () => {
             transform: none !important;
             visibility: visible !important;
           }
+
           section, div, nav, header, footer {
             opacity: 1 !important;
             transform: none !important;
