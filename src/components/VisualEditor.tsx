@@ -2,8 +2,6 @@ import { useEffect, useRef } from "react";
 import grapesjs from "grapesjs";
 import presetWebpage from "grapesjs-preset-webpage";
 import "grapesjs/dist/css/grapes.min.css";
-import Navigation from "./Navigation";
-import ReactDOMServer from "react-dom/server";
 import { initializeEditorStyles } from "./editorStyles";
 
 const VisualEditor: React.FC = () => {
@@ -13,7 +11,7 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current || editorRef.current) return;
 
-    console.log("🧪 Initializing GrapesJS...");
+    console.log("🧪 Initializing GrapesJS (stable)");
 
     const editor = grapesjs.init({
       container: containerRef.current,
@@ -38,54 +36,45 @@ const VisualEditor: React.FC = () => {
 
     editorRef.current = editor;
 
+    // Load styles and then inject HTML only after iframe fully ready
     editor.on("canvas:frame:load", () => {
-      console.log("✅ GrapesJS iframe loaded");
+      console.log("✅ GrapesJS iframe fully loaded");
 
       const frame = editor.Canvas.getFrame();
-      const head = frame?.contentDocument?.head;
+      const doc = frame?.contentDocument;
+      const head = doc?.head;
+      const body = doc?.body;
 
-      if (head) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "/tailwind.output.css";
-        head.appendChild(link);
-
-        const debugStyle = document.createElement("style");
-        debugStyle.innerHTML = `
-          * {
-            opacity: 1 !important;
-            transform: none !important;
-            visibility: visible !important;
-          }
-
-          section, div, nav, header, footer {
-            opacity: 1 !important;
-            transform: none !important;
-          }
-        `;
-        head.appendChild(debugStyle);
+      if (!doc || !head || !body) {
+        console.warn("❌ iframe or its document structure is missing");
+        return;
       }
 
-      const body = frame?.contentDocument?.body;
-      if (body) {
-        body.querySelectorAll("*").forEach((el) => {
-          const element = el as HTMLElement;
-          element.style.opacity = "1";
-          element.style.transform = "none";
-          element.style.visibility = "visible";
-        });
-      }
+      // Add Tailwind + font link again (safety)
+      const tailwind = document.createElement("link");
+      tailwind.rel = "stylesheet";
+      tailwind.href = "/tailwind.output.css";
+      head.appendChild(tailwind);
 
-      try {
-        // ✅ TEST MODE: Render only <Navigation />
-        const html = ReactDOMServer.renderToString(
-          <Navigation onLoginClick={() => {}} />
-        );
-        editor.setComponents(html);
-      } catch (error) {
-        console.error("❌ Error rendering component:", error);
-      }
+      const font = document.createElement("link");
+      font.rel = "stylesheet";
+      font.href = "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap";
+      head.appendChild(font);
 
+      // Make sure body is visible
+      body.style.opacity = "1";
+      body.style.visibility = "visible";
+      body.style.transform = "none";
+
+      // Inject simple test HTML
+      editor.setComponents(`
+        <section style="min-height: 100vh; background-color: black; color: white; padding: 2rem;">
+          <h1 style="font-size: 2rem;">✅ Working Editor</h1>
+          <p>This content is visible and editable in GrapesJS.</p>
+        </section>
+      `);
+
+      // Apply custom styling
       initializeEditorStyles(editor);
     });
 
