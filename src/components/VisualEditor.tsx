@@ -11,7 +11,7 @@ const VisualEditor: React.FC = () => {
   useEffect(() => {
     if (!containerRef.current || editorRef.current) return;
 
-    console.log("🧪 Initializing GrapesJS editor...");
+    console.log("🧪 Initializing GrapesJS...");
 
     const editor = grapesjs.init({
       container: containerRef.current,
@@ -22,7 +22,7 @@ const VisualEditor: React.FC = () => {
       canvas: {
         styles: [
           "/tailwind.output.css",
-          "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap"
+          "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap",
         ],
       },
     });

@@ -4,36 +4,47 @@ export const initializeEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     console.log("📦 canvas:frame:load triggered");
 
-    const tryInject = () => {
+    const attempt = () => {
       const frame = editor.Canvas.getFrame();
       const doc = frame?.contentDocument;
-      const head = doc?.head;
-      const body = doc?.body;
 
-      if (!doc || !head || !body) {
-        console.warn("⏳ Retrying DOM access...");
-        setTimeout(tryInject, 100);
+      if (!doc) {
+        console.warn("⏳ Frame document not ready. Retrying...");
+        setTimeout(attempt, 100);
         return;
       }
 
-      // ✅ Inject custom styles
-      const styleEl = doc.createElement('style');
-      styleEl.innerHTML = `
-        body {
-          background-color: black;
-          color: white;
-          margin: 0;
-          font-family: 'Playfair Display', serif;
-          min-height: 100vh;
+      const head = doc.head;
+      const body = doc.body;
+
+      if (!head || !body) {
+        console.warn("⏳ Head or body missing. Retrying...");
+        setTimeout(attempt, 100);
+        return;
+      }
+
+      // ✅ Force reset style for visibility
+      const style = doc.createElement("style");
+      style.innerHTML = `
+        html, body {
+          background: black !important;
+          color: white !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          font-family: 'Playfair Display', serif !important;
+          min-height: 100vh !important;
         }
+
         *, *::before, *::after {
           opacity: 1 !important;
           transform: none !important;
           visibility: visible !important;
+          animation: none !important;
         }
       `;
-      head.appendChild(styleEl);
+      head.appendChild(style);
 
+      // Load Tailwind and Google Fonts
       const tailwind = doc.createElement("link");
       tailwind.rel = "stylesheet";
       tailwind.href = "/tailwind.output.css";
@@ -44,27 +55,24 @@ export const initializeEditorStyles = (editor: Editor) => {
       font.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap";
       head.appendChild(font);
 
-      // ✅ Inject content
-      try {
-        editor.setComponents(`
-          <section class="min-h-screen bg-black text-white p-8">
-            <h1 class="text-4xl font-bold">✅ GrapesJS Canvas Renders</h1>
-            <p>This was injected after successful DOM access.</p>
-          </section>
-        `);
-        console.log("✅ Styles + components injected!");
-      } catch (err) {
-        console.error("❌ Injection failed:", err);
-      }
+      // ✅ Inject visible debug content
+      editor.setComponents(`
+        <section class="min-h-screen bg-black text-white p-8">
+          <h1 class="text-4xl font-bold">✅ Canvas Loaded</h1>
+          <p>This HTML was injected directly after DOM stabilization.</p>
+        </section>
+      `);
+
+      console.log("✅ Styles and test HTML injected into canvas");
     };
 
-    tryInject();
+    attempt(); // kick off retry loop
   });
 
-  // Optional outer GrapesJS UI styling
-  const outerStyle = document.createElement('style');
+  // Optional outer editor styling
+  const outerStyle = document.createElement("style");
   outerStyle.innerHTML = `
-    .gjs-cv-canvas { background-color: #000 !important; }
+    .gjs-cv-canvas { background: #000 !important; }
     .gjs-frame-wrapper { padding: 1rem !important; }
   `;
   document.head.appendChild(outerStyle);
