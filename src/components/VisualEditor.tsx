@@ -1,46 +1,45 @@
-import { useEffect, useRef } from "react";
-import grapesjs from "grapesjs";
-import presetWebpage from "grapesjs-preset-webpage";
-import "grapesjs/dist/css/grapes.min.css";
-import { initializeEditorStyles } from "./editorStyles";
+import { useEffect, useRef } from 'react';
+import grapesjs from 'grapesjs';
+import 'grapesjs/dist/css/grapes.min.css';
 
-const VisualEditor: React.FC = () => {
-  const editorRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+const VisualEditor = () => {
+  const editorRef = useRef<grapesjs.Editor>();
 
   useEffect(() => {
-    if (!containerRef.current || editorRef.current) return;
-
-    console.log("🧪 Initializing GrapesJS...");
-
     const editor = grapesjs.init({
-      container: containerRef.current,
-      height: "100vh",
-      width: "100%",
+      container: '#gjs',
+      height: 'auto',
+      fromElement: false,
       storageManager: false,
-      plugins: [presetWebpage],
       canvas: {
         styles: [
-          "/tailwind.output.css",
-          "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap",
+          '/tailwind.output.css',
+          'https://fonts.googleapis.com/css2?family=Urbanist:wght@300;600;800&display=swap',
         ],
       },
     });
 
     editorRef.current = editor;
-    initializeEditorStyles(editor);
 
-    return () => {
-      editor.destroy();
-      editorRef.current = null;
-    };
+    // Wait for GrapesJS to finish loading before setting components
+    editor.on('load', async () => {
+      try {
+        const [html, css] = await Promise.all([
+          fetch('/static/homepage.html').then((r) => r.text()),
+          fetch('/tailwind.output.css').then((r) => r.text()),
+        ]);
+
+        editor.setComponents(html); // ✅ Safe now
+        editor.setStyle(css);
+      } catch (error) {
+        console.error('❌ Failed to load homepage or CSS:', error);
+      }
+    });
+
+    return () => editor.destroy();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-black">
-      <div ref={containerRef} className="h-screen" />
-    </div>
-  );
+  return <div id="gjs" className="flex-1" />;
 };
 
 export default VisualEditor;

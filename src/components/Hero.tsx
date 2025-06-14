@@ -1,7 +1,18 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-scroll';
+import { useState, useEffect } from 'react';
 
 const Hero: React.FC = () => {
+  const isClient = typeof window !== 'undefined';
+  const [ScrollLink, setScrollLink] = useState<any>(null);
+
+  useEffect(() => {
+    if (isClient) {
+      import('react-scroll').then((module) => {
+        setScrollLink(() => module.Link);
+      });
+    }
+  }, [isClient]);
+
   return (
     <section
       id="home"
@@ -74,24 +85,49 @@ const Hero: React.FC = () => {
           transition={{ duration: 1, delay: 1.5 }}
           className="flex justify-center gap-6"
         >
-          <Link to="services" smooth={true} duration={500}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-all"
-            >
-              Explore Services
-            </motion.button>
-          </Link>
-          <Link to="custom-design" smooth={true} duration={500}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-blue-500/10 border border-blue-400/30 text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-500/20 transition-all"
-            >
-              Custom Design
-            </motion.button>
-          </Link>
+          {isClient && ScrollLink ? (
+            <ScrollLink to="services" smooth={true} duration={500}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-all"
+              >
+                Explore Services
+              </motion.button>
+            </ScrollLink>
+          ) : (
+            <a href="#services">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-500 text-white px-8 py-3 rounded-lg hover:bg-blue-600 transition-all"
+              >
+                Explore Services
+              </motion.button>
+            </a>
+          )}
+          
+          {isClient && ScrollLink ? (
+            <ScrollLink to="custom-design" smooth={true} duration={500}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-500/10 border border-blue-400/30 text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-500/20 transition-all"
+              >
+                Custom Design
+              </motion.button>
+            </ScrollLink>
+          ) : (
+            <a href="#custom-design">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-blue-500/10 border border-blue-400/30 text-blue-400 px-8 py-3 rounded-lg hover:bg-blue-500/20 transition-all"
+              >
+                Custom Design
+              </motion.button>
+            </a>
+          )}
         </motion.div>
       </div>
     </section>
