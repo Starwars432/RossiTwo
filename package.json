@@ -1,7 +1,9 @@
 {
+  "name": "manifest-illusions",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "prerender": "NODE_OPTIONS=--loader=ts-node/esm ts-node --project tsconfig.node.json scripts/prerender-homepage.ts",
+    "prerender": "tsx scripts/prerender-homepage.tsx",
     "dev": "npm run prerender && vite",
     "build": "npm run prerender && vite build",
     "preview": "vite preview",
@@ -47,6 +49,7 @@
     "autoprefixer": "^10.4.17",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^5.0.12"
