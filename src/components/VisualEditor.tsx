@@ -1,3 +1,4 @@
+// src/components/VisualEditor.tsx
 import { useEffect } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
@@ -11,11 +12,8 @@ export default function VisualEditor() {
       storageManager: false,
       canvas: {
         customSpots: true,
-        styles: [
-          '/tailwind.output.css',
-          '/assets/index-r4rMtXkJ.css' // ✅ update this to your latest asset hash!
-        ]
-      }
+        styles: ['/static/homepage.css'],  // Pre-load full CSS upfront
+      },
     });
 
     editor.on('load', async () => {
@@ -23,20 +21,28 @@ export default function VisualEditor() {
         const htmlRes = await fetch('/static/homepage.html');
         const html = await htmlRes.text();
 
-        const bodyOnly = html.replace(/^[\s\S]*<body[^>]*>/i, '').replace(/<\/body>[\s\S]*$/i, '');
-        editor.setComponents(bodyOnly); // ✅ safe now!
+        // Extract only the <body> contents
+        const bodyOnly = html
+          .replace(/^[\s\S]*?<body[^>]*>/i, '')
+          .replace(/<\/body>[\s\S]*$/i, '');
+
+        // Set the full CSS *before* HTML
+        const cssRes = await fetch('/static/homepage.css');
+        const css = await cssRes.text();
+        editor.setStyle(css);
+
+        editor.setComponents(bodyOnly);
 
         const doc = editor.Canvas.getFrame()?.contentDocument;
         const body = doc?.body;
-
         if (body) {
-          body.style.background = '#ffffff';
+          body.style.background = '';  // Remove any forced background
           body.style.margin = '0';
           body.style.minHeight = '100vh';
           body.style.overflow = 'visible';
         }
       } catch (err) {
-        console.error('Failed to load homepage or CSS:', err);
+        console.error('Error loading homepage:', err);
       }
     });
 
