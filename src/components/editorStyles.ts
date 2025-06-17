@@ -2,68 +2,42 @@
 import { Editor } from 'grapesjs';
 
 /**
- * Injects Tailwind, Google Fonts and a safe reset into the GrapesJS canvas
- * iframe — without forcing everything to white text.
+ * Inject Tailwind + Google Fonts into the GrapesJS iframe
+ * without forcing any background colour.
  */
 export const initializeEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
-    const waitForIframeReady = () => {
-      const frame = editor.Canvas.getFrame();
-      const doc = frame?.contentDocument;
+    const frame = editor.Canvas.getFrame();
+    const doc   = frame?.contentDocument;
+    const head  = doc?.head;
 
-      if (!doc || doc.readyState !== 'complete') {
-        // iframe still loading → try again in 50 ms
-        setTimeout(waitForIframeReady, 50);
-        return;
-      }
+    if (!doc || !head) return;
 
-      const { head, body } = doc;
-      if (!head || !body) {
-        setTimeout(waitForIframeReady, 50);
-        return;
-      }
+    /* Tailwind (already loaded via /static/homepage.css but
+       keeping this allows live‑preview of new utility classes) */
+    const tailwind = doc.createElement('link');
+    tailwind.rel = 'stylesheet';
+    tailwind.href = '/tailwind.output.css';
+    head.appendChild(tailwind);
 
-      /* ------------------------------------------------------------------
-         1.  Tailwind + Fonts
-      ------------------------------------------------------------------ */
-      const tailwind = doc.createElement('link');
-      tailwind.rel = 'stylesheet';
-      tailwind.href = '/tailwind.output.css';      // ✅ point to your build
-      head.appendChild(tailwind);
+    /* Google Font */
+    const font = doc.createElement('link');
+    font.rel = 'stylesheet';
+    font.href =
+      'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
+    head.appendChild(font);
 
-      const font = doc.createElement('link');
-      font.rel = 'stylesheet';
-      font.href =
-        'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
-      head.appendChild(font);
-
-      /* ------------------------------------------------------------------
-         2.  Minimal reset (no forced colours!)
-      ------------------------------------------------------------------ */
-      const style = doc.createElement('style');
-      style.innerHTML = `
-        /* make sure no element is hidden or mid‑animation */
-        *, *::before, *::after {
-          opacity: 1 !important;
-          transform: none !important;
-          visibility: visible !important;
-        }
-        /* let Tailwind handle layout; just clear default margins */
-        body { margin: 0; min-height: 100vh; }
-      `;
-      head.appendChild(style);
-    };
-
-    waitForIframeReady();
+    /* Minimal reset */
+    const style = doc.createElement('style');
+    style.textContent = `
+      *,*::before,*::after{opacity:1!important;transform:none!important;visibility:visible!important;}
+      body{margin:0;min-height:100vh;}
+    `;
+    head.appendChild(style);
   });
 
-  /* --------------------------------------------------------------------
-     3.  Optional outer‑chrome tweaks for the GrapesJS UI
-  -------------------------------------------------------------------- */
-  const outerStyle = document.createElement('style');
-  outerStyle.innerHTML = `
-    .gjs-cv-canvas { background-color: #000 !important; }
-    .gjs-frame-wrapper { padding: 1rem !important; }
-  `;
-  document.head.appendChild(outerStyle);
+  /* Make GrapesJS outer wrapper transparent */
+  const outer = document.createElement('style');
+  outer.textContent = `.gjs-cv-canvas{background:transparent!important;}`;
+  document.head.appendChild(outer);
 };
