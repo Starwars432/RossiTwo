@@ -1,20 +1,14 @@
-import { useEffect, useRef } from 'react';
-import grapesjs, { Editor as GrapesEditor } from 'grapesjs';
+import { useEffect } from 'react';
+import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 
-const VisualEditor = () => {
-  // Hold the GrapesJS instance so you can access it later if needed
-  const editorRef = useRef<GrapesEditor | null>(null);
-
+export default function VisualEditor() {
   useEffect(() => {
-    /* ------------------------------------------------------------------
-       1. Initialise GrapesJS
-    ------------------------------------------------------------------ */
+    /* 1. Initialise GrapesJS */
     const editor = grapesjs.init(
       {
         container: '#gjs',
-        // we’ll control height via CSS; keep it ‘auto’ here
-        height: 'auto',
+        height: '100%',
         fromElement: false,
         storageManager: false,
         canvas: {
@@ -23,51 +17,53 @@ const VisualEditor = () => {
             'https://fonts.googleapis.com/css2?family=Urbanist:wght@300;600;800&display=swap',
           ],
         },
-      } as any // GrapesJS type defs don’t include all props; cast to 'any'
+      } as any
     );
 
-    editorRef.current = editor;
-
-    /* ------------------------------------------------------------------
-       2. When GrapesJS is ready, inject the homepage HTML & styles
-    ------------------------------------------------------------------ */
+    /* 2. After the editor is fully ready */
     editor.on('load', async () => {
       try {
-        const [html, css] = await Promise.all([
-          fetch('/static/homepage.html').then((r) => r.text()),
-          fetch('/tailwind.output.css').then((r) => r.text()),
-        ]);
-
+        const html = await fetch('/static/homepage.html').then((r) => r.text());
         editor.setComponents(html);
-        editor.setStyle(css);
 
-        /* --------------------------------------------------------------
-           3. Ensure the iframe body isn’t clipped / hidden
-        -------------------------------------------------------------- */
         const frame = editor.Canvas.getFrame();
         const doc = frame?.contentDocument;
         const body = doc?.body;
+        if (!doc || !body) return;
 
-        if (body) {
-          body.style.minHeight = '100vh';
-          body.style.overflow = 'visible';
-          body.style.background = 'transparent';
-          // add some padding so you can scroll/see everything
-          body.style.padding = '2rem';
-        }
+        /* ①  Force layout */
+        doc.documentElement.style.height = '100%';
+        body.style.minHeight = '100vh';
+        body.style.margin = '0';
+        body.style.overflow = 'visible';
+
+        /* ②  Add bright‑red test banner */
+        const test = doc.createElement('div');
+        test.textContent =
+          'TEST BANNER – if you can read this, the page loaded!';
+        test.style.cssText = `
+          position:fixed;top:0;left:0;right:0;
+          background:#ff0040;color:#fff;font-size:20px;
+          padding:8px;z-index:9999;text-align:center;
+        `;
+        doc.body.appendChild(test);
+
+        /* ③  Remove hero overlays if present */
+        doc
+          .querySelectorAll('.pointer-events-none.absolute.inset-0')
+          .forEach((el) => el.remove());
+
+        /* ④  Be 100 % sure background is white */
+        body.style.background = '#ffffff';
       } catch (err) {
-        console.error('❌ Failed to load homepage or CSS', err);
+        console.error('Failed to inject homepage', err);
       }
     });
 
-    return () => {
-      editor.destroy();
-    };
+    return () => editor.destroy();
   }, []);
 
-  /* --------------------------------------------------------------------
-     4. Editor container: take full viewport height, allow scrolling
-  -------------------------------------------------------------------- */
+  /* 3. GrapesJS container – white + scrollable */
   return (
     <div
       id="gjs"
@@ -75,10 +71,8 @@ const VisualEditor = () => {
         height: '100vh',
         width: '100%',
         overflow: 'auto',
-        backgroundColor: '#000', // optional: matches site background
+        background: '#fff',
       }}
     />
   );
-};
-
-export default VisualEditor;
+}

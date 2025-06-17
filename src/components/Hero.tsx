@@ -13,77 +13,145 @@ const Hero: React.FC = () => {
     }
   }, [isClient]);
 
+  // Generate hyperspace stars with different depths/speeds
+  const generateHyperspaceStars = (count: number) => {
+    return Array.from({ length: count }, (_, i) => {
+      const depth = Math.random() * 3 + 1; // 1-4 depth levels
+      const speed = 4 - depth; // Closer stars move faster
+      
+      return {
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        initialX: Math.random() * 100,
+        initialY: Math.random() * 100,
+        size: Math.random() * 2 + 0.5,
+        depth: depth,
+        speed: speed,
+        opacity: Math.random() * 0.8 + 0.2,
+      };
+    });
+  };
+
+  const stars = generateHyperspaceStars(80);
+
   return (
     <section
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       data-sb-field-path="sections.0"
     >
-      {/* Fog Animation */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-radial from-transparent via-black/50 to-black pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [0, 0.5, 0.3] }}
-        transition={{ duration: 3, times: [0, 0.5, 1], ease: "easeInOut" }}
-      />
+      {/* Hyperspace Stars Background */}
+      <div className="absolute inset-0 pointer-events-none">
+        {stars.map((star) => (
+          <motion.div
+            key={star.id}
+            className="absolute"
+            style={{
+              left: `${star.initialX}%`,
+              top: `${star.initialY}%`,
+            }}
+            initial={{
+              x: 0,
+              y: 0,
+              scale: 0,
+              opacity: 0,
+            }}
+            animate={{
+              x: [0, (star.x - 50) * 8], // Stretch outward from center
+              y: [0, (star.y - 50) * 8],
+              scale: [0, star.size, star.size * 2],
+              opacity: [0, star.opacity, 0],
+            }}
+            transition={{
+              duration: star.speed,
+              repeat: Infinity,
+              ease: "easeOut",
+              delay: Math.random() * 2,
+            }}
+          >
+            {/* Star with trailing effect */}
+            <div className="relative">
+              {/* Main star */}
+              <div 
+                className="bg-blue-400 rounded-full"
+                style={{
+                  width: `${star.size}px`,
+                  height: `${star.size}px`,
+                  boxShadow: `0 0 ${star.size * 2}px rgba(96, 165, 250, 0.8)`,
+                }}
+              />
+              {/* Trailing line for hyperspace effect */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 bg-gradient-to-r from-blue-400 to-transparent"
+                style={{
+                  width: `${star.size * 20}px`,
+                  height: `${star.size * 0.5}px`,
+                  transformOrigin: 'left center',
+                }}
+                initial={{ scaleX: 0, opacity: 0 }}
+                animate={{ 
+                  scaleX: [0, 1, 0],
+                  opacity: [0, 0.8, 0],
+                  rotate: Math.atan2(star.y - 50, star.x - 50) * (180 / Math.PI),
+                }}
+                transition={{
+                  duration: star.speed,
+                  repeat: Infinity,
+                  ease: "easeOut",
+                  delay: Math.random() * 2,
+                }}
+              />
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
-      {/* Light Beam Effect */}
+      {/* Central light burst effect */}
       <motion.div
-        className="absolute inset-0 bg-gradient-conic from-blue-500/10 via-transparent to-transparent pointer-events-none"
-        initial={{ opacity: 0, rotate: -45 }}
-        animate={{ 
-          opacity: [0, 0.15, 0.1],
-          rotate: [-45, -30, -45]
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.3, 0.1],
         }}
-        transition={{ 
-          duration: 5,
-          times: [0, 0.5, 1],
-          ease: "easeInOut",
+        transition={{
+          duration: 4,
           repeat: Infinity,
-          repeatType: "reverse"
+          ease: "easeInOut",
         }}
-      />
+      >
+        <div className="w-96 h-96 bg-gradient-radial from-blue-500/20 via-blue-400/10 to-transparent rounded-full" />
+      </motion.div>
+
+      {/* Subtle gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/10 to-black/30 pointer-events-none" />
 
       <div className="relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
           className="flex flex-col items-center space-y-4"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1, ease: "easeOut" }}
         >
-          <motion.h1 
-            className="text-8xl italic"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-          >
-            Manifest
-          </motion.h1>
-          <motion.h1 
-            className="text-8xl italic text-blue-400"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-          >
-            Illusions
-          </motion.h1>
+          <h1 className="text-8xl italic">Manifest</h1>
+          <h1 className="text-8xl italic text-blue-400">Illusions</h1>
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.2 }}
-          className="text-xl text-gray-300 mt-8 mb-12 max-w-3xl mx-auto"
+          className="text-xl text-gray-300 mt-8 mb-12 max-w-3xl mx-auto text-center"
           data-sb-field-path="sections.0.content"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
         >
           Elevating brands with cutting-edge design and innovative digital marketing strategies
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.5 }}
           className="flex justify-center gap-6"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
         >
           {isClient && ScrollLink ? (
             <ScrollLink to="services" smooth={true} duration={500}>
