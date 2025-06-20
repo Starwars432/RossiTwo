@@ -13,27 +13,43 @@ const Hero: React.FC = () => {
     }
   }, [isClient]);
 
-  // Generate hyperspace stars with different depths/speeds
-  const generateHyperspaceStars = (count: number) => {
+  // Generate cosmic particles with different types and behaviors
+  const generateCosmicParticles = (count: number) => {
     return Array.from({ length: count }, (_, i) => {
-      const depth = Math.random() * 3 + 1; // 1-4 depth levels
-      const speed = 4 - depth; // Closer stars move faster
+      const type = Math.random();
+      let particleType = 'star';
+      
+      if (type < 0.08) particleType = 'nebula';
+      else if (type < 0.15) particleType = 'comet';
+      else if (type < 0.22) particleType = 'planet';
+      else if (type < 0.28) particleType = 'asteroid';
+      else if (type < 0.32) particleType = 'pulsar';
       
       return {
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        initialX: Math.random() * 100,
-        initialY: Math.random() * 100,
-        size: Math.random() * 2 + 0.5,
-        depth: depth,
-        speed: speed,
+        size: Math.random() * 4 + 1,
+        type: particleType,
+        speed: Math.random() * 25 + 8,
         opacity: Math.random() * 0.8 + 0.2,
+        color: [
+          '#60A5FA', // Blue
+          '#A78BFA', // Purple
+          '#F472B6', // Pink
+          '#34D399', // Emerald
+          '#FBBF24', // Amber
+          '#FB7185', // Rose
+          '#818CF8', // Indigo
+          '#06B6D4', // Cyan
+          '#8B5CF6', // Violet
+        ][Math.floor(Math.random() * 9)],
+        delay: Math.random() * 8,
       };
     });
   };
 
-  const stars = generateHyperspaceStars(80);
+  const particles = generateCosmicParticles(80);
 
   return (
     <section
@@ -41,91 +57,291 @@ const Hero: React.FC = () => {
       className="relative min-h-screen flex items-center justify-center overflow-hidden"
       data-sb-field-path="sections.0"
     >
-      {/* Hyperspace Stars Background */}
-      <div className="absolute inset-0 pointer-events-none">
-        {stars.map((star) => (
+      {/* Cosmic Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-950 via-purple-950 to-black">
+        {/* Animated Gradient Overlay */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              'radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%)',
+              'radial-gradient(circle at 80% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 20% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 60% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%)',
+              'radial-gradient(circle at 40% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 60% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%)',
+            ]
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+        />
+
+        {/* Cosmic Particles */}
+        {particles.map((particle) => (
           <motion.div
-            key={star.id}
+            key={particle.id}
             className="absolute"
             style={{
-              left: `${star.initialX}%`,
-              top: `${star.initialY}%`,
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
             }}
             initial={{
-              x: 0,
-              y: 0,
               scale: 0,
               opacity: 0,
             }}
             animate={{
-              x: [0, (star.x - 50) * 8], // Stretch outward from center
-              y: [0, (star.y - 50) * 8],
-              scale: [0, star.size, star.size * 2],
-              opacity: [0, star.opacity, 0],
+              scale: [0, 1, 1, 0],
+              opacity: [0, particle.opacity, particle.opacity, 0],
+              x: particle.type === 'comet' ? [0, 120] : 
+                 particle.type === 'asteroid' ? [0, Math.sin(particle.id) * 40] :
+                 [0, Math.sin(particle.id) * 15],
+              y: particle.type === 'comet' ? [0, -60] : 
+                 particle.type === 'asteroid' ? [0, Math.cos(particle.id) * 30] :
+                 [0, Math.cos(particle.id) * 15],
+              rotate: particle.type === 'asteroid' ? [0, 360] : 0,
             }}
             transition={{
-              duration: star.speed,
+              duration: particle.speed,
               repeat: Infinity,
-              ease: "easeOut",
-              delay: Math.random() * 2,
+              ease: particle.type === 'pulsar' ? "easeInOut" : "linear",
+              delay: particle.delay,
             }}
           >
-            {/* Star with trailing effect */}
-            <div className="relative">
-              {/* Main star */}
-              <div 
-                className="bg-blue-400 rounded-full"
+            {particle.type === 'star' && (
+              <div
+                className="rounded-full"
                 style={{
-                  width: `${star.size}px`,
-                  height: `${star.size}px`,
-                  boxShadow: `0 0 ${star.size * 2}px rgba(96, 165, 250, 0.8)`,
+                  width: `${particle.size}px`,
+                  height: `${particle.size}px`,
+                  backgroundColor: particle.color,
+                  boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
                 }}
               />
-              {/* Trailing line for hyperspace effect */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 bg-gradient-to-r from-blue-400 to-transparent"
+            )}
+            
+            {particle.type === 'nebula' && (
+              <div
+                className="rounded-full blur-sm"
                 style={{
-                  width: `${star.size * 20}px`,
-                  height: `${star.size * 0.5}px`,
-                  transformOrigin: 'left center',
+                  width: `${particle.size * 4}px`,
+                  height: `${particle.size * 4}px`,
+                  background: `radial-gradient(circle, ${particle.color}40 0%, ${particle.color}20 40%, transparent 70%)`,
                 }}
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{ 
-                  scaleX: [0, 1, 0],
-                  opacity: [0, 0.8, 0],
-                  rotate: Math.atan2(star.y - 50, star.x - 50) * (180 / Math.PI),
+              />
+            )}
+            
+            {particle.type === 'comet' && (
+              <div className="relative">
+                <div
+                  className="rounded-full"
+                  style={{
+                    width: `${particle.size}px`,
+                    height: `${particle.size}px`,
+                    backgroundColor: particle.color,
+                    boxShadow: `0 0 ${particle.size * 3}px ${particle.color}`,
+                  }}
+                />
+                <div
+                  className="absolute top-1/2 left-full h-px origin-left"
+                  style={{
+                    width: `${particle.size * 12}px`,
+                    background: `linear-gradient(to right, ${particle.color}, ${particle.color}80, transparent)`,
+                    transform: 'translateY(-50%) rotate(45deg)',
+                  }}
+                />
+              </div>
+            )}
+            
+            {particle.type === 'planet' && (
+              <div
+                className="rounded-full"
+                style={{
+                  width: `${particle.size * 2}px`,
+                  height: `${particle.size * 2}px`,
+                  background: `radial-gradient(circle at 30% 30%, ${particle.color}, ${particle.color}60, ${particle.color}20)`,
+                  boxShadow: `0 0 ${particle.size}px ${particle.color}40`,
+                }}
+              />
+            )}
+
+            {particle.type === 'asteroid' && (
+              <div
+                className="rounded-sm"
+                style={{
+                  width: `${particle.size * 1.5}px`,
+                  height: `${particle.size}px`,
+                  backgroundColor: particle.color,
+                  opacity: 0.6,
+                  clipPath: 'polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%)',
+                }}
+              />
+            )}
+
+            {particle.type === 'pulsar' && (
+              <motion.div
+                className="rounded-full"
+                style={{
+                  width: `${particle.size * 3}px`,
+                  height: `${particle.size * 3}px`,
+                  background: `radial-gradient(circle, ${particle.color}, transparent)`,
+                }}
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.8, 0.3, 0.8],
                 }}
                 transition={{
-                  duration: star.speed,
+                  duration: 2,
                   repeat: Infinity,
-                  ease: "easeOut",
-                  delay: Math.random() * 2,
+                  ease: "easeInOut",
                 }}
               />
+            )}
+          </motion.div>
+        ))}
+
+        {/* Floating Energy Orbs */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={`orb-${i}`}
+            className="absolute rounded-full"
+            style={{
+              left: `${15 + i * 7}%`,
+              top: `${25 + (i % 4) * 18}%`,
+              width: `${30 + i * 8}px`,
+              height: `${30 + i * 8}px`,
+              background: `radial-gradient(circle, ${
+                ['#60A5FA', '#A78BFA', '#F472B6', '#34D399', '#FBBF24', '#06B6D4'][i % 6]
+              }25 0%, transparent 70%)`,
+            }}
+            animate={{
+              y: [0, -40, 0],
+              x: [0, Math.sin(i) * 25, 0],
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.7, 0.2],
+            }}
+            transition={{
+              duration: 10 + i * 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: i * 0.8,
+            }}
+          />
+        ))}
+
+        {/* Cosmic Dust Clouds */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`dust-${i}`}
+            className="absolute blur-xl"
+            style={{
+              left: `${i * 15}%`,
+              top: `${15 + i * 12}%`,
+              width: `${180 + i * 40}px`,
+              height: `${90 + i * 25}px`,
+              background: `linear-gradient(${45 + i * 30}deg, 
+                rgba(96, 165, 250, 0.15) 0%, 
+                rgba(167, 139, 250, 0.15) 30%,
+                rgba(244, 114, 182, 0.15) 60%,
+                rgba(52, 211, 153, 0.15) 100%)`,
+              borderRadius: '50%',
+            }}
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.5, 0.1],
+            }}
+            transition={{
+              duration: 35 + i * 15,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+
+        {/* Distant Galaxy Spiral */}
+        <motion.div
+          className="absolute top-1/4 right-1/4 w-96 h-96 opacity-15"
+          animate={{
+            rotate: [0, 360],
+          }}
+          transition={{
+            duration: 80,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          <div
+            className="w-full h-full rounded-full"
+            style={{
+              background: `conic-gradient(from 0deg, 
+                transparent 0deg, 
+                rgba(96, 165, 250, 0.4) 60deg, 
+                transparent 120deg, 
+                rgba(167, 139, 250, 0.4) 180deg, 
+                transparent 240deg, 
+                rgba(244, 114, 182, 0.4) 300deg, 
+                transparent 360deg)`,
+            }}
+          />
+        </motion.div>
+
+        {/* Cosmic Rings */}
+        {[...Array(3)].map((_, i) => (
+          <motion.div
+            key={`ring-${i}`}
+            className="absolute rounded-full border opacity-10"
+            style={{
+              left: `${30 + i * 20}%`,
+              top: `${20 + i * 25}%`,
+              width: `${200 + i * 100}px`,
+              height: `${200 + i * 100}px`,
+              borderColor: ['#60A5FA', '#A78BFA', '#F472B6'][i],
+              borderWidth: '2px',
+            }}
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 360],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: 20 + i * 10,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        ))}
+
+        {/* Shooting Stars */}
+        {[...Array(4)].map((_, i) => (
+          <motion.div
+            key={`shooting-${i}`}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+              x: [0, 200],
+              y: [0, -100],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 8 + Math.random() * 10,
+              ease: "easeOut",
+            }}
+          >
+            <div className="w-1 h-1 bg-white rounded-full">
+              <div className="absolute top-0 left-0 w-20 h-px bg-gradient-to-r from-white to-transparent transform -rotate-45 origin-left" />
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Central light burst effect */}
-      <motion.div
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.3, 0.1],
-        }}
-        transition={{
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      >
-        <div className="w-96 h-96 bg-gradient-radial from-blue-500/20 via-blue-400/10 to-transparent rounded-full" />
-      </motion.div>
-
-      {/* Subtle gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-radial from-transparent via-black/10 to-black/30 pointer-events-none" />
-
+      {/* Content */}
       <div className="relative z-10">
         <motion.div
           className="flex flex-col items-center space-y-4"

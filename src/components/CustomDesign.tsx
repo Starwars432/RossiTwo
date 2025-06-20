@@ -106,7 +106,7 @@ const CustomDesign: React.FC = () => {
   };
 
   return (
-    <section id="custom-design" className="relative py-20 px-6 bg-blue-900/10">
+    <section id="custom-design" className="relative py-20 px-6 bg-black">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0 }}
