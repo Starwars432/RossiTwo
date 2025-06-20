@@ -1,43 +1,58 @@
 // src/components/editorStyles.ts
 import { Editor } from 'grapesjs';
 
-/**
- * Inject Tailwind + Google Fonts into the GrapesJS iframe
- * without forcing any background colour.
- */
 export const initializeEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     const frame = editor.Canvas.getFrame();
-    const doc   = frame?.contentDocument;
-    const head  = doc?.head;
+    const doc = frame?.contentDocument;
+    const head = doc?.head;
+    const body = doc?.body;
 
-    if (!doc || !head) return;
+    if (!doc || !head || !body) return;
 
-    /* Tailwind (already loaded via /static/homepage.css but
-       keeping this allows live‑preview of new utility classes) */
+    // ✅ Tailwind (live-preview of custom utilities)
     const tailwind = doc.createElement('link');
     tailwind.rel = 'stylesheet';
     tailwind.href = '/tailwind.output.css';
     head.appendChild(tailwind);
 
-    /* Google Font */
+    // ✅ Google Fonts
     const font = doc.createElement('link');
     font.rel = 'stylesheet';
-    font.href =
-      'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
+    font.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
     head.appendChild(font);
 
-    /* Minimal reset */
+    // ✅ Inject minimal and stable iframe CSS
     const style = doc.createElement('style');
     style.textContent = `
-      *,*::before,*::after{opacity:1!important;transform:none!important;visibility:visible!important;}
-      body{margin:0;min-height:100vh;}
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
+        font-family: 'Playfair Display', serif !important;
+        background-color: transparent !important;
+      }
+      *, *::before, *::after {
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
+        animation: none !important;
+      }
+
+      /* Optional: add visible outline to every component for debugging */
+      [data-gjs-highlightable] {
+        outline: 1px dashed rgba(255, 255, 255, 0.2);
+      }
     `;
     head.appendChild(style);
   });
 
-  /* Make GrapesJS outer wrapper transparent */
+  // ✅ GrapesJS wrapper outside the iframe
   const outer = document.createElement('style');
-  outer.textContent = `.gjs-cv-canvas{background:transparent!important;}`;
+  outer.textContent = `
+    .gjs-cv-canvas { background: transparent !important; }
+    .gjs-frame-wrapper { padding: 1rem; }
+    .gjs-frame { background-color: transparent !important; }
+  `;
   document.head.appendChild(outer);
 };

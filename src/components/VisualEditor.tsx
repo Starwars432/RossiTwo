@@ -1,6 +1,7 @@
 // src/components/VisualEditor.tsx
 import { useEffect } from 'react';
 import grapesjs from 'grapesjs';
+import * as presetWebpage from 'grapesjs-preset-webpage';
 import 'grapesjs/dist/css/grapes.min.css';
 
 export default function VisualEditor() {
@@ -8,41 +9,54 @@ export default function VisualEditor() {
     const editor = grapesjs.init({
       container: '#gjs',
       height: '100vh',
-      fromElement: false,
       storageManager: false,
+      plugins: [editor =>
+        presetWebpage.default(editor, {
+          blocks: [
+            'column1',
+            'column2',
+            'column3',
+            'text',
+            'link',
+            'image',
+            'video',
+          ],
+        })
+      ],
       canvas: {
-        customSpots: true,
-        styles: ['/static/homepage.css'],  // Pre-load full CSS upfront
+        styles: [
+          '/tailwind.output.css',
+          'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
+        ],
       },
     });
 
     editor.on('load', async () => {
       try {
         const htmlRes = await fetch('/static/homepage.html');
-        const html = await htmlRes.text();
-
-        // Extract only the <body> contents
-        const bodyOnly = html
+        const rawHTML = await htmlRes.text();
+        const bodyContent = rawHTML
           .replace(/^[\s\S]*?<body[^>]*>/i, '')
           .replace(/<\/body>[\s\S]*$/i, '');
 
-        // Set the full CSS *before* HTML
         const cssRes = await fetch('/static/homepage.css');
-        const css = await cssRes.text();
-        editor.setStyle(css);
+        const rawCSS = await cssRes.text();
 
-        editor.setComponents(bodyOnly);
+        editor.setStyle(rawCSS);
+        editor.setComponents(bodyContent);
 
         const doc = editor.Canvas.getFrame()?.contentDocument;
         const body = doc?.body;
         if (body) {
-          body.style.background = '';  // Remove any forced background
           body.style.margin = '0';
           body.style.minHeight = '100vh';
           body.style.overflow = 'visible';
+          body.style.background = 'black';
+          body.style.color = 'white';
+          body.style.fontFamily = "'Playfair Display', serif";
         }
       } catch (err) {
-        console.error('Error loading homepage:', err);
+        console.error('❌ Error loading homepage:', err);
       }
     });
 

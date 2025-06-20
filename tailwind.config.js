@@ -1,25 +1,29 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './scripts/**/*.{ts,tsx}',
+  ],
   theme: {
     extend: {
       colors: {
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
-        background: 'var(--color-background)',
-        text: 'var(--color-text)',
-        accent: 'var(--color-accent)'
+        primary: 'var(--color-primary, #3B82F6)',
+        secondary: 'var(--color-secondary, #60A5FA)',
+        background: 'var(--color-background, #000000)',
+        text: 'var(--color-text, #ffffff)',
+        accent: 'var(--color-accent, #2563EB)',
       },
       fontFamily: {
-        heading: ['var(--font-heading)', 'serif'],
-        body: ['var(--font-body)', 'serif']
+        heading: ['var(--font-heading)', 'Playfair Display', 'serif'],
+        body: ['var(--font-body)', 'Playfair Display', 'serif'],
       },
       spacing: {
-        xs: 'var(--spacing-xs)',
-        sm: 'var(--spacing-sm)',
-        md: 'var(--spacing-md)',
-        lg: 'var(--spacing-lg)',
-        xl: 'var(--spacing-xl)'
+        xs: 'var(--spacing-xs, 0.5rem)',
+        sm: 'var(--spacing-sm, 1rem)',
+        md: 'var(--spacing-md, 1.5rem)',
+        lg: 'var(--spacing-lg, 2rem)',
+        xl: 'var(--spacing-xl, 3rem)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -49,11 +53,8 @@ export default {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
-      }
+      },
     },
   },
   plugins: [],
-  future: {
-    hoverOnlyWhenSupported: true,
-  }
 }
