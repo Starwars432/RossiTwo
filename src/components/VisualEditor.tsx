@@ -1,37 +1,34 @@
 // src/components/VisualEditor.tsx
 import { useEffect } from 'react';
 import grapesjs from 'grapesjs';
-import * as presetWebpage from 'grapesjs-preset-webpage';
 import 'grapesjs/dist/css/grapes.min.css';
+import * as presetWebpage from 'grapesjs-preset-webpage';
 
 export default function VisualEditor() {
   useEffect(() => {
     const editor = grapesjs.init({
       container: '#gjs',
       height: '100vh',
+      fromElement: false,
       storageManager: false,
-      plugins: [editor =>
-        presetWebpage.default(editor, {
-          blocks: [
-            'column1',
-            'column2',
-            'column3',
-            'text',
-            'link',
-            'image',
-            'video',
-          ],
-        })
+      plugins: [
+        editor =>
+          presetWebpage.default(editor, {
+            blocks: ['text', 'link', 'image', 'video'],
+          }),
       ],
       canvas: {
+        customSpots: true,
         styles: [
           '/tailwind.output.css',
+          '/static/homepage.css',
           'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
         ],
       },
     });
 
-    editor.on('load', async () => {
+    // Safe loader
+    editor.on('canvas:frame:load', async () => {
       try {
         const htmlRes = await fetch('/static/homepage.html');
         const rawHTML = await htmlRes.text();
@@ -45,7 +42,9 @@ export default function VisualEditor() {
         editor.setStyle(rawCSS);
         editor.setComponents(bodyContent);
 
-        const doc = editor.Canvas.getFrame()?.contentDocument;
+        // Optional: improve layout
+        const frame = editor.Canvas.getFrame();
+        const doc = frame?.contentDocument;
         const body = doc?.body;
         if (body) {
           body.style.margin = '0';
@@ -56,7 +55,7 @@ export default function VisualEditor() {
           body.style.fontFamily = "'Playfair Display', serif";
         }
       } catch (err) {
-        console.error('❌ Error loading homepage:', err);
+        console.error('❌ Failed to load homepage HTML:', err);
       }
     });
 

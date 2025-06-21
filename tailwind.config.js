@@ -3,7 +3,29 @@ export default {
   content: [
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
-    './scripts/**/*.{ts,tsx}',
+    './scripts/**/*.{ts,tsx,js,jsx}',
+    './public/static/**/*.html', // also scan static output
+  ],
+  safelist: [
+    'bg-gradient-to-b',
+    'from-black',
+    'via-purple-950',
+    'to-white',
+    'text-white',
+    'text-black',
+    'bg-black',
+    'bg-white',
+    'min-h-screen',
+    'inset-0',
+    'absolute',
+    'relative',
+    'overflow-x-hidden',
+    'overflow-hidden',
+    'font-serif',
+    'font-sans',
+    'pointer-events-none',
+    'z-50',
+    'z-0',
   ],
   theme: {
     extend: {
@@ -57,4 +79,4 @@ export default {
     },
   },
   plugins: [],
-}
+};
