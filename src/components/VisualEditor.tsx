@@ -1,8 +1,9 @@
 // src/components/VisualEditor.tsx
-import { useEffect } from 'react';
-import grapesjs from 'grapesjs';
+import { useEffect }    from 'react';
+import grapesjs         from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import * as presetWebpage from 'grapesjs-preset-webpage';
+import { initialiseEditorStyles } from './editorStyles';   // ← add
 
 export default function VisualEditor() {
   useEffect(() => {
@@ -12,50 +13,32 @@ export default function VisualEditor() {
       fromElement: false,
       storageManager: false,
       plugins: [
-        editor =>
-          presetWebpage.default(editor, {
-            blocks: ['text', 'link', 'image', 'video'],
-          }),
+        (e) => presetWebpage.default(e, { blocks: ['text','link','image','video'] }),
       ],
       canvas: {
-        customSpots: true,
-        styles: [
-          '/tailwind.output.css',
+        styles: [                 // we no longer need tailwind here – will be injected
           '/static/homepage.css',
-          'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
         ],
       },
     });
 
-    // Safe loader
-    editor.on('canvas:frame:load', async () => {
+    /* inject “show everything” styles */
+    initialiseEditorStyles(editor);
+
+    /* load the static HTML + CSS ----------------------------------------- */
+    editor.on('load', async () => {
       try {
-        const htmlRes = await fetch('/static/homepage.html');
-        const rawHTML = await htmlRes.text();
-        const bodyContent = rawHTML
-          .replace(/^[\s\S]*?<body[^>]*>/i, '')
-          .replace(/<\/body>[\s\S]*$/i, '');
+        const html = await (await fetch('/static/homepage.html')).text();
+        const css  = await (await fetch('/static/homepage.css')).text();
 
-        const cssRes = await fetch('/static/homepage.css');
-        const rawCSS = await cssRes.text();
-
-        editor.setStyle(rawCSS);
-        editor.setComponents(bodyContent);
-
-        // Optional: improve layout
-        const frame = editor.Canvas.getFrame();
-        const doc = frame?.contentDocument;
-        const body = doc?.body;
-        if (body) {
-          body.style.margin = '0';
-          body.style.minHeight = '100vh';
-          body.style.overflow = 'visible';
-          body.style.background = 'black';
-          body.style.color = 'white';
-          body.style.fontFamily = "'Playfair Display', serif";
-        }
+        editor.setStyle(css);
+        editor.setComponents(
+          html
+            .replace(/^[\s\S]*?<body[^>]*>/i, '')
+            .replace(/<\/body>[\s\S]*$/i, '')
+        );
       } catch (err) {
-        console.error('❌ Failed to load homepage HTML:', err);
+        console.error('❌ failed injecting homepage into GrapesJS', err);
       }
     });
 

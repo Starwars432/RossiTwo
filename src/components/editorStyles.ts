@@ -1,58 +1,49 @@
 // src/components/editorStyles.ts
 import { Editor } from 'grapesjs';
 
-export const initializeEditorStyles = (editor: Editor) => {
+/**
+ * Run once, right after the GrapesJS iframe has loaded,
+ * to make absolutely every element visible.
+ */
+export const initialiseEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     const frame = editor.Canvas.getFrame();
-    const doc = frame?.contentDocument;
-    const head = doc?.head;
-    const body = doc?.body;
+    const doc   = frame?.contentDocument;
+    const head  = doc?.head;
+    if (!doc || !head) return;
 
-    if (!doc || !head || !body) return;
+    /* Tailwind + Google Fonts (already present) -------- */
+    appendStylesheet(head, '/tailwind.output.css');
+    appendStylesheet(head, 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
-    // ✅ Tailwind (live-preview of custom utilities)
-    const tailwind = doc.createElement('link');
-    tailwind.rel = 'stylesheet';
-    tailwind.href = '/tailwind.output.css';
-    head.appendChild(tailwind);
-
-    // ✅ Google Fonts
-    const font = doc.createElement('link');
-    font.rel = 'stylesheet';
-    font.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap';
-    head.appendChild(font);
-
-    // ✅ Inject minimal and stable iframe CSS
-    const style = doc.createElement('style');
-    style.textContent = `
-      html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        min-height: 100vh !important;
-        font-family: 'Playfair Display', serif !important;
-        background-color: transparent !important;
-      }
+    /* NEW:  Hard-override every animation / transition  */
+    const forceVisible = doc.createElement('style');
+    forceVisible.textContent = `
+      /* stop all css / aos / framer animations */
       *, *::before, *::after {
-        opacity: 1 !important;
+        animation: none !important;
+        transition: none !important;
+        opacity: 1   !important;
         transform: none !important;
         visibility: visible !important;
-        animation: none !important;
       }
-
-      /* Optional: add visible outline to every component for debugging */
-      [data-gjs-highlightable] {
-        outline: 1px dashed rgba(255, 255, 255, 0.2);
+      html, body {
+        min-height: 100vh !important;
+        background: black !important;
+        color: white !important;
+        margin: 0 !important;
+        font-family: 'Playfair Display', serif !important;
+        overflow: visible !important;
       }
     `;
-    head.appendChild(style);
+    head.appendChild(forceVisible);
   });
-
-  // ✅ GrapesJS wrapper outside the iframe
-  const outer = document.createElement('style');
-  outer.textContent = `
-    .gjs-cv-canvas { background: transparent !important; }
-    .gjs-frame-wrapper { padding: 1rem; }
-    .gjs-frame { background-color: transparent !important; }
-  `;
-  document.head.appendChild(outer);
 };
+
+function appendStylesheet (head: HTMLHeadElement, href: string) {
+  if (head.querySelector(`link[href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel   = 'stylesheet';
+  link.href  = href;
+  head.appendChild(link);
+}
