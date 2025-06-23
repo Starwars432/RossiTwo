@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import grapesjs from 'grapesjs';
 import 'grapesjs/dist/css/grapes.min.css';
 import * as presetWebpage from 'grapesjs-preset-webpage';
+import { initialiseEditorStyles } from './editorStyles';
 
 export default function VisualEditor() {
   useEffect(() => {
@@ -10,9 +11,6 @@ export default function VisualEditor() {
       container: '#gjs',
       height: '100vh',
       storageManager: false,
-      plugins: [
-        (e) => presetWebpage.default(e, { blocks: ['text', 'link', 'image', 'video'] }),
-      ],
       canvas: {
         customSpots: true,
         styles: [
@@ -20,12 +18,24 @@ export default function VisualEditor() {
           'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap',
         ],
       },
+      plugins: [
+        (e) =>
+          presetWebpage.default(e, {
+            blocks: ['text', 'link', 'image', 'video'],
+          }),
+      ],
     });
+
+    // ✅ Inject iframe-wide styles for visibility overrides
+    initialiseEditorStyles(editor);
 
     editor.on('load', async () => {
       try {
-        const html = await (await fetch('/static/homepage.html')).text();
-        const css  = await (await fetch('/static/homepage.css')).text();
+        const htmlRes = await fetch('/static/homepage.html');
+        const cssRes = await fetch('/static/homepage.css');
+
+        const html = await htmlRes.text();
+        const css = await cssRes.text();
 
         editor.setStyle(css);
         editor.setComponents(
@@ -34,31 +44,15 @@ export default function VisualEditor() {
             .replace(/<\/body>[\s\S]*$/i, '')
         );
 
-        const doc = editor.Canvas.getFrame()?.contentDocument;
-        const head = doc?.head;
-        const body = doc?.body;
+        // ✅ Remove inline styles to stop AOS/framer hiding content
+        const frame = editor.Canvas.getFrame();
+        const doc = frame?.contentDocument;
+        const allElements = doc?.body?.querySelectorAll('*');
 
-        if (head && body) {
-          const fixStyle = doc.createElement('style');
-          fixStyle.innerHTML = `
-            html, body {
-              background-color: black !important;
-              color: white !important;
-              font-family: 'Playfair Display', serif !important;
-              min-height: 100vh !important;
-              overflow: visible !important;
-              margin: 0 !important;
-            }
-            *, *::before, *::after {
-              opacity: 1 !important;
-              visibility: visible !important;
-              transform: none !important;
-              animation: none !important;
-              transition: none !important;
-            }
-          `;
-          head.appendChild(fixStyle);
-        }
+        allElements?.forEach((el) => {
+          el.removeAttribute('style');
+        });
+
       } catch (err) {
         console.error('❌ failed injecting homepage into GrapesJS', err);
       }
