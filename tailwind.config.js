@@ -4,28 +4,28 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
     './scripts/**/*.{ts,tsx,js,jsx}',
-    './public/static/**/*.html', // also scan static output
+    './public/static/**/*.html',
   ],
   safelist: [
-    'bg-gradient-to-b',
-    'from-black',
-    'via-purple-950',
-    'to-white',
-    'text-white',
-    'text-black',
-    'bg-black',
-    'bg-white',
-    'min-h-screen',
-    'inset-0',
-    'absolute',
-    'relative',
-    'overflow-x-hidden',
-    'overflow-hidden',
-    'font-serif',
-    'font-sans',
-    'pointer-events-none',
-    'z-50',
-    'z-0',
+    // layout / backgrounds
+    'bg-black', 'bg-white', 'text-white', 'text-black',
+    'bg-gradient-to-b', 'from-black', 'via-purple-950', 'to-white',
+    'min-h-screen', 'inset-0', 'absolute', 'relative',
+    'overflow-x-hidden', 'overflow-hidden',
+    'z-50', 'z-0',
+
+    // font
+    'font-serif', 'font-sans',
+
+    // visibility fixes
+    'opacity-0', 'opacity-100',
+    'invisible', 'visible',
+    'pointer-events-none', 'pointer-events-auto',
+
+    // animations (used on load transitions)
+    'animate-fade', 'animate-slide-up', 'animate-slide-down', 'animate-scale-in',
+    'transition-all', 'duration-300', 'ease-in-out',
+    'transform', 'translate-y-4', 'translate-y-0',
   ],
   theme: {
     extend: {
