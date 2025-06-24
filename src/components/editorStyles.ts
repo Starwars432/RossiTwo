@@ -2,31 +2,29 @@
 import { Editor } from 'grapesjs';
 
 /**
- * Inject force-show CSS into the GrapesJS iframe
- * to defeat Framer Motion, AOS, and scroll-based animations.
+ * Inject CSS + runtime visibility resets into the iframe after it's loaded.
  */
 export const initialiseEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     const frame = editor.Canvas.getFrame();
-    const doc   = frame?.contentDocument;
-    const head  = doc?.head;
-    const body  = doc?.body;
+    const doc = frame?.contentDocument;
+    const head = doc?.head;
+    const body = doc?.body;
     if (!doc || !head || !body) return;
 
-    // ✅ Inject Tailwind and Fonts (if not already loaded)
+    // ✅ Append external CSS files
     appendStylesheet(head, '/static/homepage.css');
     appendStylesheet(head, 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
-    // ✅ Force-visible styles
+    // ✅ Append force-visible CSS rules
     const style = doc.createElement('style');
-    style.innerHTML = `
+    style.textContent = `
       html, body {
+        min-height: 100vh !important;
         background-color: black !important;
         color: white !important;
         font-family: 'Playfair Display', serif !important;
         margin: 0 !important;
-        padding: 0 !important;
-        min-height: 100vh !important;
         overflow: visible !important;
       }
 
@@ -38,30 +36,28 @@ export const initialiseEditorStyles = (editor: Editor) => {
         transition: none !important;
       }
 
-      /* Remove common hide conditions */
-      [style*="opacity"]             { opacity: 1 !important; }
-      [style*="transform"]           { transform: none !important; }
-      [style*="visibility"]          { visibility: visible !important; }
-      [style*="display: none"]       { display: block !important; }
-
-      /* Target animation frameworks */
-      [data-framer-motion],
-      [data-observe],
-      .aos-init,
-      .aos-animate {
+      [data-framer-motion], [data-observe], .aos-init, .aos-animate {
         opacity: 1 !important;
         transform: none !important;
-        animation: none !important;
       }
     `;
     head.appendChild(style);
+
+    // ✅ Remove inline styles — just like you did manually in the console
+    body.querySelectorAll<HTMLElement>('*').forEach((el) => {
+      el.removeAttribute('style');
+    });
   });
 
-  // Optional: editor chrome styling
+  // Optional: Style outer canvas
   const outer = document.createElement('style');
-  outer.innerHTML = `
-    .gjs-cv-canvas      { background-color: black !important; }
-    .gjs-frame-wrapper  { padding: 1rem !important; }
+  outer.textContent = `
+    .gjs-cv-canvas {
+      background-color: black !important;
+    }
+    .gjs-frame-wrapper {
+      padding: 1rem !important;
+    }
   `;
   document.head.appendChild(outer);
 };

@@ -7,25 +7,47 @@ export default {
     './public/static/**/*.html',
   ],
   safelist: [
-    // layout / backgrounds
-    'bg-black', 'bg-white', 'text-white', 'text-black',
-    'bg-gradient-to-b', 'from-black', 'via-purple-950', 'to-white',
-    'min-h-screen', 'inset-0', 'absolute', 'relative',
-    'overflow-x-hidden', 'overflow-hidden',
-    'z-50', 'z-0',
+    // Layout / Flex / Grid
+    'min-h-screen', 'h-screen', 'w-full', 'w-screen',
+    'flex', 'grid', 'items-center', 'justify-center', 'justify-between',
+    'gap-2', 'gap-4', 'gap-6', 'gap-8',
+    'absolute', 'relative', 'inset-0', 'z-50', 'z-0',
+    'overflow-hidden', 'overflow-x-hidden',
 
-    // font
-    'font-serif', 'font-sans',
+    // Typography
+    'text-left', 'text-center', 'text-right',
+    'text-white', 'text-black', 'text-gray-400', 'text-sm',
+    'text-lg', 'text-xl', 'text-2xl', 'text-3xl', 'text-4xl', 'text-5xl', 'text-6xl',
+    'font-light', 'font-normal', 'font-medium', 'font-semibold', 'font-bold',
+    'uppercase', 'lowercase', 'tracking-widest',
 
-    // visibility fixes
+    // Backgrounds / Gradients / Borders
+    'bg-black', 'bg-white', 'bg-gradient-to-b',
+    'from-black', 'via-purple-950', 'to-white',
+    'border', 'border-white', 'border-gray-200',
+
+    // Animations / Transitions
+    'transition-all', 'transition-opacity', 'transition-transform',
+    'duration-300', 'duration-500', 'ease-in-out', 'ease-in', 'ease-out',
+    'animate-fade', 'animate-slide-up', 'animate-slide-down', 'animate-scale-in',
+    'transform', 'translate-y-0', 'translate-y-4',
+
+    // Visibility Fixes
     'opacity-0', 'opacity-100',
     'invisible', 'visible',
     'pointer-events-none', 'pointer-events-auto',
 
-    // animations (used on load transitions)
-    'animate-fade', 'animate-slide-up', 'animate-slide-down', 'animate-scale-in',
-    'transition-all', 'duration-300', 'ease-in-out',
-    'transform', 'translate-y-4', 'translate-y-0',
+    // Fonts
+    'font-serif', 'font-sans',
+
+    // Buttons / Links
+    'cursor-pointer', 'hover:bg-white', 'hover:text-black', 'underline',
+
+    // Padding / Margin (common)
+    'p-0', 'p-1', 'p-2', 'p-4', 'p-6', 'p-8',
+    'pt-4', 'pb-4', 'pl-4', 'pr-4',
+    'm-0', 'm-2', 'm-4', 'm-6',
+    'mt-4', 'mb-4', 'ml-4', 'mr-4',
   ],
   theme: {
     extend: {
