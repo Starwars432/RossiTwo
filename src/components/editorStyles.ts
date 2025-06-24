@@ -1,14 +1,19 @@
+// src/components/editorStyles.ts
 import { Editor } from 'grapesjs';
 
+/**
+ * Inject force-show CSS into the GrapesJS iframe
+ * to defeat Framer Motion, AOS, and scroll-based animations.
+ */
 export const initialiseEditorStyles = (editor: Editor) => {
   editor.on('canvas:frame:load', () => {
     const frame = editor.Canvas.getFrame();
-    const doc = frame?.contentDocument;
-    const head = doc?.head;
-    const body = doc?.body;
+    const doc   = frame?.contentDocument;
+    const head  = doc?.head;
+    const body  = doc?.body;
     if (!doc || !head || !body) return;
 
-    // ✅ Append stylesheets
+    // ✅ Inject Tailwind and Fonts (if not already loaded)
     appendStylesheet(head, '/static/homepage.css');
     appendStylesheet(head, 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
 
@@ -16,49 +21,47 @@ export const initialiseEditorStyles = (editor: Editor) => {
     const style = doc.createElement('style');
     style.innerHTML = `
       html, body {
-        min-height: 100vh !important;
-        background: black !important;
+        background-color: black !important;
         color: white !important;
         font-family: 'Playfair Display', serif !important;
         margin: 0 !important;
+        padding: 0 !important;
+        min-height: 100vh !important;
         overflow: visible !important;
       }
 
       *, *::before, *::after {
         opacity: 1 !important;
-        transform: none !important;
         visibility: visible !important;
+        transform: none !important;
         animation: none !important;
         transition: none !important;
       }
 
-      [style*="opacity"] {
-        opacity: 1 !important;
-      }
+      /* Remove common hide conditions */
+      [style*="opacity"]             { opacity: 1 !important; }
+      [style*="transform"]           { transform: none !important; }
+      [style*="visibility"]          { visibility: visible !important; }
+      [style*="display: none"]       { display: block !important; }
 
-      [style*="transform"] {
-        transform: none !important;
-      }
-
-      [style*="visibility"] {
-        visibility: visible !important;
-      }
-
+      /* Target animation frameworks */
       [data-framer-motion],
       [data-observe],
       .aos-init,
       .aos-animate {
         opacity: 1 !important;
         transform: none !important;
+        animation: none !important;
       }
     `;
     head.appendChild(style);
   });
 
+  // Optional: editor chrome styling
   const outer = document.createElement('style');
   outer.innerHTML = `
-    .gjs-cv-canvas { background-color: black !important; }
-    .gjs-frame-wrapper { padding: 1rem !important; }
+    .gjs-cv-canvas      { background-color: black !important; }
+    .gjs-frame-wrapper  { padding: 1rem !important; }
   `;
   document.head.appendChild(outer);
 };

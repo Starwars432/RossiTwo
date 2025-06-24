@@ -19,42 +19,52 @@ export default function VisualEditor() {
         ],
       },
       plugins: [
-        (e) =>
-          presetWebpage.default(e, {
-            blocks: ['text', 'link', 'image', 'video'],
-          }),
+        (e) => presetWebpage.default(e, {
+          blocks: ['text', 'link', 'image', 'video'],
+        }),
       ],
     });
 
-    // ✅ Inject iframe-wide styles for visibility overrides
+    // ✅ Inject iframe-wide CSS overrides
     initialiseEditorStyles(editor);
 
     editor.on('load', async () => {
       try {
         const htmlRes = await fetch('/static/homepage.html');
-        const cssRes = await fetch('/static/homepage.css');
+        const cssRes  = await fetch('/static/homepage.css');
 
         const html = await htmlRes.text();
-        const css = await cssRes.text();
+        const css  = await cssRes.text();
+
+        // ✅ Clean animation classes from class="..." attributes
+        const strippedHtml = html
+          .replace(/^[\s\S]*?<body[^>]*>/i, '')
+          .replace(/<\/body>[\s\S]*$/i, '')
+          .replace(/class="([^"]*)"/g, (_, cls) => {
+            const cleaned = cls
+              .split(' ')
+              .filter(c =>
+                !/^opacity-/.test(c) &&
+                !/^translate/.test(c) &&
+                !/^scale-/.test(c) &&
+                !/^aos-/.test(c) &&
+                !/^motion-/.test(c)
+              )
+              .join(' ');
+            return `class="${cleaned}"`;
+          });
 
         editor.setStyle(css);
-        editor.setComponents(
-          html
-            .replace(/^[\s\S]*?<body[^>]*>/i, '')
-            .replace(/<\/body>[\s\S]*$/i, '')
-        );
+        editor.setComponents(strippedHtml);
 
-        // ✅ Remove inline styles to stop AOS/framer hiding content
-        const frame = editor.Canvas.getFrame();
-        const doc = frame?.contentDocument;
-        const allElements = doc?.body?.querySelectorAll('*');
-
-        allElements?.forEach((el) => {
+        // ✅ Kill inline styles from JS animation frameworks
+        const doc = editor.Canvas.getFrame()?.contentDocument;
+        const all = doc?.body?.querySelectorAll('*') || [];
+        all.forEach((el) => {
           el.removeAttribute('style');
         });
-
       } catch (err) {
-        console.error('❌ failed injecting homepage into GrapesJS', err);
+        console.error('❌ Failed to inject homepage:', err);
       }
     });
 
